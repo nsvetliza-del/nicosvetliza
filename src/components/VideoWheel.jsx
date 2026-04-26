@@ -13,7 +13,7 @@ export default function VideoWheel({
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
-  const mobileTouchLastXRef = useRef(0);
+  const mobileTouchLastYRef = useRef(0);
   const mobileTouchMovedRef = useRef(false);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
@@ -200,16 +200,16 @@ export default function VideoWheel({
 
   const mobileItems = useMemo(() => {
     const total = projects.length || 1;
-    const radiusX = viewportWidth * 0.64;
-    const radiusY = 82;
+    const radiusX = viewportWidth * 0.66;
+    const radiusY = 105;
 
     return projects.map((project, index) => {
       const angle = (index / total) * Math.PI * 2 + rotation;
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.34 + depth * 0.82;
-      const opacity = depth < 0.18 ? 0 : 0.18 + depth * 0.82;
+      const scale = 0.28 + depth * 0.95;
+      const opacity = depth < 0.14 ? 0 : 0.1 + depth * 0.9;
       const zIndex = Math.round(depth * 100);
       const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
 
@@ -224,7 +224,7 @@ export default function VideoWheel({
           "--scale": scale,
           "--opacity": opacity,
           "--z": zIndex,
-          pointerEvents: depth < 0.18 ? "none" : "auto",
+          pointerEvents: depth < 0.14 ? "none" : "auto",
         },
       };
     });
@@ -274,20 +274,22 @@ export default function VideoWheel({
   }, [activeMobileItem, isMobile, items, projects]);
 
   const handleMobileTouchStart = (event) => {
-    mobileTouchLastXRef.current = event.touches[0]?.clientX ?? 0;
+    mobileTouchLastYRef.current = event.touches[0]?.clientY ?? 0;
     mobileTouchMovedRef.current = false;
   };
 
   const handleMobileTouchMove = (event) => {
-    const currentX = event.touches[0]?.clientX ?? mobileTouchLastXRef.current;
-    const delta = currentX - mobileTouchLastXRef.current;
+    event.preventDefault();
 
-    if (Math.abs(delta) > 1) {
+    const currentY = event.touches[0]?.clientY ?? mobileTouchLastYRef.current;
+    const deltaY = currentY - mobileTouchLastYRef.current;
+
+    if (Math.abs(deltaY) > 1) {
       mobileTouchMovedRef.current = true;
     }
 
-    mobileTouchLastXRef.current = currentX;
-    rotationRef.current += delta * 0.01;
+    mobileTouchLastYRef.current = currentY;
+    rotationRef.current += deltaY * 0.0028;
     targetRotationRef.current = rotationRef.current;
     setRotation(rotationRef.current);
   };
@@ -298,6 +300,17 @@ export default function VideoWheel({
     }, 120);
   };
 
+  const handleMobileWheel = (event) => {
+    event.preventDefault();
+    targetRotationRef.current += event.deltaY * 0.0015;
+  };
+
+  const handleMobileRandom = () => {
+    if (!projects.length) return;
+    const randomIndex = Math.floor(Math.random() * projects.length);
+    rotateProjectToFront(randomIndex, 0);
+  };
+
   const renderMobileGallery = () => {
     return (
       <>
@@ -306,6 +319,7 @@ export default function VideoWheel({
           onTouchStart={handleMobileTouchStart}
           onTouchMove={handleMobileTouchMove}
           onTouchEnd={handleMobileTouchEnd}
+          onWheel={handleMobileWheel}
         >
           {mobileItems.map(({ index, isFocused, project, style }) => (
               <button
@@ -349,6 +363,15 @@ export default function VideoWheel({
               </button>
           ))}
         </div>
+
+        <button
+          type="button"
+          className="mobile-random-button"
+          onClick={handleMobileRandom}
+          aria-label="Random project"
+        >
+          ⤨
+        </button>
 
         {activeMobileItem ? (
           <div className="mobile-active-title">{activeMobileItem.project.title}</div>

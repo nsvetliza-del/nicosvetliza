@@ -93,26 +93,26 @@
 @media (max-width: 768px) {
   .mobile-carousel-container {
     position: fixed !important;
-    top: 63dvh !important;
+    top: 56dvh !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 100vw !important;
-    height: 260px !important;
+    height: 330px !important;
     overflow: visible !important;
     z-index: 20 !important;
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-    touch-action: pan-y !important;
+    touch-action: none !important;
   }
 
   .mobile-carousel-container .mobile-video-card {
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
-    width: clamp(90px, 34vw, 165px) !important;
-    height: clamp(58px, 21vw, 105px) !important;
+    width: clamp(78px, 30vw, 145px) !important;
+    height: clamp(50px, 19vw, 95px) !important;
     max-height: none !important;
     min-height: 0 !important;
     margin: 0 !important;
@@ -128,8 +128,8 @@
     opacity: var(--opacity) !important;
     z-index: var(--z) !important;
     transition:
-      transform 520ms cubic-bezier(0.19, 1, 0.22, 1),
-      opacity 420ms ease !important;
+      transform 680ms cubic-bezier(0.19, 1, 0.22, 1),
+      opacity 520ms ease !important;
   }
 
   .mobile-carousel-container .mobile-video-card video {
@@ -141,16 +141,41 @@
 
   .mobile-active-title {
     position: fixed !important;
-    top: calc(63dvh + 118px) !important;
-    left: 0 !important;
-    width: 100vw !important;
-    padding: 0 24px !important;
+    top: calc(56dvh + 155px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90vw !important;
+    padding: 0 !important;
     text-align: center !important;
-    font-size: 14px !important;
+    font-size: 15px !important;
     line-height: 1.2 !important;
-    opacity: 0.72 !important;
-    z-index: 80 !important;
+    color: rgba(0, 0, 0, 0.72) !important;
+    opacity: 1 !important;
+    z-index: 120 !important;
     pointer-events: none !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .mobile-random-button {
+    position: fixed !important;
+    left: 50% !important;
+    top: 56dvh !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 180 !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: rgba(17, 17, 17, 0.72) !important;
+    opacity: 0.45 !important;
+    cursor: pointer !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
   }
 
   .minimal-menu {
@@ -248,9 +273,9 @@
   .piano-keys,
   .rhythm-machine {
     position: fixed !important;
-    bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
     left: 50% !important;
-    transform: translateX(-50%) scale(0.48) !important;
+    transform: translateX(-50%) scale(0.42) !important;
     z-index: 60 !important;
   }
 
