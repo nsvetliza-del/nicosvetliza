@@ -93,11 +93,11 @@
 @media (max-width: 768px) {
   .mobile-carousel-container {
     position: fixed !important;
-    top: 56dvh !important;
+    top: 48dvh !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 100vw !important;
-    height: 330px !important;
+    height: 360px !important;
     overflow: visible !important;
     z-index: 20 !important;
     display: block !important;
@@ -111,8 +111,8 @@
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
-    width: clamp(78px, 30vw, 145px) !important;
-    height: clamp(50px, 19vw, 95px) !important;
+    width: clamp(70px, 27vw, 130px) !important;
+    height: clamp(45px, 17vw, 85px) !important;
     max-height: none !important;
     min-height: 0 !important;
     margin: 0 !important;
@@ -141,7 +141,7 @@
 
   .mobile-active-title {
     position: fixed !important;
-    top: calc(56dvh + 155px) !important;
+    top: calc(48dvh + 165px) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 90vw !important;
@@ -149,7 +149,7 @@
     text-align: center !important;
     font-size: 15px !important;
     line-height: 1.2 !important;
-    color: rgba(0, 0, 0, 0.72) !important;
+    color: rgba(0, 0, 0, 0.75) !important;
     opacity: 1 !important;
     z-index: 120 !important;
     pointer-events: none !important;
@@ -161,7 +161,7 @@
   .mobile-random-button {
     position: fixed !important;
     left: 50% !important;
-    top: 56dvh !important;
+    top: 48dvh !important;
     transform: translate(-50%, -50%) !important;
     z-index: 180 !important;
     width: 28px !important;
@@ -174,7 +174,7 @@
     color: rgba(17, 17, 17, 0.72) !important;
     opacity: 0.45 !important;
     cursor: pointer !important;
-    font-size: 20px !important;
+    font-size: 18px !important;
     line-height: 1 !important;
   }
 
@@ -273,9 +273,9 @@
   .piano-keys,
   .rhythm-machine {
     position: fixed !important;
-    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(22px + env(safe-area-inset-bottom)) !important;
     left: 50% !important;
-    transform: translateX(-50%) scale(0.42) !important;
+    transform: translateX(-50%) scale(0.4) !important;
     z-index: 60 !important;
   }
 

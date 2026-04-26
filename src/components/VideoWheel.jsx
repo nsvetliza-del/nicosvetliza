@@ -200,16 +200,16 @@ export default function VideoWheel({
 
   const mobileItems = useMemo(() => {
     const total = projects.length || 1;
-    const radiusX = viewportWidth * 0.66;
-    const radiusY = 105;
+    const radiusX = viewportWidth * 0.64;
+    const radiusY = 115;
 
     return projects.map((project, index) => {
       const angle = (index / total) * Math.PI * 2 + rotation;
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.28 + depth * 0.95;
-      const opacity = depth < 0.14 ? 0 : 0.1 + depth * 0.9;
+      const scale = 0.38 + depth * 0.72;
+      const opacity = 0.32 + depth * 0.68;
       const zIndex = Math.round(depth * 100);
       const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
 
@@ -224,7 +224,7 @@ export default function VideoWheel({
           "--scale": scale,
           "--opacity": opacity,
           "--z": zIndex,
-          pointerEvents: depth < 0.14 ? "none" : "auto",
+          pointerEvents: "auto",
         },
       };
     });
@@ -289,7 +289,7 @@ export default function VideoWheel({
     }
 
     mobileTouchLastYRef.current = currentY;
-    rotationRef.current += deltaY * 0.0028;
+    rotationRef.current += deltaY * 0.0018;
     targetRotationRef.current = rotationRef.current;
     setRotation(rotationRef.current);
   };
