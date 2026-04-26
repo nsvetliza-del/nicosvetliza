@@ -430,3 +430,46 @@
     text-align: left;
   }
 }
+
+@media (max-width: 768px) {
+  .portfolio-page,
+  .simple-page {
+    min-height: 100dvh;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .portfolio-stage,
+  .simple-page-shell {
+    width: 100%;
+    min-height: calc(100dvh - 32px - env(safe-area-inset-bottom));
+  }
+
+  .portfolio-views {
+    min-height: calc(100dvh - 32px - env(safe-area-inset-bottom));
+  }
+
+  .portfolio-view {
+    align-content: start;
+    justify-items: center;
+    gap: 1.1rem;
+    padding-top: 108px;
+    padding-bottom: calc(34px + env(safe-area-inset-bottom));
+  }
+
+  .portfolio-wheel-shell {
+    gap: 0.95rem;
+    width: 100%;
+  }
+
+  .portfolio-tagline {
+    top: 16px;
+    right: 16px;
+    z-index: 24;
+    max-width: 120px;
+    font-size: 11px;
+    line-height: 1.12;
+    letter-spacing: 0.08em;
+    text-align: right;
+    opacity: 0.64;
+  }
+}
