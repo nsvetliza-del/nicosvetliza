@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
-import blueDotSound from "../assets/audios/blue-dot-sound.mp3";
+
+const blueDotSound = "";
 
 const BRAND_NAME = "Nico Svetliza™";
 
@@ -26,10 +27,12 @@ export default function MinimalMenu({ onSonicShuffle }) {
     if (!audio) return;
 
     console.log("blue dot sound play called");
+
     audio.pause();
     audio.currentTime = 0;
 
     const playPromise = audio.play();
+
     if (playPromise !== undefined) {
       playPromise.catch((error) => {
         console.warn("blue dot sound error", error);
@@ -39,25 +42,37 @@ export default function MinimalMenu({ onSonicShuffle }) {
 
   const handleTune = () => {
     console.log("blue dot clicked");
+
     setIsTuning(true);
     window.clearTimeout(tuningTimerRef.current);
     tuningTimerRef.current = window.setTimeout(() => setIsTuning(false), 1080);
+
     playBlueSound();
     onSonicShuffle?.();
   };
 
   useEffect(() => {
+    if (!blueDotSound) {
+      blueDotAudioRef.current = null;
+
+      return () => {
+        window.clearTimeout(tuningTimerRef.current);
+      };
+    }
+
     const audio = new Audio(blueDotSound);
     audio.preload = "auto";
     audio.volume = 0.7;
     audio.loop = false;
     audio.load();
+
     blueDotAudioRef.current = audio;
 
     return () => {
       window.clearTimeout(tuningTimerRef.current);
       audio.pause();
       audio.currentTime = 0;
+
       if (blueDotAudioRef.current === audio) {
         blueDotAudioRef.current = null;
       }
@@ -72,7 +87,9 @@ export default function MinimalMenu({ onSonicShuffle }) {
         </NavLink>
 
         <div
-          className={`minimal-menu-portfolio-group ${isPortfolioOpen ? "is-open" : ""}`}
+          className={`minimal-menu-portfolio-group ${
+            isPortfolioOpen ? "is-open" : ""
+          }`}
           onMouseEnter={() => setIsPortfolioOpen(true)}
           onMouseLeave={() => setIsPortfolioOpen(false)}
         >
@@ -107,7 +124,9 @@ export default function MinimalMenu({ onSonicShuffle }) {
           <NavLink
             key={link.to}
             to={link.to}
-            className={({ isActive }) => `minimal-menu-link ${isActive ? "is-active" : ""}`}
+            className={({ isActive }) =>
+              `minimal-menu-link ${isActive ? "is-active" : ""}`
+            }
           >
             {link.label}
           </NavLink>
