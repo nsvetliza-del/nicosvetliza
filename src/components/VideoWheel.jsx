@@ -13,7 +13,7 @@ export default function VideoWheel({
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
-  const mobileTouchLastYRef = useRef(0);
+  const mobileTouchLastXRef = useRef(0);
   const mobileTouchMovedRef = useRef(false);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
@@ -208,8 +208,8 @@ export default function VideoWheel({
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.38 + depth * 0.72;
-      const opacity = 0.32 + depth * 0.68;
+      const scale = 0.25 + Math.pow(depth, 2.2) * 1.05;
+      const opacity = 0.35 + depth * 0.65;
       const zIndex = Math.round(depth * 100);
       const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
 
@@ -274,22 +274,22 @@ export default function VideoWheel({
   }, [activeMobileItem, isMobile, items, projects]);
 
   const handleMobileTouchStart = (event) => {
-    mobileTouchLastYRef.current = event.touches[0]?.clientY ?? 0;
+    mobileTouchLastXRef.current = event.touches[0]?.clientX ?? 0;
     mobileTouchMovedRef.current = false;
   };
 
   const handleMobileTouchMove = (event) => {
     event.preventDefault();
 
-    const currentY = event.touches[0]?.clientY ?? mobileTouchLastYRef.current;
-    const deltaY = currentY - mobileTouchLastYRef.current;
+    const currentX = event.touches[0]?.clientX ?? mobileTouchLastXRef.current;
+    const deltaX = currentX - mobileTouchLastXRef.current;
 
-    if (Math.abs(deltaY) > 1) {
+    if (Math.abs(deltaX) > 1) {
       mobileTouchMovedRef.current = true;
     }
 
-    mobileTouchLastYRef.current = currentY;
-    rotationRef.current += deltaY * 0.0018;
+    mobileTouchLastXRef.current = currentX;
+    rotationRef.current += deltaX * 0.0023;
     targetRotationRef.current = rotationRef.current;
     setRotation(rotationRef.current);
   };

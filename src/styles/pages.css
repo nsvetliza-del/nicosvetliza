@@ -128,8 +128,8 @@
     opacity: var(--opacity) !important;
     z-index: var(--z) !important;
     transition:
-      transform 680ms cubic-bezier(0.19, 1, 0.22, 1),
-      opacity 520ms ease !important;
+      transform 720ms cubic-bezier(0.19, 1, 0.22, 1),
+      opacity 500ms ease !important;
   }
 
   .mobile-carousel-container .mobile-video-card video {
