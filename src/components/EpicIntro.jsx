@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import orchestraTuning from "../assets/audios/orchestra-tuning.mp3";
+
+// Temporary fallback while the audio file is not present in the repo.
+const orchestraTuning = "";
 
 const introWords = [
   { text: "soundscape", marker: "—", x: "-13vw", y: "-7vh" },
@@ -35,7 +37,7 @@ export default function EpicIntro({ enabled = true, onComplete }) {
     const audio = audioRef.current;
 
     console.log("initial play clicked");
-    if (audio) {
+    if (audio && orchestraTuning) {
       audio.currentTime = 0;
       audio.volume = 0.45;
       audio.loop = false;
@@ -75,13 +77,17 @@ export default function EpicIntro({ enabled = true, onComplete }) {
   useEffect(() => {
     if (!enabled) return undefined;
 
-    const audio = new Audio(orchestraTuning);
-    audio.preload = "auto";
-    audio.onended = () => {
-      console.log("orchestra audio ended");
-    };
-    audio.load();
-    audioRef.current = audio;
+    if (orchestraTuning) {
+      const audio = new Audio(orchestraTuning);
+      audio.preload = "auto";
+      audio.onended = () => {
+        console.log("orchestra audio ended");
+      };
+      audio.load();
+      audioRef.current = audio;
+    } else {
+      audioRef.current = null;
+    }
 
     setPhase("gate");
     setActiveWord(0);
@@ -90,6 +96,10 @@ export default function EpicIntro({ enabled = true, onComplete }) {
 
     return () => {
       clearScheduledWork();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
       audioRef.current = null;
     };
   }, [clearScheduledWork, enabled]);
