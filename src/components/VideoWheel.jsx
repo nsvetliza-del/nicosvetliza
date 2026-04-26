@@ -234,10 +234,17 @@ export default function VideoWheel({
                   <video
                     src={project.video}
                     poster={project.cover}
+                    autoPlay
                     muted
                     loop
                     playsInline
                     preload="metadata"
+                    ref={(video) => {
+                      if (!video) return;
+                      video.muted = true;
+                      video.playsInline = true;
+                      void video.play().catch(() => {});
+                    }}
                   />
                 ) : (
                   <div className="video-wheel-fallback">{project.title}</div>
