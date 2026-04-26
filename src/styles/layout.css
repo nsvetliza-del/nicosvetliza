@@ -470,7 +470,7 @@
   .portfolio-tagline {
     top: 24px;
     right: 20px;
-    z-index: 24;
+    z-index: 50;
     max-width: 130px;
     font-size: 10px;
     line-height: 1.1;

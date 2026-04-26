@@ -20,7 +20,7 @@ export default function VideoWheel({
   const targetRotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
-  const [mobileDragOffset, setMobileDragOffset] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
   const [showRandomButton, setShowRandomButton] = useState(false);
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
@@ -67,12 +67,15 @@ export default function VideoWheel({
     const media = window.matchMedia("(max-width: 768px)");
     const update = () => {
       setIsMobile(media.matches);
+      setViewportWidth(window.innerWidth);
     };
 
     update();
     media.addEventListener("change", update);
+    window.addEventListener("resize", update);
     return () => {
       media.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
     };
   }, []);
 
@@ -240,53 +243,17 @@ export default function VideoWheel({
     preloadVideoBatch([nextTwo?.video], { priority: "metadata", delay: 220 });
   }, [isMobile, items, mobileActiveIndex, projects]);
 
-  const visibleMobileItems = useMemo(() => {
-    if (!isMobile) return [];
-
-    return projects
-      .map((project, index) => {
-        const total = projects.length;
-        let offset = index - mobileActiveIndex;
-        if (offset > total / 2) offset -= total;
-        if (offset < -total / 2) offset += total;
-
-        const isFocused = offset === 0;
-        const isNearby = Math.abs(offset) <= 2;
-
-        return {
-          project,
-          index,
-          offset,
-          isFocused,
-          isPrepared: isFocused || Math.abs(offset) === 1 || hoveredProjectId === project.id,
-          style: {
-            "--mobile-offset": offset,
-            "--mobile-drag": `${mobileDragOffset}px`,
-            zIndex: isFocused ? 20 : 10 - Math.abs(offset),
-            opacity: isExpanded ? undefined : 0,
-            pointerEvents: isNearby ? "auto" : "none",
-          },
-        };
-      })
-      .filter((item) => Math.abs(item.offset) <= 2)
-      .sort((a, b) => a.offset - b.offset);
-  }, [hoveredProjectId, isExpanded, isMobile, mobileActiveIndex, mobileDragOffset, projects]);
-
   const handleTouchStart = (event) => {
     touchStartXRef.current = event.touches[0]?.clientX ?? 0;
     touchLastXRef.current = touchStartXRef.current;
     touchDeltaXRef.current = 0;
-    setMobileDragOffset(0);
   };
 
   const handleTouchMove = (event) => {
     const currentX = event.touches[0]?.clientX ?? 0;
     touchLastXRef.current = currentX;
     touchDeltaXRef.current = currentX - touchStartXRef.current;
-    if (isMobile) {
-      setMobileDragOffset(Math.max(-56, Math.min(56, touchDeltaXRef.current * 0.42)));
-      return;
-    }
+    if (isMobile) return;
 
     hideRandomButton();
     targetRotationRef.current += (currentX - touchStartXRef.current) * 0.006;
@@ -294,7 +261,6 @@ export default function VideoWheel({
 
   const handleTouchEnd = () => {
     const totalDelta = touchDeltaXRef.current || touchLastXRef.current - touchStartXRef.current;
-    setMobileDragOffset(0);
 
     if (isMobile) {
       if (totalDelta > 40) moveMobileCarousel(-1);
@@ -307,151 +273,153 @@ export default function VideoWheel({
     }
   };
 
-  const activeMobileItem =
-    isMobile && visibleMobileItems.length > 0
-      ? visibleMobileItems.find((item) => item.isFocused)
-      : null;
+  useEffect(() => {
+    if (!projects.length) {
+      setMobileActiveIndex(0);
+      return;
+    }
 
-  return (
-    <section className="video-wheel-section">
-      {isMobile ? (
+    setMobileActiveIndex((index) => Math.min(index, projects.length - 1));
+  }, [projects]);
+
+  const renderMobileGallery = () => {
+    const activeProject = projects[mobileActiveIndex];
+    const cardWidth = viewportWidth * 0.68;
+    const sidePadding = viewportWidth * 0.16;
+    const gap = 16;
+    const offset = sidePadding - mobileActiveIndex * (cardWidth + gap);
+
+    return (
+      <section className="mobile-gallery-shell">
         <div
-          className="video-wheel-frame video-wheel-frame-mobile"
-          ref={wheelRef}
+          className="mobile-gallery"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <div className="video-wheel video-wheel-mobile">
-            {visibleMobileItems.map(({ project, style, index, isPrepared, isFocused }) => (
-              <button
-                key={project.id}
-                type="button"
-                className={`video-wheel-item video-wheel-item-mobile ${
-                  isFocused ? "is-focused" : "is-side"
-                } ${launchingProjectId === project.id ? "is-launching" : ""}`}
-                style={style}
-                onMouseEnter={() => {
-                  setHoveredProjectId(project.id);
-                  preloadVideo(project.video, {
-                    priority: isFocused ? "auto" : "metadata",
-                  });
-                }}
-                onFocus={() => {
-                  setHoveredProjectId(project.id);
-                  preloadVideo(project.video, {
-                    priority: isFocused ? "auto" : "metadata",
-                  });
-                }}
-                onMouseLeave={() => setHoveredProjectId(null)}
-                onBlur={() => setHoveredProjectId(null)}
-                onClick={(event) => {
-                  const mediaElement = event.currentTarget.querySelector(".video-wheel-media");
-                  preloadVideo(project.video, { priority: "auto" });
-                  const rect =
-                    mediaElement?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
-                  if (!isFocused) {
-                    setMobileActiveIndex(index);
-                    return;
-                  }
-                  onProjectSelect(project.id, rect);
-                }}
-              >
-                <div className="video-wheel-media">
+          <div
+            className="mobile-gallery-track"
+            style={{ transform: `translateX(${offset}px)` }}
+          >
+            {projects.map((project, index) => {
+              const isActive = index === mobileActiveIndex;
+
+              return (
+                <button
+                  key={project.id}
+                  type="button"
+                  className={`mobile-gallery-card ${isActive ? "is-active" : ""}`}
+                  onClick={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    preloadVideo(project.video, { priority: "auto" });
+
+                    if (!isActive) {
+                      setMobileActiveIndex(index);
+                      return;
+                    }
+
+                    onProjectSelect(project.id, rect);
+                  }}
+                >
                   {project.video || project.cover ? (
                     <video
-                      className="video-wheel-video"
                       src={project.video}
                       poster={project.cover}
-                      autoPlay
+                      autoPlay={isActive}
                       muted
                       loop
                       playsInline
-                      preload={isFocused ? "auto" : isPrepared ? "metadata" : "none"}
+                      preload={isActive ? "auto" : "metadata"}
                     />
                   ) : (
                     <div className="video-wheel-fallback">{project.title}</div>
                   )}
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
-
-          {activeMobileItem ? (
-            <div className="video-wheel-mobile-title">
-              <span>{activeMobileItem.project.title}</span>
-            </div>
-          ) : null}
         </div>
-      ) : (
-        <div className="video-wheel-frame" ref={wheelRef}>
-          <div className="video-wheel">
-            {projects.length > 0 ? (
-              <RandomPlayButton
-                onClick={(event) => {
-                  const randomProject = projects[Math.floor(Math.random() * projects.length)];
-                  if (!randomProject) return;
-                  preloadVideo(randomProject.video);
-                  const rect = event.currentTarget.getBoundingClientRect();
-                  onProjectSelect(randomProject.id, rect);
-                }}
-                isVisible={showRandomButton && !isCarouselMoving}
+
+        {activeProject ? (
+          <div className="mobile-active-title">{activeProject.title}</div>
+        ) : null}
+      </section>
+    );
+  };
+
+  const renderDesktopWheel = () => (
+    <div className="video-wheel-frame" ref={wheelRef}>
+      <div className="video-wheel">
+        {projects.length > 0 ? (
+          <RandomPlayButton
+            onClick={(event) => {
+              const randomProject = projects[Math.floor(Math.random() * projects.length)];
+              if (!randomProject) return;
+              preloadVideo(randomProject.video);
+              const rect = event.currentTarget.getBoundingClientRect();
+              onProjectSelect(randomProject.id, rect);
+            }}
+            isVisible={showRandomButton && !isCarouselMoving}
+          />
+        ) : null}
+        {items.map(({ project, style, isFocused, isPrepared }) => (
+          <button
+            key={project.id}
+            type="button"
+            className={`video-wheel-item ${isFocused ? "is-focused" : ""} ${
+              launchingProjectId === project.id ? "is-launching" : ""
+            }`}
+            style={style}
+            onMouseEnter={() => {
+              setHoveredProjectId(project.id);
+              preloadVideo(project.video);
+            }}
+            onFocus={() => {
+              setHoveredProjectId(project.id);
+              preloadVideo(project.video);
+            }}
+            onMouseLeave={() => setHoveredProjectId(null)}
+            onBlur={() => setHoveredProjectId(null)}
+            onClick={(event) => {
+              const mediaElement = event.currentTarget.querySelector(".video-wheel-media");
+              const videoElement = mediaElement?.querySelector("video");
+              preloadVideo(project.video, { priority: "auto" });
+              if (videoElement) {
+                videoElement.preload = "auto";
+                videoElement.load();
+                void videoElement.play().catch(() => {});
+              }
+              const rect =
+                mediaElement?.getBoundingClientRect() ??
+                event.currentTarget.getBoundingClientRect();
+              onProjectSelect(project.id, rect);
+            }}
+          >
+            <div className="video-wheel-media">
+              <video
+                className="video-wheel-video"
+                src={project.video}
+                poster={project.cover}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload={isPrepared || hoveredProjectId === project.id ? "auto" : "metadata"}
               />
-            ) : null}
-            {items.map(({ project, style, isFocused, isPrepared }) => (
-              <button
-                key={project.id}
-                type="button"
-                className={`video-wheel-item ${isFocused ? "is-focused" : ""} ${
-                  launchingProjectId === project.id ? "is-launching" : ""
-                }`}
-                style={style}
-                onMouseEnter={() => {
-                  setHoveredProjectId(project.id);
-                  preloadVideo(project.video);
-                }}
-                onFocus={() => {
-                  setHoveredProjectId(project.id);
-                  preloadVideo(project.video);
-                }}
-                onMouseLeave={() => setHoveredProjectId(null)}
-                onBlur={() => setHoveredProjectId(null)}
-                onClick={(event) => {
-                  const mediaElement = event.currentTarget.querySelector(".video-wheel-media");
-                  const videoElement = mediaElement?.querySelector("video");
-                  preloadVideo(project.video, { priority: "auto" });
-                  if (videoElement) {
-                    videoElement.preload = "auto";
-                    videoElement.load();
-                    void videoElement.play().catch(() => {});
-                  }
-                  const rect =
-                    mediaElement?.getBoundingClientRect() ??
-                    event.currentTarget.getBoundingClientRect();
-                  onProjectSelect(project.id, rect);
-                }}
-              >
-                <div className="video-wheel-media">
-                  <video
-                    className="video-wheel-video"
-                    src={project.video}
-                    poster={project.cover}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload={isPrepared || hoveredProjectId === project.id ? "auto" : "metadata"}
-                  />
-                </div>
+            </div>
 
-                <div className="video-wheel-meta">
-                  <span>{project.title}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+            <div className="video-wheel-meta">
+              <span>{project.title}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <section className="video-wheel-section">
+      {isMobile ? renderMobileGallery() : renderDesktopWheel()}
     </section>
   );
 }
