@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-// Temporary fallback while the audio file is not present in the repo.
 const orchestraTuning = "";
 
 const introWords = [
@@ -37,16 +36,22 @@ export default function EpicIntro({ enabled = true, onComplete }) {
     const audio = audioRef.current;
 
     console.log("initial play clicked");
-    if (audio && orchestraTuning) {
+
+    if (audio) {
       audio.currentTime = 0;
       audio.volume = 0.45;
       audio.loop = false;
+
       console.log("orchestra play called immediately");
-      void audio.play().then(() => {
-        console.log("orchestra started");
-      }).catch((error) => {
-        console.warn("orchestra audio error", error);
-      });
+
+      audio
+        .play()
+        .then(() => {
+          console.log("orchestra started");
+        })
+        .catch((error) => {
+          console.warn("orchestra audio error", error);
+        });
     }
 
     hasStartedRef.current = true;
@@ -77,8 +82,10 @@ export default function EpicIntro({ enabled = true, onComplete }) {
   useEffect(() => {
     if (!enabled) return undefined;
 
+    let audio = null;
+
     if (orchestraTuning) {
-      const audio = new Audio(orchestraTuning);
+      audio = new Audio(orchestraTuning);
       audio.preload = "auto";
       audio.onended = () => {
         console.log("orchestra audio ended");
@@ -96,10 +103,12 @@ export default function EpicIntro({ enabled = true, onComplete }) {
 
     return () => {
       clearScheduledWork();
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
       }
+
       audioRef.current = null;
     };
   }, [clearScheduledWork, enabled]);
@@ -109,7 +118,12 @@ export default function EpicIntro({ enabled = true, onComplete }) {
   return (
     <div className={`epic-intro ${isLeaving ? "is-leaving" : ""}`}>
       {phase === "gate" ? (
-        <button type="button" className="epic-intro-play" onClick={startIntro} aria-label="Play intro">
+        <button
+          type="button"
+          className="epic-intro-play"
+          onClick={startIntro}
+          aria-label="Play intro"
+        >
           <span className="epic-intro-play-icon" aria-hidden="true" />
         </button>
       ) : null}
@@ -124,8 +138,12 @@ export default function EpicIntro({ enabled = true, onComplete }) {
               "--word-y": introWords[activeWord].y,
             }}
           >
-            <span className="epic-intro-word-marker">{introWords[activeWord].marker}</span>
-            <span className="epic-intro-word-text">{introWords[activeWord].text}</span>
+            <span className="epic-intro-word-marker">
+              {introWords[activeWord].marker}
+            </span>
+            <span className="epic-intro-word-text">
+              {introWords[activeWord].text}
+            </span>
           </div>
         </div>
       ) : null}
