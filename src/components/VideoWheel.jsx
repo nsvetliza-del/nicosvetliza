@@ -209,9 +209,9 @@ export default function VideoWheel({
         if (Math.abs(offset) > 2) return null;
 
         const distance = Math.abs(offset);
-        const translateX = offset * 62;
-        const scale = distance === 0 ? 1 : distance === 1 ? 0.78 : 0.62;
-        const opacity = distance === 0 ? 1 : distance === 1 ? 0.5 : 0.16;
+        const translateX = offset * 70;
+        const scale = distance === 0 ? 1 : distance === 1 ? 0.75 : 0.58;
+        const opacity = distance === 0 ? 1 : distance === 1 ? 0.25 : 0;
         const zIndex = 20 - distance;
 
         return {
@@ -284,6 +284,10 @@ export default function VideoWheel({
                   preloadVideo(project.video);
                   const rect =
                     mediaElement?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
+                  if (!isActive) {
+                    setActiveIndex(index);
+                    return;
+                  }
                   onProjectSelect(project.id, rect);
                 }}
               >

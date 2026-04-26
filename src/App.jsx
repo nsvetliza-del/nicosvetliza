@@ -3,14 +3,12 @@ import { Route, Routes } from "react-router-dom";
 import Portfolio from "./pages/Portfolio";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import CustomCursor from "./components/CustomCursor";
 
 export default function App() {
   return (
     <div className="app-shell">
       <div className="app-background" aria-hidden="true" />
       <div className="app-content">
-        <CustomCursor />
         <Routes>
           <Route path="/" element={<Portfolio showIntro />} />
           <Route path="/project/:projectId" element={<Portfolio showIntro={false} />} />
