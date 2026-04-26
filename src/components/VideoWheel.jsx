@@ -13,14 +13,9 @@ export default function VideoWheel({
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
-  const touchStartXRef = useRef(0);
-  const touchLastXRef = useRef(0);
-  const touchDeltaXRef = useRef(0);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
-  const [viewportWidth, setViewportWidth] = useState(0);
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
   const [showRandomButton, setShowRandomButton] = useState(false);
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
@@ -51,31 +46,18 @@ export default function VideoWheel({
     targetRotationRef.current = finalRotation + overshoot;
   };
 
-  const normalizeProjectIndex = (index) => {
-    const total = projects.length;
-    if (!total) return 0;
-    return (index + total) % total;
-  };
-
-  const moveMobileCarousel = (offset) => {
-    setMobileActiveIndex((index) => normalizeProjectIndex(index + offset));
-  };
-
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
     const media = window.matchMedia("(max-width: 768px)");
     const update = () => {
       setIsMobile(media.matches);
-      setViewportWidth(window.innerWidth);
     };
 
     update();
     media.addEventListener("change", update);
-    window.addEventListener("resize", update);
     return () => {
       media.removeEventListener("change", update);
-      window.removeEventListener("resize", update);
     };
   }, []);
 
@@ -134,7 +116,7 @@ export default function VideoWheel({
     if (!projects.length) return;
 
     const initialVisible = isMobile
-      ? [projects[mobileActiveIndex]]
+      ? []
       : projects.slice(0, 5);
 
     initialVisible
@@ -150,7 +132,7 @@ export default function VideoWheel({
     if (remainingSources.length) {
       preloadVideoBatch(remainingSources, { priority: "metadata", delay: 900 });
     }
-  }, [isMobile, mobileActiveIndex, projects]);
+  }, [isMobile, projects]);
 
   useEffect(() => {
     if (!sonicShuffleTick || projects.length === 0) return undefined;
@@ -160,7 +142,6 @@ export default function VideoWheel({
 
     const randomIndex = Math.floor(Math.random() * projects.length);
     if (isMobile) {
-      setMobileActiveIndex(randomIndex);
       return undefined;
     }
 
@@ -214,15 +195,6 @@ export default function VideoWheel({
     if (!projects.length) return;
 
     if (isMobile) {
-      const current = projects[mobileActiveIndex];
-      const prev = projects[normalizeProjectIndex(mobileActiveIndex - 1)];
-      const next = projects[normalizeProjectIndex(mobileActiveIndex + 1)];
-
-      [current, prev, next].forEach((project) =>
-        preloadVideo(project?.video, {
-          priority: project?.id === current?.id ? "auto" : "metadata",
-        })
-      );
       return;
     }
 
@@ -241,109 +213,42 @@ export default function VideoWheel({
       preloadVideo(project?.video, { priority: "auto" })
     );
     preloadVideoBatch([nextTwo?.video], { priority: "metadata", delay: 220 });
-  }, [isMobile, items, mobileActiveIndex, projects]);
-
-  const handleTouchStart = (event) => {
-    touchStartXRef.current = event.touches[0]?.clientX ?? 0;
-    touchLastXRef.current = touchStartXRef.current;
-    touchDeltaXRef.current = 0;
-  };
-
-  const handleTouchMove = (event) => {
-    const currentX = event.touches[0]?.clientX ?? 0;
-    touchLastXRef.current = currentX;
-    touchDeltaXRef.current = currentX - touchStartXRef.current;
-    if (isMobile) return;
-
-    hideRandomButton();
-    targetRotationRef.current += (currentX - touchStartXRef.current) * 0.006;
-  };
-
-  const handleTouchEnd = () => {
-    const totalDelta = touchDeltaXRef.current || touchLastXRef.current - touchStartXRef.current;
-
-    if (isMobile) {
-      if (totalDelta > 40) moveMobileCarousel(-1);
-      if (totalDelta < -40) moveMobileCarousel(1);
-      return;
-    }
-
-    if (Math.abs(totalDelta) > 8) {
-      targetRotationRef.current += totalDelta * 0.0012;
-    }
-  };
-
-  useEffect(() => {
-    if (!projects.length) {
-      setMobileActiveIndex(0);
-      return;
-    }
-
-    setMobileActiveIndex((index) => Math.min(index, projects.length - 1));
-  }, [projects]);
+  }, [isMobile, items, projects]);
 
   const renderMobileGallery = () => {
-    const activeProject = projects[mobileActiveIndex];
-    const cardWidth = viewportWidth * 0.68;
-    const sidePadding = viewportWidth * 0.16;
-    const gap = 16;
-    const offset = sidePadding - mobileActiveIndex * (cardWidth + gap);
-
     return (
-      <section className="mobile-gallery-shell">
-        <div
-          className="mobile-gallery"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div
-            className="mobile-gallery-track"
-            style={{ transform: `translateX(${offset}px)` }}
-          >
-            {projects.map((project, index) => {
-              const isActive = index === mobileActiveIndex;
+      <div className="mobile-video-gallery">
+        <div className="mobile-video-track">
+          {projects.map((project) => (
+            <article key={project.id} className="mobile-video-item">
+              <button
+                type="button"
+                className="mobile-video-card"
+                onClick={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  preloadVideo(project.video, { priority: "auto" });
+                  onProjectSelect(project.id, rect);
+                }}
+              >
+                {project.video || project.cover ? (
+                  <video
+                    src={project.video}
+                    poster={project.cover}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <div className="video-wheel-fallback">{project.title}</div>
+                )}
+              </button>
 
-              return (
-                <button
-                  key={project.id}
-                  type="button"
-                  className={`mobile-gallery-card ${isActive ? "is-active" : ""}`}
-                  onClick={(event) => {
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    preloadVideo(project.video, { priority: "auto" });
-
-                    if (!isActive) {
-                      setMobileActiveIndex(index);
-                      return;
-                    }
-
-                    onProjectSelect(project.id, rect);
-                  }}
-                >
-                  {project.video || project.cover ? (
-                    <video
-                      src={project.video}
-                      poster={project.cover}
-                      autoPlay={isActive}
-                      muted
-                      loop
-                      playsInline
-                      preload={isActive ? "auto" : "metadata"}
-                    />
-                  ) : (
-                    <div className="video-wheel-fallback">{project.title}</div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+              <h2 className="mobile-video-title">{project.title}</h2>
+            </article>
+          ))}
         </div>
-
-        {activeProject ? (
-          <div className="mobile-active-title">{activeProject.title}</div>
-        ) : null}
-      </section>
+      </div>
     );
   };
 
