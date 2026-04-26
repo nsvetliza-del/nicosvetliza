@@ -208,8 +208,8 @@ export default function VideoWheel({
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.25 + Math.pow(depth, 2.2) * 1.05;
-      const opacity = 0.35 + depth * 0.65;
+      const scale = 0.28 + Math.pow(depth, 3) * 1.25;
+      const opacity = 0.38 + depth * 0.62;
       const zIndex = Math.round(depth * 100);
       const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
 
@@ -289,12 +289,16 @@ export default function VideoWheel({
     }
 
     mobileTouchLastXRef.current = currentX;
-    rotationRef.current += deltaX * 0.0023;
+    rotationRef.current -= deltaX * 0.0018;
     targetRotationRef.current = rotationRef.current;
     setRotation(rotationRef.current);
   };
 
   const handleMobileTouchEnd = () => {
+    if (activeMobileItem) {
+      rotateProjectToFront(activeMobileItem.index, 0);
+    }
+
     window.setTimeout(() => {
       mobileTouchMovedRef.current = false;
     }, 120);

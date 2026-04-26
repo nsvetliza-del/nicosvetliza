@@ -201,8 +201,8 @@
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
-    width: clamp(70px, 27vw, 130px) !important;
-    height: clamp(45px, 17vw, 85px) !important;
+    width: clamp(72px, 25vw, 120px) !important;
+    height: clamp(46px, 16vw, 78px) !important;
     max-height: none !important;
     min-height: 0 !important;
     margin: 0 !important;
