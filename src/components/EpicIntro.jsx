@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-const orchestraTuning = "";
+const orchestraTuning =
+  "https://res.cloudinary.com/dlpmcvfva/video/upload/v1777178051/orchestra-tuning_su2efh.mp3";
 
 const introWords = [
   { text: "soundscape", marker: "—", x: "-13vw", y: "-7vh" },
@@ -15,6 +16,7 @@ export default function EpicIntro({ enabled = true, onComplete }) {
   const [phase, setPhase] = useState("gate");
   const [isLeaving, setIsLeaving] = useState(false);
   const [activeWord, setActiveWord] = useState(0);
+
   const timeoutRefs = useRef([]);
   const hasStartedRef = useRef(false);
   const audioRef = useRef(null);
@@ -30,31 +32,35 @@ export default function EpicIntro({ enabled = true, onComplete }) {
     return timer;
   }, []);
 
-  const startIntro = useCallback(() => {
+  const startIntro = useCallback(async () => {
     if (!enabled || hasStartedRef.current) return;
 
-    const audio = audioRef.current;
+    hasStartedRef.current = true;
 
     console.log("initial play clicked");
 
+    const audio = audioRef.current;
+
     if (audio) {
-      audio.currentTime = 0;
-      audio.volume = 0.45;
-      audio.loop = false;
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = 0.45;
+        audio.loop = false;
+        audio.muted = false;
 
-      console.log("orchestra play called immediately");
+        console.log("orchestra play called immediately");
 
-      audio
-        .play()
-        .then(() => {
-          console.log("orchestra started");
-        })
-        .catch((error) => {
-          console.warn("orchestra audio error", error);
-        });
+        await audio.play();
+
+        console.log("orchestra started");
+      } catch (error) {
+        console.warn("orchestra audio error", error);
+      }
+    } else {
+      console.warn("orchestra audio ref missing");
     }
 
-    hasStartedRef.current = true;
     setPhase("words");
     setActiveWord(0);
     setIsLeaving(false);
@@ -82,19 +88,26 @@ export default function EpicIntro({ enabled = true, onComplete }) {
   useEffect(() => {
     if (!enabled) return undefined;
 
-    let audio = null;
+    const audio = new Audio();
+    audio.src = orchestraTuning;
+    audio.preload = "auto";
+    audio.volume = 0.45;
+    audio.loop = false;
 
-    if (orchestraTuning) {
-      audio = new Audio(orchestraTuning);
-      audio.preload = "auto";
-      audio.onended = () => {
-        console.log("orchestra audio ended");
-      };
-      audio.load();
-      audioRef.current = audio;
-    } else {
-      audioRef.current = null;
-    }
+    audio.addEventListener("canplaythrough", () => {
+      console.log("orchestra audio can play through");
+    });
+
+    audio.addEventListener("ended", () => {
+      console.log("orchestra audio ended");
+    });
+
+    audio.addEventListener("error", () => {
+      console.warn("orchestra audio failed to load");
+    });
+
+    audio.load();
+    audioRef.current = audio;
 
     setPhase("gate");
     setActiveWord(0);
@@ -104,12 +117,12 @@ export default function EpicIntro({ enabled = true, onComplete }) {
     return () => {
       clearScheduledWork();
 
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
+      audio.pause();
+      audio.currentTime = 0;
 
-      audioRef.current = null;
+      if (audioRef.current === audio) {
+        audioRef.current = null;
+      }
     };
   }, [clearScheduledWork, enabled]);
 
