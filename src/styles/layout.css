@@ -457,7 +457,7 @@
     align-content: start;
     justify-items: stretch;
     gap: 1.1rem;
-    padding-top: 108px;
+    padding-top: 0;
     padding-bottom: calc(34px + env(safe-area-inset-bottom));
   }
 
@@ -468,14 +468,14 @@
   }
 
   .portfolio-tagline {
-    top: 16px;
-    right: 16px;
+    top: 24px;
+    right: 20px;
     z-index: 24;
-    max-width: 150px;
-    font-size: 11px;
-    line-height: 1.12;
-    letter-spacing: 0.08em;
+    max-width: 130px;
+    font-size: 10px;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
     text-align: right;
-    opacity: 0.64;
+    opacity: 0.55;
   }
 }

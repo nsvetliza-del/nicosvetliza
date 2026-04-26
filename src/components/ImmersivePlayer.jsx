@@ -34,7 +34,7 @@ export default function ImmersivePlayer({ project, onClose, onPrev, onNext }) {
     const video = videoRef.current;
     if (!video || !project?.video) return undefined;
 
-    preloadVideo(project.video);
+    preloadVideo(project.video, { priority: "auto" });
 
     const attemptId = ++playAttemptRef.current;
 
