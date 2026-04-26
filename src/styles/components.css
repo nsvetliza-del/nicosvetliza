@@ -336,6 +336,20 @@
   background: transparent;
 }
 
+.video-wheel-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  color: rgba(17, 17, 17, 0.62);
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  text-align: center;
+  background: rgba(250, 250, 247, 0.88);
+}
+
 .rhythm-machine {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -781,16 +795,14 @@
     left: 16px;
     top: 16px;
     z-index: 26;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     align-items: flex-start;
-    gap: 0.45rem 0.9rem;
-    width: calc(100vw - 32px);
-    max-width: 15rem;
+    gap: 0.45rem;
+    width: min(calc(100vw - 32px), 13.5rem);
+    padding: 0;
   }
 
   .minimal-menu-brand {
-    flex-basis: 100%;
     font-size: 1.2rem;
     line-height: 1;
     margin-bottom: 0.1rem;
@@ -805,6 +817,12 @@
   .minimal-menu-sublink {
     font-size: 0.78rem;
     line-height: 1.1;
+  }
+
+  .minimal-menu-links-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.9rem;
   }
 
   .minimal-menu-submenu {
@@ -830,7 +848,7 @@
   .audio-keys-wrap {
     width: 100%;
     justify-items: center;
-    margin-top: 0.65rem;
+    margin-top: 0.9rem;
     margin-bottom: 0.15rem;
     z-index: 9;
   }
@@ -843,7 +861,64 @@
 
   .video-wheel-section {
     width: 100%;
-    margin-top: 0.4rem;
+    margin-top: 0.45rem;
+  }
+
+  .video-wheel-frame-mobile {
+    width: 100%;
+    height: auto;
+    min-height: min(52vh, 30rem);
+    overflow: visible;
+    padding: 0;
+  }
+
+  .video-wheel-mobile {
+    position: relative;
+    width: 100%;
+    min-height: min(44vh, 24rem);
+    overflow: visible;
+  }
+
+  .video-wheel-item-mobile {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: min(78vw, 23rem);
+    margin: 0;
+    gap: 0;
+    transform-origin: center center;
+    transition:
+      transform 800ms cubic-bezier(0.19, 1, 0.22, 1),
+      opacity 500ms cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .video-wheel-item-mobile .video-wheel-media {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  .video-wheel-item-mobile .video-wheel-video {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+  }
+
+  .video-wheel-mobile-title {
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    margin-top: 0.5rem;
+    min-height: 2.3rem;
+    padding: 0 1.2rem;
+  }
+
+  .video-wheel-mobile-title span {
+    font-size: 1rem;
+    line-height: 1.18;
+    color: rgba(17, 17, 17, 0.82);
+    text-align: center;
   }
 
   .video-wheel-frame {
@@ -857,18 +932,18 @@
     padding-bottom: 0.2rem;
   }
 
-  .video-wheel {
+  .video-wheel:not(.video-wheel-mobile) {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 74vw);
-    gap: 0.95rem;
+    grid-auto-columns: minmax(0, 78vw);
+    gap: 1rem;
     align-items: center;
     justify-content: start;
     height: auto;
-    padding: 0 13vw;
+    padding: 0 11vw;
   }
 
-  .video-wheel-item {
+  .video-wheel:not(.video-wheel-mobile) .video-wheel-item {
     position: relative;
     left: auto;
     top: auto;
@@ -882,27 +957,36 @@
     scroll-snap-align: center;
   }
 
-  .video-wheel-media {
+  .video-wheel:not(.video-wheel-mobile) .video-wheel-media {
     width: 100%;
     min-height: 0;
     display: grid;
     place-items: center;
+    aspect-ratio: 4 / 5;
   }
 
-  .video-wheel-video {
+  .video-wheel:not(.video-wheel-mobile) .video-wheel-video {
     width: 100%;
-    max-height: min(34vh, 18rem);
-    object-fit: contain;
+    height: 100%;
+    max-height: min(42vh, 22rem);
+    object-fit: cover;
+    border-radius: 0;
   }
 
-  .video-wheel-meta {
+  .video-wheel-random {
+    display: none;
+  }
+
+  .video-wheel:not(.video-wheel-mobile) .video-wheel-meta {
     opacity: 1;
     transform: none;
     text-align: center;
     justify-items: center;
+    min-height: 2.45rem;
+    align-content: start;
   }
 
-  .video-wheel-meta span:first-child {
+  .video-wheel:not(.video-wheel-mobile) .video-wheel-meta span:first-child {
     font-size: 1rem;
     line-height: 1.15;
     color: rgba(17, 17, 17, 0.82);

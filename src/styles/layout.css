@@ -442,15 +442,20 @@
   .simple-page-shell {
     width: 100%;
     min-height: calc(100dvh - 32px - env(safe-area-inset-bottom));
+    align-content: start;
+    justify-items: stretch;
   }
 
   .portfolio-views {
-    min-height: calc(100dvh - 32px - env(safe-area-inset-bottom));
+    min-height: auto;
+    display: block;
   }
 
   .portfolio-view {
+    position: relative;
+    inset: auto;
     align-content: start;
-    justify-items: center;
+    justify-items: stretch;
     gap: 1.1rem;
     padding-top: 108px;
     padding-bottom: calc(34px + env(safe-area-inset-bottom));
@@ -459,6 +464,7 @@
   .portfolio-wheel-shell {
     gap: 0.95rem;
     width: 100%;
+    justify-items: stretch;
   }
 
   .portfolio-tagline {

@@ -59,51 +59,53 @@ export default function MinimalMenu({ onSonicShuffle }) {
           {BRAND_NAME}
         </NavLink>
 
-        <div
-          className={`minimal-menu-portfolio-group ${
-            isPortfolioOpen ? "is-open" : ""
-          }`}
-          onMouseEnter={() => setIsPortfolioOpen(true)}
-          onMouseLeave={() => setIsPortfolioOpen(false)}
-        >
-          <NavLink
-            to="/work"
-            className={({ isActive }) =>
-              `minimal-menu-link ${isActive ? "is-active" : ""}`
-            }
-            onClick={() => setIsPortfolioOpen((open) => !open)}
-            onFocus={() => setIsPortfolioOpen(true)}
+        <div className="minimal-menu-links-row">
+          <div
+            className={`minimal-menu-portfolio-group ${
+              isPortfolioOpen ? "is-open" : ""
+            }`}
+            onMouseEnter={() => setIsPortfolioOpen(true)}
+            onMouseLeave={() => setIsPortfolioOpen(false)}
           >
-            Portfolio
-          </NavLink>
+            <NavLink
+              to="/work"
+              className={({ isActive }) =>
+                `minimal-menu-link ${isActive ? "is-active" : ""}`
+              }
+              onClick={() => setIsPortfolioOpen((open) => !open)}
+              onFocus={() => setIsPortfolioOpen(true)}
+            >
+              Portfolio
+            </NavLink>
 
-          <div className="minimal-menu-submenu">
-            {portfolioLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  `minimal-menu-sublink ${isActive ? "is-active" : ""}`
-                }
-                onClick={() => setIsPortfolioOpen(false)}
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            <div className="minimal-menu-submenu">
+              {portfolioLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `minimal-menu-sublink ${isActive ? "is-active" : ""}`
+                  }
+                  onClick={() => setIsPortfolioOpen(false)}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {links.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            className={({ isActive }) =>
-              `minimal-menu-link ${isActive ? "is-active" : ""}`
-            }
-          >
-            {link.label}
-          </NavLink>
-        ))}
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) =>
+                `minimal-menu-link ${isActive ? "is-active" : ""}`
+              }
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
       <button
