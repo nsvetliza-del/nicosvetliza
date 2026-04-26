@@ -72,7 +72,13 @@ export default function MinimalMenu({ onSonicShuffle }) {
               className={({ isActive }) =>
                 `minimal-menu-link ${isActive ? "is-active" : ""}`
               }
-              onClick={() => setIsPortfolioOpen((open) => !open)}
+              onClick={(event) => {
+                if (window.innerWidth <= 768) {
+                  event.preventDefault();
+                }
+
+                setIsPortfolioOpen((open) => !open);
+              }}
               onFocus={() => setIsPortfolioOpen(true)}
             >
               Portfolio

@@ -95,6 +95,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
 
   const basePath = useMemo(() => {
     if (location.pathname.startsWith("/project/")) return "/";
+    if (location.pathname.startsWith("/portfolio")) return "/portfolio";
     if (location.pathname.startsWith("/films")) return "/films";
     if (location.pathname.startsWith("/commercial")) return "/commercial";
     if (location.pathname.startsWith("/music-videos")) return "/music-videos";

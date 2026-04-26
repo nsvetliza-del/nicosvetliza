@@ -3,7 +3,7 @@ import MinimalMenu from "../components/MinimalMenu";
 
 export default function About() {
   return (
-    <main className="simple-page">
+    <main className="simple-page about-page">
       <section className="simple-page-shell">
         <MinimalMenu />
         <div className="simple-page-copy">

@@ -13,9 +13,12 @@ export default function VideoWheel({
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
+  const mobileTouchLastXRef = useRef(0);
+  const mobileTouchMovedRef = useRef(false);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
   const [showRandomButton, setShowRandomButton] = useState(false);
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
@@ -52,12 +55,15 @@ export default function VideoWheel({
     const media = window.matchMedia("(max-width: 768px)");
     const update = () => {
       setIsMobile(media.matches);
+      setViewportWidth(window.innerWidth);
     };
 
     update();
     media.addEventListener("change", update);
+    window.addEventListener("resize", update);
     return () => {
       media.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
     };
   }, []);
 
@@ -142,6 +148,7 @@ export default function VideoWheel({
 
     const randomIndex = Math.floor(Math.random() * projects.length);
     if (isMobile) {
+      rotateProjectToFront(randomIndex, 0);
       return undefined;
     }
 
@@ -191,10 +198,59 @@ export default function VideoWheel({
     });
   }, [projects, rotation, isExpanded]);
 
+  const mobileItems = useMemo(() => {
+    const total = projects.length || 1;
+    const radiusX = Math.max(170, viewportWidth * 0.55);
+    const radiusY = 90;
+
+    return projects.map((project, index) => {
+      const angle = (index / total) * Math.PI * 2 + rotation;
+      const x = Math.cos(angle) * radiusX;
+      const y = Math.sin(angle) * radiusY;
+      const depth = (Math.sin(angle) + 1) / 2;
+      const scale = 0.55 + depth * 0.45;
+      const opacity = depth < 0.15 ? 0 : 0.25 + depth * 0.75;
+      const zIndex = Math.round(depth * 100);
+      const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
+
+      return {
+        depth,
+        index,
+        isFocused,
+        project,
+        style: {
+          transform: `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale})`,
+          opacity,
+          zIndex,
+          pointerEvents: opacity === 0 ? "none" : "auto",
+        },
+      };
+    });
+  }, [projects, rotation, viewportWidth]);
+
+  const activeMobileItem = useMemo(() => {
+    if (!mobileItems.length) return null;
+
+    return mobileItems.reduce((front, item) =>
+      item.depth > front.depth ? item : front
+    );
+  }, [mobileItems]);
+
   useEffect(() => {
     if (!projects.length) return;
 
     if (isMobile) {
+      if (!activeMobileItem) return;
+
+      const current = activeMobileItem.project;
+      const prev = projects[(activeMobileItem.index - 1 + projects.length) % projects.length];
+      const next = projects[(activeMobileItem.index + 1) % projects.length];
+
+      [current, prev, next].forEach((project) =>
+        preloadVideo(project?.video, {
+          priority: project?.id === current?.id ? "auto" : "metadata",
+        })
+      );
       return;
     }
 
@@ -213,20 +269,59 @@ export default function VideoWheel({
       preloadVideo(project?.video, { priority: "auto" })
     );
     preloadVideoBatch([nextTwo?.video], { priority: "metadata", delay: 220 });
-  }, [isMobile, items, projects]);
+  }, [activeMobileItem, isMobile, items, projects]);
+
+  const handleMobileTouchStart = (event) => {
+    mobileTouchLastXRef.current = event.touches[0]?.clientX ?? 0;
+    mobileTouchMovedRef.current = false;
+  };
+
+  const handleMobileTouchMove = (event) => {
+    const currentX = event.touches[0]?.clientX ?? mobileTouchLastXRef.current;
+    const delta = currentX - mobileTouchLastXRef.current;
+
+    if (Math.abs(delta) > 1) {
+      mobileTouchMovedRef.current = true;
+    }
+
+    mobileTouchLastXRef.current = currentX;
+    rotationRef.current += delta * 0.01;
+    targetRotationRef.current = rotationRef.current;
+    setRotation(rotationRef.current);
+  };
+
+  const handleMobileTouchEnd = () => {
+    window.setTimeout(() => {
+      mobileTouchMovedRef.current = false;
+    }, 120);
+  };
 
   const renderMobileGallery = () => {
     return (
-      <div className="mobile-video-gallery">
-        <div className="mobile-video-track">
-          {projects.map((project) => (
-            <article key={project.id} className="mobile-video-item">
+      <>
+        <div
+          className="mobile-carousel-container"
+          onTouchStart={handleMobileTouchStart}
+          onTouchMove={handleMobileTouchMove}
+          onTouchEnd={handleMobileTouchEnd}
+        >
+          {mobileItems.map(({ index, isFocused, project, style }) => (
               <button
+                key={project.id}
                 type="button"
                 className="mobile-video-card"
+                style={style}
                 onClick={(event) => {
+                  if (mobileTouchMovedRef.current) return;
+
                   const rect = event.currentTarget.getBoundingClientRect();
                   preloadVideo(project.video, { priority: "auto" });
+
+                  if (!isFocused && activeMobileItem?.project.id !== project.id) {
+                    rotateProjectToFront(index, 0);
+                    return;
+                  }
+
                   onProjectSelect(project.id, rect);
                 }}
               >
@@ -238,7 +333,7 @@ export default function VideoWheel({
                     muted
                     loop
                     playsInline
-                    preload="metadata"
+                    preload={isFocused || activeMobileItem?.project.id === project.id ? "auto" : "metadata"}
                     ref={(video) => {
                       if (!video) return;
                       video.muted = true;
@@ -250,12 +345,13 @@ export default function VideoWheel({
                   <div className="video-wheel-fallback">{project.title}</div>
                 )}
               </button>
-
-              <h2 className="mobile-video-title">{project.title}</h2>
-            </article>
           ))}
         </div>
-      </div>
+
+        {activeMobileItem ? (
+          <div className="mobile-active-title">{activeMobileItem.project.title}</div>
+        ) : null}
+      </>
     );
   };
 

@@ -12,6 +12,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Portfolio showIntro />} />
           <Route path="/project/:projectId" element={<Portfolio showIntro={false} />} />
+          <Route path="/portfolio" element={<Portfolio initialCategory="All" />} />
+          <Route path="/portfolio/:projectId" element={<Portfolio initialCategory="All" />} />
           <Route path="/work" element={<Portfolio initialCategory="All" />} />
           <Route path="/work/:projectId" element={<Portfolio initialCategory="All" />} />
           <Route path="/films" element={<Portfolio initialCategory="Short Film" />} />
