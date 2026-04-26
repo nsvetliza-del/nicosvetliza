@@ -86,28 +86,45 @@ export default function EpicIntro({ enabled = true, onComplete }) {
   }, [clearScheduledWork, enabled, onComplete, schedule]);
 
   useEffect(() => {
-    if (!enabled) return undefined;
-
     const audio = new Audio();
     audio.src = orchestraTuning;
     audio.preload = "auto";
     audio.volume = 0.45;
     audio.loop = false;
 
-    audio.addEventListener("canplaythrough", () => {
+    const handleCanPlayThrough = () => {
       console.log("orchestra audio can play through");
-    });
+    };
 
-    audio.addEventListener("ended", () => {
+    const handleEnded = () => {
       console.log("orchestra audio ended");
-    });
+    };
 
-    audio.addEventListener("error", () => {
+    const handleError = () => {
       console.warn("orchestra audio failed to load");
-    });
+    };
+
+    audio.addEventListener("canplaythrough", handleCanPlayThrough);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
 
     audio.load();
     audioRef.current = audio;
+
+    return () => {
+      audio.removeEventListener("canplaythrough", handleCanPlayThrough);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
+      audio.pause();
+      audio.currentTime = 0;
+      if (audioRef.current === audio) {
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return undefined;
 
     setPhase("gate");
     setActiveWord(0);
@@ -116,13 +133,6 @@ export default function EpicIntro({ enabled = true, onComplete }) {
 
     return () => {
       clearScheduledWork();
-
-      audio.pause();
-      audio.currentTime = 0;
-
-      if (audioRef.current === audio) {
-        audioRef.current = null;
-      }
     };
   }, [clearScheduledWork, enabled]);
 
