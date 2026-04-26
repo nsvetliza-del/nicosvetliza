@@ -1,7 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
-
-const blueDotSound = "";
 
 const BRAND_NAME = "Nico Svetliza™";
 
@@ -19,65 +17,40 @@ const portfolioLinks = [
 export default function MinimalMenu({ onSonicShuffle }) {
   const [isTuning, setIsTuning] = useState(false);
   const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
-  const tuningTimerRef = useRef(0);
-  const blueDotAudioRef = useRef(null);
 
-  const playBlueSound = () => {
-    const audio = blueDotAudioRef.current;
-    if (!audio) return;
+  const tuningTimerRef = useRef(null);
 
-    console.log("blue dot sound play called");
+  const playBlueSound = async () => {
+    try {
+      console.log("blue dot clicked");
 
-    audio.pause();
-    audio.currentTime = 0;
+      const audio = new Audio(
+        "https://res.cloudinary.com/dlpmcvfva/video/upload/v1777178050/blue-dot-sound_kycbix.wav"
+      );
 
-    const playPromise = audio.play();
+      audio.volume = 0.9;
+      audio.currentTime = 0;
+      audio.muted = false;
 
-    if (playPromise !== undefined) {
-      playPromise.catch((error) => {
-        console.warn("blue dot sound error", error);
-      });
+      await audio.play();
+
+      console.log("blue dot sound started");
+    } catch (error) {
+      console.warn("blue dot sound error", error);
     }
   };
 
   const handleTune = () => {
-    console.log("blue dot clicked");
+    playBlueSound();
 
     setIsTuning(true);
     window.clearTimeout(tuningTimerRef.current);
-    tuningTimerRef.current = window.setTimeout(() => setIsTuning(false), 1080);
+    tuningTimerRef.current = window.setTimeout(() => {
+      setIsTuning(false);
+    }, 1080);
 
-    playBlueSound();
     onSonicShuffle?.();
   };
-
-  useEffect(() => {
-    if (!blueDotSound) {
-      blueDotAudioRef.current = null;
-
-      return () => {
-        window.clearTimeout(tuningTimerRef.current);
-      };
-    }
-
-    const audio = new Audio(blueDotSound);
-    audio.preload = "auto";
-    audio.volume = 0.7;
-    audio.loop = false;
-    audio.load();
-
-    blueDotAudioRef.current = audio;
-
-    return () => {
-      window.clearTimeout(tuningTimerRef.current);
-      audio.pause();
-      audio.currentTime = 0;
-
-      if (blueDotAudioRef.current === audio) {
-        blueDotAudioRef.current = null;
-      }
-    };
-  }, []);
 
   return (
     <>
