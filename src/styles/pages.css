@@ -93,11 +93,11 @@
 @media (max-width: 768px) {
   .mobile-carousel-container {
     position: fixed !important;
-    top: 52dvh !important;
+    top: 63dvh !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 100vw !important;
-    height: 320px !important;
+    height: 260px !important;
     overflow: visible !important;
     z-index: 20 !important;
     display: block !important;
@@ -111,16 +111,25 @@
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
-    width: clamp(95px, 38vw, 175px) !important;
-    height: clamp(60px, 23vw, 110px) !important;
+    width: clamp(90px, 34vw, 165px) !important;
+    height: clamp(58px, 21vw, 105px) !important;
     max-height: none !important;
     min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
     overflow: hidden !important;
-    background: #f2f2f2 !important;
+    background: #eee !important;
     display: block !important;
+    transform:
+      translate(-50%, -50%)
+      translate(var(--x), var(--y))
+      scale(var(--scale)) !important;
+    opacity: var(--opacity) !important;
+    z-index: var(--z) !important;
+    transition:
+      transform 520ms cubic-bezier(0.19, 1, 0.22, 1),
+      opacity 420ms ease !important;
   }
 
   .mobile-carousel-container .mobile-video-card video {
@@ -132,14 +141,14 @@
 
   .mobile-active-title {
     position: fixed !important;
-    top: calc(52dvh + 170px) !important;
+    top: calc(63dvh + 118px) !important;
     left: 0 !important;
     width: 100vw !important;
     padding: 0 24px !important;
     text-align: center !important;
     font-size: 14px !important;
     line-height: 1.2 !important;
-    opacity: 0.7 !important;
+    opacity: 0.72 !important;
     z-index: 80 !important;
     pointer-events: none !important;
   }
@@ -148,7 +157,7 @@
     position: fixed !important;
     top: 22px !important;
     left: 22px !important;
-    z-index: 200 !important;
+    z-index: 300 !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 7px !important;
@@ -157,7 +166,7 @@
 
   .minimal-menu-brand {
     font-size: 20px !important;
-    line-height: 1.1 !important;
+    line-height: 1.05 !important;
   }
 
   .minimal-menu-links-row {
@@ -175,8 +184,9 @@
   .minimal-menu-submenu {
     display: none !important;
     flex-direction: column !important;
-    margin-left: 10px !important;
-    gap: 5px !important;
+    margin-top: 5px !important;
+    margin-left: 18px !important;
+    gap: 6px !important;
     max-height: none !important;
     padding-left: 0 !important;
     opacity: 1 !important;
@@ -190,8 +200,10 @@
   }
 
   .minimal-menu-sublink {
-    font-size: 13px !important;
+    font-size: 14px !important;
     line-height: 1.1 !important;
+    opacity: 0.65 !important;
+    white-space: nowrap !important;
   }
 
   .site-tagline,
@@ -236,15 +248,26 @@
   .piano-keys,
   .rhythm-machine {
     position: fixed !important;
-    bottom: calc(22px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(64px + env(safe-area-inset-bottom)) !important;
     left: 50% !important;
     transform: translateX(-50%) scale(0.48) !important;
     z-index: 60 !important;
   }
 
+  .about-page .audio-keys-wrap,
+  .about-page .audio-keys,
+  .about-page .piano-keys,
+  .about-page .rhythm-machine,
+  .contact-page .audio-keys-wrap,
+  .contact-page .audio-keys,
+  .contact-page .piano-keys,
+  .contact-page .rhythm-machine {
+    display: none !important;
+  }
+
   .minimal-menu-pulse {
     position: fixed !important;
-    top: 92px !important;
+    top: 118px !important;
     right: 24px !important;
     left: auto !important;
     bottom: auto !important;

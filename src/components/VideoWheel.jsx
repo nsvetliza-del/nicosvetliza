@@ -200,16 +200,16 @@ export default function VideoWheel({
 
   const mobileItems = useMemo(() => {
     const total = projects.length || 1;
-    const radiusX = viewportWidth * 0.68;
-    const radiusY = 125;
+    const radiusX = viewportWidth * 0.64;
+    const radiusY = 82;
 
     return projects.map((project, index) => {
       const angle = (index / total) * Math.PI * 2 + rotation;
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.36 + depth * 0.72;
-      const opacity = depth < 0.22 ? 0 : 0.12 + depth * 0.88;
+      const scale = 0.34 + depth * 0.82;
+      const opacity = depth < 0.18 ? 0 : 0.18 + depth * 0.82;
       const zIndex = Math.round(depth * 100);
       const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
 
@@ -219,10 +219,12 @@ export default function VideoWheel({
         isFocused,
         project,
         style: {
-          transform: `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale})`,
-          opacity,
-          zIndex,
-          pointerEvents: depth < 0.22 ? "none" : "auto",
+          "--x": `${x}px`,
+          "--y": `${y}px`,
+          "--scale": scale,
+          "--opacity": opacity,
+          "--z": zIndex,
+          pointerEvents: depth < 0.18 ? "none" : "auto",
         },
       };
     });
