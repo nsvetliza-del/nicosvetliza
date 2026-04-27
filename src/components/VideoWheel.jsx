@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import RandomPlayButton from "./RandomPlayButton";
-import { preloadVideo, preloadVideoBatch } from "../utils/videoPreload";
+import {
+  optimizeVideoSrc,
+  preloadVideo,
+  preloadVideoBatch,
+  preloadVideoLink,
+} from "../utils/videoPreload";
 
 export default function VideoWheel({
   projects,
@@ -18,6 +23,7 @@ export default function VideoWheel({
   const mobileItemRefs = useRef([]);
   const mobileFrameRef = useRef(0);
   const mobileActiveIndexRef = useRef(0);
+  const mobileActiveTitleRef = useRef("");
   const mobileActiveTitleTimerRef = useRef(0);
   const mobileSnapTimerRef = useRef(0);
   const mobileVelocityRef = useRef(0);
@@ -83,22 +89,20 @@ export default function VideoWheel({
 
   const updateMobileActiveTitle = useCallback((index, immediate = false) => {
     if (!projects[index]) return;
-    if (mobileActiveIndexRef.current === index && mobileActiveTitle) return;
+    if (mobileActiveIndexRef.current === index && mobileActiveTitleRef.current) return;
 
     mobileActiveIndexRef.current = index;
     window.clearTimeout(mobileActiveTitleTimerRef.current);
 
     const commitTitle = () => {
-      setMobileActiveTitle(projects[index]?.title ?? "");
+      const nextTitle = projects[index]?.title ?? "";
+      mobileActiveTitleRef.current = nextTitle;
+      setMobileActiveTitle(nextTitle);
       const prev = projects[(index - 1 + projects.length) % projects.length];
       const current = projects[index];
       const next = projects[(index + 1) % projects.length];
 
-      [prev, current, next].forEach((project) =>
-        preloadVideo(project?.video, {
-          priority: project?.id === current?.id ? "auto" : "metadata",
-        })
-      );
+      [prev, current, next].forEach((project) => preloadVideoLink(project?.video));
 
       mobileItemRefs.current.forEach((element, itemIndex) => {
         const video = element?.querySelector("video");
@@ -123,7 +127,7 @@ export default function VideoWheel({
     }
 
     mobileActiveTitleTimerRef.current = window.setTimeout(commitTitle, 150);
-  }, [mobileActiveTitle, projects]);
+  }, [projects]);
 
   const updateMobileWheel = useCallback(() => {
     const total = projects.length;
@@ -131,8 +135,8 @@ export default function VideoWheel({
 
     const radiusX = window.innerWidth * 0.64;
     const radiusY = 105;
-    let frontIndex = 0;
-    let frontDepth = -1;
+    const frontIndex = getMobileFrontIndex();
+    const frontAngle = Math.PI / 2;
 
     projects.forEach((_, index) => {
       const element = mobileItemRefs.current[index];
@@ -140,6 +144,10 @@ export default function VideoWheel({
 
       const baseAngle = (index / total) * Math.PI * 2;
       const angle = baseAngle + rotationRef.current;
+      const angleDistanceToFront = Math.abs(Math.atan2(
+        Math.sin(angle - frontAngle),
+        Math.cos(angle - frontAngle)
+      ));
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
@@ -151,14 +159,53 @@ export default function VideoWheel({
       element.style.opacity = String(opacity);
       element.style.zIndex = String(zIndex);
 
-      if (depth > frontDepth) {
-        frontDepth = depth;
-        frontIndex = index;
+      const video = element.querySelector("video");
+      if (!video) return;
+
+      const source = video.dataset.src;
+      const isNearFront = angleDistanceToFront < 1.2;
+      const isFront = index === frontIndex;
+      const hasSource = Boolean(video.getAttribute("src"));
+
+      if (isNearFront && source && !hasSource) {
+        video.src = source;
+        video.preload = isFront ? "auto" : "metadata";
+        video.load();
+      } else if (isFront && hasSource && video.preload !== "auto") {
+        video.preload = "auto";
+      } else if (!isFront && hasSource && video.preload !== "metadata") {
+        video.preload = "metadata";
+      }
+
+      if (!isNearFront && hasSource) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+      }
+
+      const nextFrontState = isFront ? "true" : "false";
+      if (video.dataset.front !== nextFrontState) {
+        video.dataset.front = nextFrontState;
+
+        if (isFront && source) {
+          if (!video.getAttribute("src")) {
+            video.src = source;
+            video.preload = "auto";
+            video.load();
+          }
+
+          video.muted = true;
+          video.loop = true;
+          video.playsInline = true;
+          void video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
       }
     });
 
     updateMobileActiveTitle(frontIndex);
-  }, [projects, updateMobileActiveTitle]);
+  }, [getMobileFrontIndex, projects, updateMobileActiveTitle]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -435,6 +482,10 @@ export default function VideoWheel({
           onPointerCancel={handleMobilePointerCancel}
         >
           {projects.map((project, index) => (
+            (() => {
+              const optimizedSrc = optimizeVideoSrc(project.video);
+
+              return (
               <button
                 key={project.id}
                 type="button"
@@ -458,7 +509,7 @@ export default function VideoWheel({
               >
                 {project.video || project.cover ? (
                   <video
-                    src={project.video}
+                    data-src={optimizedSrc}
                     poster={project.cover}
                     muted
                     loop
@@ -474,6 +525,8 @@ export default function VideoWheel({
                   <div className="video-wheel-fallback">{project.title}</div>
                 )}
               </button>
+              );
+            })()
           ))}
         </div>
 
