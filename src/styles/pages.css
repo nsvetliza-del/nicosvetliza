@@ -243,8 +243,8 @@
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
-    width: clamp(72px, 25vw, 120px) !important;
-    height: clamp(46px, 16vw, 78px) !important;
+    width: clamp(72px, 25vw, 125px) !important;
+    height: clamp(46px, 16vw, 82px) !important;
     max-height: none !important;
     min-height: 0 !important;
     margin: 0 !important;
@@ -260,8 +260,12 @@
     opacity: var(--opacity) !important;
     z-index: var(--z) !important;
     transition:
-      transform 720ms cubic-bezier(0.19, 1, 0.22, 1),
+      transform 650ms cubic-bezier(0.19, 1, 0.22, 1),
       opacity 500ms ease !important;
+  }
+
+  .mobile-carousel-container.is-dragging .mobile-video-card {
+    transition: none !important;
   }
 
   .mobile-carousel-container .mobile-video-card video {

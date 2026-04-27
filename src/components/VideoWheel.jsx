@@ -24,6 +24,7 @@ export default function VideoWheel({
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMobileDragging, setIsMobileDragging] = useState(false);
 
   const hideRandomButton = () => {
     setIsCarouselMoving(true);
@@ -200,15 +201,15 @@ export default function VideoWheel({
 
   const mobileItems = useMemo(() => {
     const total = projects.length || 1;
-    const radiusX = viewportWidth * 0.64;
-    const radiusY = 115;
+    const radiusX = viewportWidth * 0.62;
+    const radiusY = 105;
 
     return projects.map((project, index) => {
       const angle = (index / total) * Math.PI * 2 + rotation;
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.28 + Math.pow(depth, 3) * 1.25;
+      const scale = 0.32 + Math.pow(depth, 2.4) * 1.05;
       const opacity = 0.38 + depth * 0.62;
       const zIndex = Math.round(depth * 100);
       const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
@@ -276,6 +277,7 @@ export default function VideoWheel({
   const handleMobileTouchStart = (event) => {
     mobileTouchLastXRef.current = event.touches[0]?.clientX ?? 0;
     mobileTouchMovedRef.current = false;
+    setIsMobileDragging(true);
   };
 
   const handleMobileTouchMove = (event) => {
@@ -289,12 +291,14 @@ export default function VideoWheel({
     }
 
     mobileTouchLastXRef.current = currentX;
-    rotationRef.current -= deltaX * 0.0018;
+    rotationRef.current -= deltaX * 0.0022;
     targetRotationRef.current = rotationRef.current;
     setRotation(rotationRef.current);
   };
 
   const handleMobileTouchEnd = () => {
+    setIsMobileDragging(false);
+
     if (activeMobileItem) {
       rotateProjectToFront(activeMobileItem.index, 0);
     }
@@ -302,11 +306,6 @@ export default function VideoWheel({
     window.setTimeout(() => {
       mobileTouchMovedRef.current = false;
     }, 120);
-  };
-
-  const handleMobileWheel = (event) => {
-    event.preventDefault();
-    targetRotationRef.current += event.deltaY * 0.0015;
   };
 
   const handleMobileRandom = () => {
@@ -319,11 +318,10 @@ export default function VideoWheel({
     return (
       <>
         <div
-          className="mobile-carousel-container"
+          className={`mobile-carousel-container ${isMobileDragging ? "is-dragging" : ""}`}
           onTouchStart={handleMobileTouchStart}
           onTouchMove={handleMobileTouchMove}
           onTouchEnd={handleMobileTouchEnd}
-          onWheel={handleMobileWheel}
         >
           {mobileItems.map(({ index, isFocused, project, style }) => (
               <button
@@ -349,7 +347,7 @@ export default function VideoWheel({
                   <video
                     src={project.video}
                     poster={project.cover}
-                    autoPlay
+                    autoPlay={activeMobileItem?.project.id === project.id}
                     muted
                     loop
                     playsInline
