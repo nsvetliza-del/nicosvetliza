@@ -60,35 +60,8 @@ export default function Contact() {
           </div>
 
           <div className="ig-info">
-            <div className="ig-header">
-              <span className="ig-username">nicosvetliza</span>
-              <svg
-                className="ig-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                aria-hidden="true"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="1" />
-              </svg>
-            </div>
-
-            <div className="ig-name">Nico Svetliza</div>
-
-            <div className="ig-stats">
-              <span><strong>95</strong> posts</span>
-              <span><strong>1589</strong> followers</span>
-              <span><strong>2017</strong> following</span>
-            </div>
-
-            <div className="ig-bio">
-              Composer | Music Producer
-              <br />
-              Sound Designer
-            </div>
+            <div className="ig-username">@nicosvetliza</div>
+            <div className="ig-bio">latest visual work / behind the sound</div>
           </div>
         </a>
 

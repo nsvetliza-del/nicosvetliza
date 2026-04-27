@@ -8,130 +8,107 @@
   align-items: center;
   justify-content: center;
   padding: 140px 24px 80px;
-  text-align: center;
+  text-align: left;
 }
 
 .contact-content {
   width: 100%;
-  max-width: 520px;
-  display: grid;
-  justify-items: center;
-  gap: 0;
-  text-align: center;
-}
-
-.contact-header {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 24px;
-  color: inherit;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 600;
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-  text-decoration: none;
-  transition: opacity 280ms ease;
-}
-
-.contact-header:hover {
-  opacity: 0.7;
-}
-
-.instagram-inline-icon {
-  display: inline-grid;
-  place-items: center;
-  opacity: 0.62;
-  transform: translateY(0.08em);
+  max-width: 720px;
+  margin: 0 auto;
+  padding-top: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .contact-intro {
-  display: grid;
-  gap: 0.65rem;
-  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
 }
 
 .contact-intro p {
+  max-width: 520px;
   margin: 0;
-  color: rgba(17, 17, 17, 0.72);
   font-size: 15px;
-  line-height: 1.45;
-  opacity: 0.75;
+  line-height: 1.6;
+  opacity: 0.7;
 }
 
 .contact-links {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
-  margin-bottom: 28px;
 }
 
-.contact-links a {
-  width: fit-content;
-  color: inherit;
-  font-size: 0.86rem;
-  line-height: 1.35;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.18);
-  transition: opacity 250ms ease, transform 250ms ease, border-color 250ms ease;
-}
-
-.instagram-card {
-  display: block;
-  width: 100% !important;
-  max-width: 340px;
-  padding: 18px 20px;
-  color: inherit;
-  border: 1px solid rgba(0, 0, 0, 0.15) !important;
-  text-decoration: none;
-  transition: opacity 280ms ease, transform 280ms ease, border-color 280ms ease;
-}
-
-.instagram-inner {
+.ig-profile {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  gap: 20px;
+  width: fit-content;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 250ms ease;
 }
 
-.instagram-icon {
-  display: grid;
-  place-items: center;
-  opacity: 0.74;
-}
-
-.instagram-text {
-  display: grid;
-  justify-items: start;
-  text-align: left;
-}
-
-.instagram-label {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.5;
-}
-
-.instagram-handle {
-  font-size: 18px;
-  letter-spacing: -0.02em;
-}
-
-.contact-links a:hover,
-.instagram-card:hover {
+.ig-profile:hover {
   opacity: 0.7;
-  transform: translateY(-2px);
+}
+
+.ig-avatar {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+}
+
+.ig-avatar img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ig-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ig-username {
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.ig-bio {
+  max-width: 18rem;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.6;
+}
+
+.contact-email {
+  width: fit-content;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1.25;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  opacity: 0.6;
+  transition: opacity 250ms ease;
+}
+
+.contact-email:hover {
+  opacity: 1;
 }
 
 .contact-form {
   width: 100%;
-  max-width: 320px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .contact-form input,
@@ -159,16 +136,21 @@
 }
 
 .contact-form button {
-  align-self: center;
+  align-self: flex-start;
   margin-top: 10px;
-  padding: 10px 18px;
-  border: 1px solid rgba(0, 0, 0, 0.28);
+  padding: 10px 16px;
+  border: 1px solid #000;
   border-radius: 0;
   background: transparent;
   color: inherit;
   font: inherit;
   font-size: 14px;
   cursor: pointer;
+  transition: opacity 250ms ease;
+}
+
+.contact-form button:hover {
+  opacity: 0.7;
 }
 
 .contact-form button:disabled {
@@ -185,6 +167,10 @@
 }
 
 @media (max-width: 768px) {
+  :root {
+    --mobile-header-safe: 190px;
+  }
+
   .portfolio-stage,
   .portfolio-view,
   .portfolio-view.is-active,
@@ -275,7 +261,7 @@
 @media (max-width: 768px) {
   .mobile-carousel-container {
     position: fixed !important;
-    top: 48dvh !important;
+    top: calc(var(--mobile-header-safe) + 250px) !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 100vw !important;
@@ -324,7 +310,7 @@
 
   .mobile-active-title {
     position: fixed !important;
-    top: calc(48dvh + 165px) !important;
+    top: calc(var(--mobile-header-safe) + 430px) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 90vw !important;
@@ -332,7 +318,7 @@
     text-align: center !important;
     font-size: 15px !important;
     line-height: 1.2 !important;
-    color: rgba(0, 0, 0, 0.75) !important;
+    color: rgba(0, 0, 0, 0.78) !important;
     opacity: 1 !important;
     z-index: 120 !important;
     pointer-events: none !important;
@@ -344,7 +330,7 @@
   .mobile-random-button {
     position: fixed !important;
     left: 50% !important;
-    top: 48dvh !important;
+    top: calc(var(--mobile-header-safe) + 250px) !important;
     transform: translate(-50%, -50%) !important;
     z-index: 180 !important;
     width: 28px !important;
@@ -431,35 +417,56 @@
   .about-page,
   .contact-page {
     min-height: 100dvh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 140px 24px 100px !important;
-    text-align: center !important;
+    display: block !important;
+    overflow-y: auto !important;
+    padding: var(--mobile-header-safe) 24px 80px !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+
+  .contact-page {
+    padding: var(--mobile-header-safe) 24px 80px !important;
+    text-align: left !important;
   }
 
   .about-page .simple-page-shell,
   .contact-page .simple-page-shell {
     min-height: 0 !important;
-    align-content: center !important;
-    justify-items: center !important;
+    display: block !important;
+    align-content: start !important;
+    justify-items: stretch !important;
   }
 
   .about-page .simple-page-copy,
   .contact-page .simple-page-copy {
-    justify-items: center !important;
-    text-align: center !important;
+    justify-items: start !important;
+    text-align: left !important;
+  }
+
+  .about-content,
+  .contact-content {
+    max-width: 340px !important;
+    margin: 0 auto !important;
+    text-align: left !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .about-content p {
+    margin: 0 0 20px !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
   }
 
   .contact-content {
     width: 100% !important;
-    max-width: 340px !important;
+    padding: 0 !important;
+    gap: 34px !important;
   }
 
   .contact-intro p {
     font-size: 14px !important;
-    line-height: 1.45 !important;
+    line-height: 1.6 !important;
   }
 
   .contact-form {
@@ -467,15 +474,16 @@
     max-width: 320px !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
-    margin-top: 20px !important;
+    gap: 14px !important;
+    margin-top: 0 !important;
   }
 
   .contact-form input,
   .contact-form textarea {
     width: 100% !important;
-    padding: 10px !important;
-    border: 1px solid #ccc !important;
+    padding: 10px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2) !important;
     font-size: 14px !important;
     font-family: inherit !important;
     background: transparent !important;

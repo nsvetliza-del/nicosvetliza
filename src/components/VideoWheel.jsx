@@ -62,7 +62,7 @@ export default function VideoWheel({
     targetRotationRef.current = finalRotation + overshoot;
   };
 
-  const getMobileFrontIndex = useCallback(() => {
+const getMobileFrontIndex = useCallback(() => {
     const total = projects.length;
     if (!total) return 0;
 
@@ -86,6 +86,28 @@ export default function VideoWheel({
 
     return frontIndex;
   }, [projects]);
+
+  const setVideoPreviewFrame = (video, isFront) => {
+    if (!video || isFront || video.dataset.previewFrameSet === "true") return;
+
+    const setFrame = () => {
+      try {
+        if (video.readyState >= 1 && video.duration > 0) {
+          video.currentTime = Math.min(0.1, video.duration * 0.05);
+          video.dataset.previewFrameSet = "true";
+        }
+      } catch {
+        // Some mobile browsers can reject early seeks; metadata still keeps the card stable.
+      }
+    };
+
+    if (video.readyState >= 1) {
+      setFrame();
+      return;
+    }
+
+    video.onloadedmetadata = setFrame;
+  };
 
   const updateMobileActiveTitle = useCallback((index, immediate = false) => {
     if (!projects[index]) return;
@@ -150,10 +172,11 @@ export default function VideoWheel({
       ));
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
+      const frontness = Math.max(0, 1 - angleDistanceToFront / 1.35);
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.25 + Math.pow(depth, 3.2) * 1.35;
-      const opacity = 0.35 + depth * 0.65;
-      const zIndex = Math.round(depth * 100);
+      const scale = 0.38 + Math.pow(frontness, 2.6) * 1.35;
+      const opacity = 0.35 + Math.pow(frontness, 1.2) * 0.65;
+      const zIndex = Math.round(frontness * 1000);
 
       element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
       element.style.opacity = String(opacity);
@@ -163,23 +186,26 @@ export default function VideoWheel({
       if (!video) return;
 
       const source = video.dataset.src;
-      const isNearFront = angleDistanceToFront < 1.2;
+      const shouldLoad = depth > 0.18 || angleDistanceToFront < 2.6;
       const isFront = index === frontIndex;
       const hasSource = Boolean(video.getAttribute("src"));
 
-      if (isNearFront && source && !hasSource) {
+      if (shouldLoad && source && !hasSource) {
         video.src = source;
         video.preload = isFront ? "auto" : "metadata";
         video.load();
+        setVideoPreviewFrame(video, isFront);
       } else if (isFront && hasSource && video.preload !== "auto") {
         video.preload = "auto";
       } else if (!isFront && hasSource && video.preload !== "metadata") {
         video.preload = "metadata";
       }
 
-      if (!isNearFront && hasSource) {
+      if (!shouldLoad && hasSource) {
         video.pause();
         video.removeAttribute("src");
+        video.dataset.front = "false";
+        video.dataset.previewFrameSet = "false";
         video.load();
       }
 
@@ -200,6 +226,7 @@ export default function VideoWheel({
           void video.play().catch(() => {});
         } else {
           video.pause();
+          setVideoPreviewFrame(video, false);
         }
       }
     });
@@ -432,7 +459,7 @@ export default function VideoWheel({
     }
 
     mobileTouchLastXRef.current = currentX;
-    mobileVelocityRef.current = -deltaX * 0.0022;
+    mobileVelocityRef.current = -deltaX * 0.002;
     rotationRef.current += mobileVelocityRef.current;
     targetRotationRef.current = rotationRef.current;
     updateMobileWheel();
