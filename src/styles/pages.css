@@ -537,7 +537,7 @@ body.is-transitioning .mobile-carousel-container {
 @media (max-width: 768px) {
   :root {
     --mobile-header-safe: 190px;
-    --mobile-menu-zone: 220px;
+    --mobile-menu-zone: 245px;
   }
 
   .portfolio-stage,
@@ -630,11 +630,11 @@ body.is-transitioning .mobile-carousel-container {
 @media (max-width: 768px) {
   .mobile-carousel-container {
     position: fixed !important;
-    top: 48dvh !important;
+    top: max(46dvh, calc(var(--mobile-menu-zone) + 190px)) !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 100vw !important;
-    height: 430px !important;
+    height: 330px !important;
     overflow: visible !important;
     z-index: 20 !important;
     display: block !important;
@@ -692,13 +692,18 @@ body.is-transitioning .mobile-carousel-container {
     text-align: center !important;
   }
 
-  .mobile-video-card.has-poster-error .mobile-video-fallback-title {
-    display: block !important;
+  .mobile-video-card.has-poster-error .mobile-video-fallback-title,
+  .mobile-video-card .project-title,
+  .mobile-video-card .video-title,
+  .mobile-video-card-title,
+  .video-card-title,
+  .mobile-video-card .video-wheel-fallback {
+    display: none !important;
   }
 
   .mobile-active-title {
     position: fixed !important;
-    top: calc(43dvh + 205px) !important;
+    top: max(calc(46dvh + 185px), calc(var(--mobile-menu-zone) + 360px)) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 90vw !important;
@@ -718,7 +723,7 @@ body.is-transitioning .mobile-carousel-container {
   .mobile-random-button {
     position: fixed !important;
     left: 50% !important;
-    top: 48dvh !important;
+    top: max(46dvh, calc(var(--mobile-menu-zone) + 190px)) !important;
     transform: translate(-50%, -50%) !important;
     z-index: 180 !important;
     width: 28px !important;
@@ -1027,8 +1032,8 @@ body.is-transitioning .mobile-carousel-container {
   .rhythm-machine {
     position: fixed !important;
     left: 50% !important;
-    top: auto !important;
-    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    top: max(calc(46dvh + 235px), calc(var(--mobile-menu-zone) + 410px)) !important;
+    bottom: auto !important;
     transform: translateX(-50%) scale(0.34) !important;
     z-index: 60 !important;
   }
@@ -1046,7 +1051,7 @@ body.is-transitioning .mobile-carousel-container {
 
   .minimal-menu-pulse {
     position: fixed !important;
-    top: 118px !important;
+    top: calc(var(--mobile-menu-zone) - 70px) !important;
     right: 24px !important;
     left: auto !important;
     bottom: auto !important;
