@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import Portfolio from "./pages/Portfolio";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Equipment from "./pages/Equipment";
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
             element={<Portfolio initialCategory="Music Video" />}
           />
           <Route path="/about" element={<About />} />
+          <Route path="/equipment" element={<Equipment />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>

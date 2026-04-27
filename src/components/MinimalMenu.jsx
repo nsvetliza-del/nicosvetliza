@@ -5,6 +5,7 @@ const BRAND_NAME = "Nico Svetliza™";
 
 const links = [
   { label: "About", to: "/about" },
+  { label: "Equipment", to: "/equipment" },
   { label: "Contact", to: "/contact" },
 ];
 
@@ -27,7 +28,9 @@ export default function MinimalMenu({ onSonicShuffle }) {
 
     const shouldHideOnScroll =
       window.matchMedia("(max-width: 768px)").matches &&
-      (location.pathname.startsWith("/about") || location.pathname.startsWith("/contact"));
+      (location.pathname.startsWith("/about") ||
+        location.pathname.startsWith("/contact") ||
+        location.pathname.startsWith("/equipment"));
 
     if (!shouldHideOnScroll) {
       setIsHiddenOnScroll(false);
