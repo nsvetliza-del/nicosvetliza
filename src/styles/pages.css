@@ -20,6 +20,31 @@
   text-align: center;
 }
 
+.contact-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 24px;
+  color: inherit;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  text-decoration: none;
+  transition: opacity 280ms ease;
+}
+
+.contact-header:hover {
+  opacity: 0.7;
+}
+
+.instagram-inline-icon {
+  display: inline-grid;
+  place-items: center;
+  opacity: 0.62;
+  transform: translateY(0.08em);
+}
+
 .contact-intro {
   display: grid;
   gap: 0.65rem;
@@ -57,30 +82,42 @@
   display: block;
   width: 100% !important;
   max-width: 340px;
-  padding: 18px;
+  padding: 18px 20px;
   color: inherit;
-  border: 1px solid rgba(0, 0, 0, 0.18) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
   text-decoration: none;
+  transition: opacity 280ms ease, transform 280ms ease, border-color 280ms ease;
+}
+
+.instagram-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.instagram-icon {
+  display: grid;
+  place-items: center;
+  opacity: 0.74;
+}
+
+.instagram-text {
+  display: grid;
+  justify-items: start;
+  text-align: left;
 }
 
 .instagram-label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 12px;
-  opacity: 0.55;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.5;
 }
 
 .instagram-handle {
-  display: block;
-  font-size: 22px;
+  font-size: 18px;
   letter-spacing: -0.02em;
-}
-
-.instagram-meta {
-  display: block;
-  margin-top: 6px;
-  font-size: 12px;
-  opacity: 0.55;
 }
 
 .contact-links a:hover,
