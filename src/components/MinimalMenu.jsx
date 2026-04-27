@@ -26,29 +26,21 @@ export default function MinimalMenu({ onSonicShuffle }) {
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
-    const shouldHideOnScroll =
+    const isMobileAboutOrContact =
       window.matchMedia("(max-width: 768px)").matches &&
-      (location.pathname.startsWith("/about") ||
-        location.pathname.startsWith("/contact") ||
-        location.pathname.startsWith("/equipment"));
+      (location.pathname === "/about" || location.pathname === "/contact");
 
-    if (!shouldHideOnScroll) {
+    if (!isMobileAboutOrContact) {
       setIsHiddenOnScroll(false);
       document.body.classList.remove("mobile-menu-hidden");
       return undefined;
     }
 
-    const pageScroller =
-      document.querySelector(".about-page") ||
-      document.querySelector(".contact-page") ||
-      document.querySelector(".equipment-page");
-
     const getScrollTop = () =>
       Math.max(
         window.scrollY,
         document.documentElement.scrollTop,
-        document.body.scrollTop,
-        pageScroller?.scrollTop ?? 0
+        document.body.scrollTop
       );
 
     const handleScroll = () => {
@@ -60,11 +52,9 @@ export default function MinimalMenu({ onSonicShuffle }) {
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    pageScroller?.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      pageScroller?.removeEventListener("scroll", handleScroll);
       document.body.classList.remove("mobile-menu-hidden");
     };
   }, [location.pathname]);

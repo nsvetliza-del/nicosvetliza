@@ -497,23 +497,7 @@ const getMobileFrontIndex = useCallback(() => {
         </button>
 
         {mobileActiveTitle ? (
-          <div
-            className="mobile-active-title"
-            style={{
-              position: "fixed",
-              left: "50%",
-              top: "72dvh",
-              transform: "translateX(-50%)",
-              width: "90vw",
-              textAlign: "center",
-              fontSize: "16px",
-              lineHeight: 1.2,
-              color: "rgba(0,0,0,0.82)",
-              zIndex: 220,
-              pointerEvents: "none",
-              whiteSpace: "nowrap",
-            }}
-          >
+          <div className="mobile-active-title">
             {mobileActiveTitle}
           </div>
         ) : null}

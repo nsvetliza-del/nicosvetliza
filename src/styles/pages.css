@@ -821,6 +821,7 @@
     display: none !important;
   }
 }
+
 @media (max-width: 768px) {
   :root {
     --mobile-menu-zone: 230px;
@@ -898,3 +899,90 @@
   }
 }
 
+@media (max-width: 768px) {
+  body.mobile-menu-hidden .minimal-menu,
+  .minimal-menu.mobile-menu-hidden {
+    opacity: 0 !important;
+    transform: translateY(-28px) !important;
+    pointer-events: none !important;
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  body.mobile-menu-hidden .minimal-menu-pulse,
+  .minimal-menu-pulse.mobile-menu-hidden {
+    opacity: 0 !important;
+    transform: translateY(-18px) scale(0.75) !important;
+    pointer-events: none !important;
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .about-page,
+  .contact-page {
+    min-height: 100dvh !important;
+    height: auto !important;
+    display: block !important;
+    overflow-y: visible !important;
+    padding: 245px 24px 100px !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+
+  .about-page .simple-page-shell,
+  .contact-page .simple-page-shell {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    align-content: normal !important;
+    justify-items: normal !important;
+  }
+
+  .about-content,
+  .contact-content {
+    max-width: 340px !important;
+    margin: 0 auto !important;
+    text-align: left !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .mobile-video-card .project-title,
+  .mobile-video-card .video-title,
+  .mobile-video-card-title,
+  .mobile-video-title,
+  .video-card-title,
+  .project-card-title,
+  .project-title,
+  .video-title {
+    display: none !important;
+  }
+
+  .mobile-active-title {
+    position: fixed !important;
+    left: 50% !important;
+    top: 76dvh !important;
+    transform: translateX(-50%) !important;
+    width: 90vw !important;
+    text-align: center !important;
+    font-size: 16px !important;
+    line-height: 1.2 !important;
+    color: rgba(0, 0, 0, 0.82) !important;
+    z-index: 220 !important;
+    pointer-events: none !important;
+    white-space: nowrap !important;
+    opacity: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .audio-keys-wrap {
+    display: flex !important;
+    position: fixed !important;
+    left: 50% !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) scale(0.34) !important;
+    transform-origin: center bottom !important;
+    z-index: 180 !important;
+  }
+}
