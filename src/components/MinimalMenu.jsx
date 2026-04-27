@@ -34,21 +34,39 @@ export default function MinimalMenu({ onSonicShuffle }) {
 
     if (!shouldHideOnScroll) {
       setIsHiddenOnScroll(false);
+      document.body.classList.remove("mobile-menu-hidden");
       return undefined;
     }
 
-    let lastY = window.scrollY;
+    const pageScroller =
+      document.querySelector(".about-page") ||
+      document.querySelector(".contact-page") ||
+      document.querySelector(".equipment-page");
+
+    const getScrollTop = () =>
+      Math.max(
+        window.scrollY,
+        document.documentElement.scrollTop,
+        document.body.scrollTop,
+        pageScroller?.scrollTop ?? 0
+      );
 
     const handleScroll = () => {
-      const currentY = window.scrollY;
-      const scrollingDown = currentY > lastY + 2;
+      const shouldHide = getScrollTop() > 8;
 
-      setIsHiddenOnScroll(currentY > 30 && scrollingDown);
-      lastY = currentY;
+      setIsHiddenOnScroll(shouldHide);
+      document.body.classList.toggle("mobile-menu-hidden", shouldHide);
     };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    pageScroller?.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      pageScroller?.removeEventListener("scroll", handleScroll);
+      document.body.classList.remove("mobile-menu-hidden");
+    };
   }, [location.pathname]);
 
   const playBlueSound = async () => {
@@ -88,7 +106,9 @@ export default function MinimalMenu({ onSonicShuffle }) {
   return (
     <>
       <nav
-        className={`minimal-menu ${isHiddenOnScroll ? "is-hidden-on-scroll" : ""}`}
+        className={`minimal-menu ${
+          isHiddenOnScroll ? "is-hidden-on-scroll mobile-menu-hidden" : ""
+        }`}
         aria-label="Main navigation"
       >
         <NavLink to="/work" className="minimal-menu-brand">
@@ -152,7 +172,9 @@ export default function MinimalMenu({ onSonicShuffle }) {
 
       <button
         type="button"
-        className={`minimal-menu-pulse ${isTuning ? "is-tuning" : ""}`}
+        className={`minimal-menu-pulse ${isTuning ? "is-tuning" : ""} ${
+          isHiddenOnScroll ? "mobile-menu-hidden" : ""
+        }`}
         onClick={handleTune}
         aria-label="Tune orchestra"
         title="tune"

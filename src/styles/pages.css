@@ -533,7 +533,7 @@ body.is-transitioning .mobile-carousel-container {
 @media (max-width: 768px) {
   :root {
     --mobile-header-safe: 190px;
-    --mobile-menu-zone: 230px;
+    --mobile-menu-zone: 220px;
   }
 
   .portfolio-stage,
@@ -731,8 +731,20 @@ body.is-transitioning .mobile-carousel-container {
     content: none !important;
   }
 
+  .minimal-menu.mobile-menu-hidden,
+  body.mobile-menu-hidden .minimal-menu,
   .minimal-menu.is-hidden-on-scroll {
-    transform: translateY(-120%) !important;
+    transform: translateY(-24px) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition:
+      transform 220ms ease,
+      opacity 220ms ease !important;
+  }
+
+  .minimal-menu-pulse.mobile-menu-hidden,
+  body.mobile-menu-hidden .minimal-menu-pulse {
+    transform: translateY(-16px) scale(0.8) !important;
     opacity: 0 !important;
     pointer-events: none !important;
     transition:
@@ -808,8 +820,13 @@ body.is-transitioning .mobile-carousel-container {
     text-align: left !important;
   }
 
+  .about-page,
   .contact-page {
-    padding: 0 24px 90px !important;
+    padding: var(--mobile-menu-zone) 24px 100px !important;
+  }
+
+  .contact-page {
+    padding: var(--mobile-menu-zone) 24px 100px !important;
     text-align: left !important;
   }
 
@@ -823,9 +840,11 @@ body.is-transitioning .mobile-carousel-container {
     min-height: auto !important;
     height: auto !important;
     display: block !important;
-    padding-top: var(--mobile-menu-zone) !important;
+    padding-top: 0 !important;
     align-content: start !important;
     justify-items: stretch !important;
+    align-items: initial !important;
+    justify-content: initial !important;
   }
 
   .about-page .simple-page-copy,
@@ -881,7 +900,37 @@ body.is-transitioning .mobile-carousel-container {
   }
 
   .equipment-wheel {
+    position: relative !important;
+    width: 100vw !important;
     height: 360px !important;
+    margin-top: 32px !important;
+    overflow: hidden !important;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 4%,
+      black 18%,
+      black 78%,
+      transparent 100%
+    ) !important;
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 4%,
+      black 18%,
+      black 78%,
+      transparent 100%
+    ) !important;
+  }
+
+  .equipment-wheel-stage {
+    position: absolute !important;
+    left: -42vw !important;
+    top: 50% !important;
+    width: 120vw !important;
+    height: 100% !important;
+    transform: translateY(-50%) !important;
+    overflow: visible !important;
   }
 
   .equipment-logo-item {
@@ -895,7 +944,10 @@ body.is-transitioning .mobile-carousel-container {
   }
 
   .equipment-active-label {
+    margin-top: 16px !important;
+    text-align: center !important;
     font-size: 13px !important;
+    opacity: 0.65 !important;
   }
 
   .equipment-grid {
