@@ -19,6 +19,8 @@ export default function VideoWheel({
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
+  const dizzyTimerRef = useRef(0);
+  const lastMoveTimeRef = useRef(0);
   const mobileTouchLastXRef = useRef(0);
   const mobileTouchMovedRef = useRef(false);
   const mobileItemRefs = useRef([]);
@@ -35,6 +37,7 @@ export default function VideoWheel({
   const [mobileActiveTitle, setMobileActiveTitle] = useState("");
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
   const [showRandomButton, setShowRandomButton] = useState(false);
+  const [isDizzy, setIsDizzy] = useState(false);
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -48,6 +51,25 @@ export default function VideoWheel({
       setShowRandomButton(true);
     }, 700);
   };
+
+  const triggerDizzyIfFast = useCallback((delta) => {
+    if (typeof window === "undefined") return;
+
+    const now = performance.now();
+    const previousMoveTime = lastMoveTimeRef.current || now;
+    const dt = Math.max(16, now - previousMoveTime);
+    const velocity = Math.abs(delta) / dt;
+
+    lastMoveTimeRef.current = now;
+
+    if (velocity > 1.2) {
+      setIsDizzy(true);
+      window.clearTimeout(dizzyTimerRef.current);
+      dizzyTimerRef.current = window.setTimeout(() => {
+        setIsDizzy(false);
+      }, 2000);
+    }
+  }, []);
 
   const rotateProjectToFront = (index, overshoot = 0) => {
     const total = projects.length;
@@ -220,6 +242,10 @@ const getMobileFrontIndex = useCallback(() => {
 
   useEffect(() => () => window.clearTimeout(shuffleTimerRef.current), []);
 
+  useEffect(() => () => {
+    window.clearTimeout(dizzyTimerRef.current);
+  }, []);
+
   useEffect(() => {
     const element = wheelRef.current;
     if (!element || isMobile) return undefined;
@@ -227,12 +253,13 @@ const getMobileFrontIndex = useCallback(() => {
     const handleWheel = (event) => {
       event.preventDefault();
       hideRandomButton();
+      triggerDizzyIfFast(event.deltaY);
       targetRotationRef.current += event.deltaY * 0.0011;
     };
 
     element.addEventListener("wheel", handleWheel, { passive: false });
     return () => element.removeEventListener("wheel", handleWheel);
-  }, [isMobile]);
+  }, [isMobile, triggerDizzyIfFast]);
 
   useEffect(() => {
     if (!projects.length) return;
@@ -383,6 +410,7 @@ const getMobileFrontIndex = useCallback(() => {
 
     const currentX = event.clientX;
     const deltaX = currentX - mobileTouchLastXRef.current;
+    triggerDizzyIfFast(deltaX);
 
     if (Math.abs(deltaX) > 1) {
       mobileTouchMovedRef.current = true;
@@ -499,7 +527,7 @@ const getMobileFrontIndex = useCallback(() => {
           onClick={handleMobileRandom}
           aria-label="Random project"
         >
-          ⤨
+          {isDizzy ? "I feel dizzy." : "click to open randomly"}
         </button>
 
         <AudioKeys />
@@ -520,6 +548,7 @@ const getMobileFrontIndex = useCallback(() => {
               onProjectSelect(randomProject.id, rect);
             }}
             isVisible={showRandomButton && !isCarouselMoving}
+            isDizzy={isDizzy}
           />
         ) : null}
         {items.map(({ project, style, isFocused, isPrepared }) => (

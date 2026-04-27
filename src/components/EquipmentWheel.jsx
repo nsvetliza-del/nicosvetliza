@@ -8,6 +8,7 @@ function angularDistance(a, b) {
 }
 
 export default function EquipmentWheel({ items }) {
+  const wheelRef = useRef(null);
   const itemRefs = useRef([]);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(null);
@@ -127,6 +128,10 @@ export default function EquipmentWheel({ items }) {
   }, [items, updateWheel]);
 
   const handlePointerDown = (event) => {
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
     isDraggingRef.current = true;
     didDragRef.current = false;
     targetRotationRef.current = null;
@@ -137,6 +142,10 @@ export default function EquipmentWheel({ items }) {
 
   const handlePointerMove = (event) => {
     if (!isDraggingRef.current) return;
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
 
     const currentX = event.clientX;
     const deltaX = currentX - lastXRef.current;
@@ -159,15 +168,28 @@ export default function EquipmentWheel({ items }) {
     event.currentTarget.releasePointerCapture?.(event.pointerId);
   };
 
-  const handleWheel = (event) => {
-    rotationRef.current += event.deltaY * 0.0012;
-    targetRotationRef.current = null;
-    updateWheel();
-  };
+  useEffect(() => {
+    const element = wheelRef.current;
+    if (!element) return undefined;
+
+    const handleWheelNative = (event) => {
+      event.preventDefault();
+      rotationRef.current += event.deltaY * 0.0015;
+      targetRotationRef.current = null;
+      updateWheel();
+    };
+
+    element.addEventListener("wheel", handleWheelNative, { passive: false });
+
+    return () => {
+      element.removeEventListener("wheel", handleWheelNative);
+    };
+  }, [updateWheel]);
 
   return (
     <section className="equipment-wheel-wrap" aria-label="Equipment logo wheel">
       <div
+        ref={wheelRef}
         className="equipment-wheel"
         onMouseEnter={() => {
           isHoveredRef.current = true;
@@ -179,7 +201,6 @@ export default function EquipmentWheel({ items }) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        onWheel={handleWheel}
       >
         <div className="equipment-wheel-stage">
           {items.map((item, index) => (
