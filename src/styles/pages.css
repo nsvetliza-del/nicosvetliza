@@ -698,6 +698,8 @@ body.is-transitioning .mobile-carousel-container {
   .mobile-video-card-title,
   .video-card-title,
   .project-card-title,
+  .project-title,
+  .video-title,
   .mobile-video-card .video-wheel-fallback {
     display: none !important;
   }
@@ -705,7 +707,7 @@ body.is-transitioning .mobile-carousel-container {
   .mobile-active-title {
     position: fixed !important;
     left: 50% !important;
-    top: 72dvh !important;
+    top: 70dvh !important;
     transform: translateX(-50%) !important;
     width: 90vw !important;
     padding: 0 !important;
@@ -1031,12 +1033,16 @@ body.is-transitioning .mobile-carousel-container {
   .audio-keys,
   .piano-keys,
   .rhythm-machine {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     position: fixed !important;
     left: 50% !important;
     top: auto !important;
-    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
     transform: translateX(-50%) scale(0.34) !important;
-    z-index: 60 !important;
+    z-index: 80 !important;
+    pointer-events: auto !important;
   }
 
   .about-page .audio-keys-wrap,
