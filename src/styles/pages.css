@@ -806,13 +806,12 @@
     opacity: 1 !important;
   }
 
+  .mobile-video-title,
   .mobile-video-card .project-title,
   .mobile-video-card .video-title,
   .mobile-video-card-title,
   .video-card-title,
-  .project-card-title,
-  .project-title,
-  .video-title {
+  .project-card-title {
     display: none !important;
   }
 
@@ -952,9 +951,7 @@
   .mobile-video-card-title,
   .mobile-video-title,
   .video-card-title,
-  .project-card-title,
-  .project-title,
-  .video-title {
+  .project-card-title {
     display: none !important;
   }
 
@@ -971,9 +968,6 @@
     z-index: 220 !important;
     pointer-events: none !important;
     white-space: nowrap !important;
-    opacity: 1 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
   }
 
   .audio-keys-wrap {

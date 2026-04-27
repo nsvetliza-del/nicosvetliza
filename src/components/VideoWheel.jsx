@@ -487,6 +487,12 @@ const getMobileFrontIndex = useCallback(() => {
           ))}
         </div>
 
+        {mobileActiveTitle ? (
+          <div className="mobile-active-title">
+            {mobileActiveTitle}
+          </div>
+        ) : null}
+
         <button
           type="button"
           className="mobile-random-button"
@@ -495,12 +501,6 @@ const getMobileFrontIndex = useCallback(() => {
         >
           ⤨
         </button>
-
-        {mobileActiveTitle ? (
-          <div className="mobile-active-title">
-            {mobileActiveTitle}
-          </div>
-        ) : null}
 
         <AudioKeys />
       </>
