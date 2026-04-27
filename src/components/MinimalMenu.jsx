@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 
 const BRAND_NAME = "Nico Svetliza™";
 
@@ -17,8 +17,36 @@ const portfolioLinks = [
 export default function MinimalMenu({ onSonicShuffle }) {
   const [isTuning, setIsTuning] = useState(false);
   const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
+  const [isHiddenOnScroll, setIsHiddenOnScroll] = useState(false);
 
   const tuningTimerRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const shouldHideOnScroll =
+      window.matchMedia("(max-width: 768px)").matches &&
+      (location.pathname.startsWith("/about") || location.pathname.startsWith("/contact"));
+
+    if (!shouldHideOnScroll) {
+      setIsHiddenOnScroll(false);
+      return undefined;
+    }
+
+    let lastY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      const scrollingDown = currentY > lastY + 2;
+
+      setIsHiddenOnScroll(currentY > 30 && scrollingDown);
+      lastY = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [location.pathname]);
 
   const playBlueSound = async () => {
     try {
@@ -56,7 +84,10 @@ export default function MinimalMenu({ onSonicShuffle }) {
 
   return (
     <>
-      <nav className="minimal-menu" aria-label="Main navigation">
+      <nav
+        className={`minimal-menu ${isHiddenOnScroll ? "is-hidden-on-scroll" : ""}`}
+        aria-label="Main navigation"
+      >
         <NavLink to="/work" className="minimal-menu-brand">
           {BRAND_NAME}
         </NavLink>

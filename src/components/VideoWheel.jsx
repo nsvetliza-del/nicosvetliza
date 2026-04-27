@@ -155,8 +155,8 @@ const getMobileFrontIndex = useCallback(() => {
     const total = projects.length;
     if (!total) return;
 
-    const radiusX = window.innerWidth * 0.64;
-    const radiusY = 105;
+    const radiusX = window.innerWidth * 0.48;
+    const radiusY = 70;
     const frontIndex = getMobileFrontIndex();
     const frontAngle = Math.PI / 2;
 
@@ -172,10 +172,10 @@ const getMobileFrontIndex = useCallback(() => {
       ));
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
-      const frontness = Math.max(0, 1 - angleDistanceToFront / 1.35);
+      const frontness = Math.max(0, 1 - angleDistanceToFront / 1.25);
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.38 + Math.pow(frontness, 2.6) * 1.35;
-      const opacity = 0.35 + Math.pow(frontness, 1.2) * 0.65;
+      const scale = 0.42 + Math.pow(frontness, 2.8) * 1.25;
+      const opacity = 0.35 + Math.pow(frontness, 1.4) * 0.65;
       const zIndex = Math.round(frontness * 1000);
 
       element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
@@ -459,7 +459,7 @@ const getMobileFrontIndex = useCallback(() => {
     }
 
     mobileTouchLastXRef.current = currentX;
-    mobileVelocityRef.current = -deltaX * 0.002;
+    mobileVelocityRef.current = -deltaX * 0.0017;
     rotationRef.current += mobileVelocityRef.current;
     targetRotationRef.current = rotationRef.current;
     updateMobileWheel();
