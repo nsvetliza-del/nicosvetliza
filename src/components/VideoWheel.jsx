@@ -64,6 +64,9 @@ export default function VideoWheel({
 
   const getCloudinaryPoster = (src) => {
     if (!src) return "";
+    if (src.includes("rafaga_liviano_puzw5z")) {
+      return "https://res.cloudinary.com/dlpmcvfva/video/upload/so_0.2,f_jpg,q_auto/v1777177825/rafaga_liviano_puzw5z.jpg";
+    }
 
     return src
       .replace("/video/upload/f_auto,q_auto/", "/video/upload/so_0.2,f_jpg,q_auto/")

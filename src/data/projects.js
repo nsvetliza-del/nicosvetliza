@@ -1,5 +1,6 @@
 const optimizeCloudinaryVideo = (url) => {
   if (!url?.includes("/video/upload/")) return url;
+  if (url.includes("rafaga_liviano_puzw5z")) return url;
   if (url.includes("/video/upload/f_auto,q_auto/")) return url;
   return url.replace("/video/upload/", "/video/upload/f_auto,q_auto/");
 };
@@ -38,7 +39,7 @@ export const projects = [
     title: "Como una ráfaga de viento",
     category: "Short Film / Documentary",
     type: "short-film",
-    video: "https://res.cloudinary.com/dlpmcvfva/video/upload/f_auto,q_auto/v1777177825/rafaga_liviano_puzw5z.mp4",
+    video: "https://res.cloudinary.com/dlpmcvfva/video/upload/v1777177825/rafaga_liviano_puzw5z.mp4",
   },
   {
     id: "levis",
