@@ -179,19 +179,21 @@
 
 .equipment-page {
   min-height: 100dvh;
-  padding: 140px 24px 100px;
+  padding: 140px 0 100px;
   background: transparent;
+  overflow: hidden;
 }
 
 .equipment-content {
-  width: min(100%, 980px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   display: grid;
   gap: 42px;
 }
 
 .equipment-intro {
-  width: min(100%, 34rem);
+  width: min(calc(100% - 48px), 34rem);
+  margin: 0 auto;
   display: grid;
   gap: 0.85rem;
 }
@@ -211,6 +213,84 @@
   font-weight: 500;
   line-height: 1.08;
   letter-spacing: -0.04em;
+}
+
+.equipment-wheel-wrap {
+  display: grid;
+  gap: 18px;
+}
+
+.equipment-wheel {
+  position: relative;
+  width: 100vw;
+  height: 420px;
+  overflow: hidden;
+  perspective: 900px;
+  touch-action: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+}
+
+.equipment-wheel-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.equipment-logo-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 130px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  will-change: transform, opacity, filter;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.equipment-logo-item img {
+  max-width: 110px;
+  max-height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.equipment-active-label {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  color: rgba(17, 17, 17, 0.65);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.equipment-active-label span:last-child {
+  color: rgba(17, 17, 17, 0.45);
+  font-size: 11px;
 }
 
 .equipment-grid {
@@ -484,15 +564,8 @@
   }
 
   .minimal-menu::before {
-    content: "" !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 58vw !important;
-    height: var(--mobile-menu-zone) !important;
-    background: rgba(250, 250, 248, 0.96) !important;
-    z-index: -1 !important;
-    pointer-events: none !important;
+    display: none !important;
+    content: none !important;
   }
 
   .minimal-menu.is-hidden-on-scroll {
@@ -578,7 +651,8 @@
   }
 
   .equipment-page {
-    padding-top: var(--mobile-menu-zone) !important;
+    padding: var(--mobile-menu-zone) 0 100px !important;
+    overflow: hidden !important;
   }
 
   .about-page .simple-page-shell,
@@ -626,16 +700,39 @@
 
   .equipment-content {
     width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
     gap: 28px !important;
+    padding: 0 !important;
   }
 
   .equipment-intro {
+    width: calc(100% - 48px) !important;
+    margin: 0 auto !important;
     gap: 0.7rem !important;
   }
 
   .equipment-intro h1 {
     font-size: 1.35rem !important;
     line-height: 1.12 !important;
+  }
+
+  .equipment-wheel {
+    height: 360px !important;
+  }
+
+  .equipment-logo-item {
+    width: 100px !important;
+    height: 54px !important;
+  }
+
+  .equipment-logo-item img {
+    max-width: 88px !important;
+    max-height: 36px !important;
+  }
+
+  .equipment-active-label {
+    font-size: 13px !important;
   }
 
   .equipment-grid {
