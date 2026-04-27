@@ -649,8 +649,8 @@ body.is-transitioning .mobile-carousel-container {
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
-    width: clamp(80px, 30vw, 150px) !important;
-    height: clamp(50px, 19vw, 95px) !important;
+    width: clamp(78px, 27vw, 135px) !important;
+    height: clamp(50px, 17vw, 88px) !important;
     max-height: none !important;
     min-height: 0 !important;
     margin: 0 !important;
@@ -707,16 +707,16 @@ body.is-transitioning .mobile-carousel-container {
   .mobile-active-title {
     position: fixed !important;
     left: 50% !important;
-    top: 70dvh !important;
+    top: 74dvh !important;
     transform: translateX(-50%) !important;
     width: 90vw !important;
     padding: 0 !important;
     text-align: center !important;
     font-size: 16px !important;
     line-height: 1.2 !important;
-    color: rgba(0, 0, 0, 0.78) !important;
+    color: rgba(0, 0, 0, 0.82) !important;
     opacity: 1 !important;
-    z-index: 160 !important;
+    z-index: 180 !important;
     pointer-events: none !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -1039,9 +1039,9 @@ body.is-transitioning .mobile-carousel-container {
     position: fixed !important;
     left: 50% !important;
     top: auto !important;
-    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
     transform: translateX(-50%) scale(0.34) !important;
-    z-index: 80 !important;
+    z-index: 60 !important;
     pointer-events: auto !important;
   }
 

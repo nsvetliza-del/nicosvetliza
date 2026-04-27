@@ -151,7 +151,7 @@ const getMobileFrontIndex = useCallback(() => {
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const frontness = Math.max(0, 1 - angleDistanceToFront / 1.35);
-      const scale = 0.35 + Math.pow(frontness, 2.4) * 1.65;
+      const scale = 0.38 + Math.pow(frontness, 3.0) * 2.35;
       const opacity = 0.3 + Math.pow(frontness, 1.1) * 0.7;
       const zIndex = Math.round(frontness * 1000);
 

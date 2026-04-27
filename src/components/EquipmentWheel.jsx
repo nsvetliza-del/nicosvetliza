@@ -144,7 +144,7 @@ export default function EquipmentWheel({ items }) {
 
     const currentX = event.clientX;
     const deltaX = currentX - lastXRef.current;
-    const rotationDelta = deltaX * 0.002;
+    const rotationDelta = -deltaX * 0.002;
 
     if (Math.abs(deltaX) > 2) {
       didDragRef.current = true;
