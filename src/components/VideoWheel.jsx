@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AudioKeys from "./AudioKeys";
 import RandomPlayButton from "./RandomPlayButton";
 import {
   optimizeVideoSrc,
@@ -498,6 +499,8 @@ const getMobileFrontIndex = useCallback(() => {
         {mobileActiveTitle ? (
           <div className="mobile-active-title">{mobileActiveTitle}</div>
         ) : null}
+
+        <AudioKeys />
       </>
     );
   };

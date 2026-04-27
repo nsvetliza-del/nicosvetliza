@@ -17,6 +17,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   const [displayedProjects, setDisplayedProjects] = useState([]);
   const [filterPhase, setFilterPhase] = useState("idle");
   const [sonicShuffleTick, setSonicShuffleTick] = useState(0);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   const activeCategory = useMemo(() => {
     if (location.pathname.startsWith("/films")) return "Short Film";
@@ -156,6 +157,17 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
     }
   }, [projectId]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const media = window.matchMedia("(max-width: 768px)");
+    const update = () => setIsMobileViewport(media.matches);
+
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   const triggerSonicShuffle = useCallback(() => {
     setSonicShuffleTick((value) => value + 1);
   }, []);
@@ -179,7 +191,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
                       : ""
                 }`}
               >
-                <AudioKeys />
+                {!isMobileViewport ? <AudioKeys /> : null}
                 <VideoWheel
                   projects={displayedProjects}
                   onProjectSelect={openProject}
