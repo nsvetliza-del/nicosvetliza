@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const FRONT_ANGLE = Math.PI / 2;
+const DEBUG_EQUIPMENT_FOCUS = false;
 
 function angularDistance(a, b) {
   return Math.atan2(Math.sin(a - b), Math.cos(a - b));
@@ -30,6 +31,7 @@ export default function EquipmentWheel({ items }) {
       const radiusY = isMobile ? 92 : 115;
       let strongestIndex = 0;
       let strongestFrontness = -1;
+      let strongestX = 0;
 
       items.forEach((item, index) => {
         const element = itemRefs.current[index];
@@ -58,8 +60,13 @@ export default function EquipmentWheel({ items }) {
         if (frontness > strongestFrontness) {
           strongestFrontness = frontness;
           strongestIndex = index;
+          strongestX = x;
         }
       });
+
+      if (DEBUG_EQUIPMENT_FOCUS && !isMobile) {
+        console.debug("equipment focus x", Math.round(strongestX));
+      }
 
       const now = performance.now();
       if (forceLabel || now - labelTimeRef.current > 150) {

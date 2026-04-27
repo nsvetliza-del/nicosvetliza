@@ -387,6 +387,7 @@ body.is-transitioning .mobile-carousel-container {
   position: relative;
   width: 100vw;
   height: 420px;
+  margin-left: calc(50% - 50vw);
   overflow: hidden;
   perspective: 900px;
   touch-action: none;
@@ -411,7 +412,7 @@ body.is-transitioning .mobile-carousel-container {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100%;
+  width: 100vw;
   height: 100%;
   transform: translate(-50%, -50%);
 }
