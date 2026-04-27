@@ -38,7 +38,7 @@ export const projects = [
     title: "Como una ráfaga de viento",
     category: "Short Film / Documentary",
     type: "short-film",
-    video: optimizeCloudinaryVideo("https://res.cloudinary.com/dlpmcvfva/video/upload/v1777177825/rafaga_liviano_puzw5z.mp4"),
+    video: "https://res.cloudinary.com/dlpmcvfva/video/upload/f_auto,q_auto/v1777177825/rafaga_liviano_puzw5z.mp4",
   },
   {
     id: "levis",

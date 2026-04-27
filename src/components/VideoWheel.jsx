@@ -64,13 +64,11 @@ export default function VideoWheel({
 
   const getCloudinaryPoster = (src) => {
     if (!src) return "";
-    if (!src.includes("/video/upload/")) return "";
 
-    const posterSrc = src
+    return src
+      .replace("/video/upload/f_auto,q_auto/", "/video/upload/so_0.2,f_jpg,q_auto/")
       .replace("/video/upload/", "/video/upload/so_0.2,f_jpg,q_auto/")
-      .replace(/\.mp4($|\?)/i, ".jpg$1");
-
-    return posterSrc;
+      .replace(/\.mp4($|\?)/, ".jpg$1");
   };
 
 const getMobileFrontIndex = useCallback(() => {
