@@ -156,8 +156,8 @@ const getMobileFrontIndex = useCallback(() => {
     const total = projects.length;
     if (!total) return;
 
-    const radiusX = window.innerWidth * 0.72;
-    const radiusY = 135;
+    const radiusX = window.innerWidth * 0.54;
+    const radiusY = 105;
     const frontIndex = getMobileFrontIndex();
     const frontAngle = Math.PI / 2;
 
@@ -174,7 +174,7 @@ const getMobileFrontIndex = useCallback(() => {
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const frontness = Math.max(0, 1 - angleDistanceToFront / 1.35);
-      const scale = 0.38 + Math.pow(frontness, 3.0) * 2.35;
+      const scale = 0.34 + Math.pow(frontness, 3.0) * 2.0;
       const opacity = 0.3 + Math.pow(frontness, 1.1) * 0.7;
       const zIndex = Math.round(frontness * 1000);
 
@@ -606,9 +606,47 @@ const getMobileFrontIndex = useCallback(() => {
     </div>
   );
 
+  const renderSingleProject = () => {
+    const project = projects[0];
+    if (!project) return null;
+
+    return (
+      <>
+        <button
+          type="button"
+          className="single-video-project"
+          onClick={(event) => {
+            preloadVideo(project.video, { priority: "auto" });
+            onProjectSelect(project.id, event.currentTarget.getBoundingClientRect());
+          }}
+          aria-label={`Open ${project.title}`}
+        >
+          <video
+            className="single-video-project-media"
+            src={project.video}
+            poster={project.cover}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+          />
+        </button>
+
+        <div className="single-video-project-title">{project.title}</div>
+
+        {isMobile ? <AudioKeys /> : null}
+      </>
+    );
+  };
+
   return (
     <section className="video-wheel-section">
-      {isMobile ? renderMobileGallery() : renderDesktopWheel()}
+      {projects.length === 1
+        ? renderSingleProject()
+        : isMobile
+          ? renderMobileGallery()
+          : renderDesktopWheel()}
     </section>
   );
 }

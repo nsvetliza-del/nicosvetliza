@@ -7,7 +7,7 @@ function angularDistance(a, b) {
   return Math.atan2(Math.sin(a - b), Math.cos(a - b));
 }
 
-export default function EquipmentWheel({ items }) {
+export default function EquipmentWheel({ items, sonicShuffleTick = 0 }) {
   const wheelRef = useRef(null);
   const itemRefs = useRef([]);
   const rotationRef = useRef(0);
@@ -90,6 +90,20 @@ export default function EquipmentWheel({ items }) {
     [items.length]
   );
 
+  const spinWheel = useCallback(() => {
+    const total = items.length;
+    if (!total) return;
+
+    const randomIndex = Math.floor(Math.random() * total);
+    const baseAngle = (randomIndex / total) * Math.PI * 2;
+    const target = FRONT_ANGLE - baseAngle;
+    const difference = angularDistance(target, rotationRef.current);
+    const spinDirection = Math.random() > 0.5 ? 1 : -1;
+
+    targetRotationRef.current =
+      rotationRef.current + difference + spinDirection * Math.PI * 2;
+  }, [items.length]);
+
   useEffect(() => {
     rotationRef.current = 0;
     targetRotationRef.current = null;
@@ -126,6 +140,11 @@ export default function EquipmentWheel({ items }) {
       window.removeEventListener("resize", handleResize);
     };
   }, [items, updateWheel]);
+
+  useEffect(() => {
+    if (!sonicShuffleTick) return;
+    spinWheel();
+  }, [sonicShuffleTick, spinWheel]);
 
   const handlePointerDown = (event) => {
     if (event.cancelable) {

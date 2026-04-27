@@ -88,9 +88,7 @@ export default function MinimalMenu({ onSonicShuffle }) {
       setIsTuning(false);
     }, 1080);
 
-    if (window.innerWidth > 768) {
-      onSonicShuffle?.();
-    }
+    onSonicShuffle?.();
   };
 
   return (
