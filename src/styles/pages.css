@@ -743,6 +743,41 @@
 }
 /* FINAL MOBILE PORTFOLIO FIX */
 @media (max-width: 768px) {
+  :root {
+    --mobile-menu-zone: 230px;
+  }
+
+  .about-page,
+  .contact-page {
+    min-height: 100dvh !important;
+    height: auto !important;
+    display: block !important;
+    overflow-y: auto !important;
+    padding: var(--mobile-menu-zone) 24px 100px !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+
+  .about-page .simple-page-shell,
+  .contact-page .simple-page-shell {
+    display: block !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    align-content: start !important;
+    justify-items: stretch !important;
+  }
+
+  .about-content,
+  .contact-content {
+    max-width: 340px !important;
+    margin: 0 auto !important;
+    text-align: left !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
   .audio-keys-wrap {
     display: flex !important;
     visibility: visible !important;
