@@ -447,6 +447,7 @@ const getMobileFrontIndex = useCallback(() => {
                 key={project.id}
                 type="button"
                 className="mobile-video-card"
+                aria-label={project.title}
                 ref={(element) => {
                   mobileItemRefs.current[index] = element;
                 }}
@@ -476,10 +477,9 @@ const getMobileFrontIndex = useCallback(() => {
                         event.currentTarget.parentElement?.classList.add("has-poster-error");
                       }}
                     />
-                    <span className="mobile-video-fallback-title">{project.title}</span>
                   </>
                 ) : (
-                  <div className="video-wheel-fallback">{project.title}</div>
+                  <div className="video-wheel-fallback" aria-hidden="true" />
                 )}
               </button>
               );
@@ -497,7 +497,25 @@ const getMobileFrontIndex = useCallback(() => {
         </button>
 
         {mobileActiveTitle ? (
-          <div className="mobile-active-title">{mobileActiveTitle}</div>
+          <div
+            className="mobile-active-title"
+            style={{
+              position: "fixed",
+              left: "50%",
+              top: "72dvh",
+              transform: "translateX(-50%)",
+              width: "90vw",
+              textAlign: "center",
+              fontSize: "16px",
+              lineHeight: 1.2,
+              color: "rgba(0,0,0,0.82)",
+              zIndex: 220,
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {mobileActiveTitle}
+          </div>
         ) : null}
 
         <AudioKeys />
