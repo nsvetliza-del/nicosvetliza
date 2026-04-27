@@ -148,6 +148,7 @@ export default function EpicIntro({ enabled = true, onComplete }) {
           aria-label="Play intro"
         >
           <span className="epic-intro-play-icon" aria-hidden="true" />
+          <span className="epic-intro-play-label">click to enter</span>
         </button>
       ) : null}
 

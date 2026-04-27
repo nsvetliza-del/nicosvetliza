@@ -280,8 +280,8 @@ const getMobileFrontIndex = useCallback(() => {
 
   const items = useMemo(() => {
     const total = projects.length || 1;
-    const radiusX = Math.max(580, Math.min(700, total * 34));
-    const radiusY = Math.max(165, Math.min(210, total * 9));
+    const radiusX = Math.min(window.innerWidth * 0.34, 560);
+    const radiusY = 150;
 
     return projects.map((project, index) => {
       const baseAngle = (index / total) * Math.PI * 2;

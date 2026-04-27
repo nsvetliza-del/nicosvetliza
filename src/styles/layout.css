@@ -197,10 +197,11 @@
 
 .epic-intro-play {
   position: relative;
-  width: 2.8rem;
-  height: 2.8rem;
+  min-width: 7rem;
+  min-height: 3.6rem;
   display: grid;
   place-items: center;
+  gap: 10px;
   cursor: pointer;
   animation: introPlayIn 0.9s cubic-bezier(0.19, 1, 0.22, 1) both;
 }
@@ -212,12 +213,26 @@
   border-left: 1.38rem solid var(--text);
   border-top: 0.88rem solid transparent;
   border-bottom: 0.88rem solid transparent;
-  transition: transform 0.3s ease, border-left-color 0.3s ease;
+  animation: introPlayPulse 1.8s ease-in-out infinite;
+  transition: border-left-color 0.3s ease;
+}
+
+.epic-intro-play-label {
+  color: var(--text);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: lowercase;
+  opacity: 0.48;
+  transition: opacity 220ms ease;
 }
 
 .epic-intro-play:hover .epic-intro-play-icon {
-  transform: scale(1.04);
   border-left-color: var(--accent);
+}
+
+.epic-intro-play:hover .epic-intro-play-label {
+  opacity: 0.72;
 }
 
 .epic-intro-words {
@@ -394,6 +409,19 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes introPlayPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.72;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
   }
 }
 
