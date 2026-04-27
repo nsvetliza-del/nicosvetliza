@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import RandomPlayButton from "./RandomPlayButton";
 import { preloadVideo, preloadVideoBatch } from "../utils/videoPreload";
 
@@ -15,16 +15,22 @@ export default function VideoWheel({
   const shuffleTimerRef = useRef(0);
   const mobileTouchLastXRef = useRef(0);
   const mobileTouchMovedRef = useRef(false);
+  const mobileItemRefs = useRef([]);
+  const mobileFrameRef = useRef(0);
+  const mobileActiveIndexRef = useRef(0);
+  const mobileActiveTitleTimerRef = useRef(0);
+  const mobileSnapTimerRef = useRef(0);
+  const mobileVelocityRef = useRef(0);
+  const isMobileDraggingRef = useRef(false);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
-  const [viewportWidth, setViewportWidth] = useState(0);
+  const [mobileActiveTitle, setMobileActiveTitle] = useState("");
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
   const [showRandomButton, setShowRandomButton] = useState(false);
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isMobileDragging, setIsMobileDragging] = useState(false);
 
   const hideRandomButton = () => {
     setIsCarouselMoving(true);
@@ -50,13 +56,116 @@ export default function VideoWheel({
     targetRotationRef.current = finalRotation + overshoot;
   };
 
+  const getMobileFrontIndex = useCallback(() => {
+    const total = projects.length;
+    if (!total) return 0;
+
+    const frontAngle = Math.PI / 2;
+    let frontIndex = 0;
+    let smallestDistance = Infinity;
+
+    projects.forEach((_, index) => {
+      const baseAngle = (index / total) * Math.PI * 2;
+      const angle = baseAngle + rotationRef.current;
+      const distance = Math.abs(Math.atan2(
+        Math.sin(angle - frontAngle),
+        Math.cos(angle - frontAngle)
+      ));
+
+      if (distance < smallestDistance) {
+        smallestDistance = distance;
+        frontIndex = index;
+      }
+    });
+
+    return frontIndex;
+  }, [projects]);
+
+  const updateMobileActiveTitle = useCallback((index, immediate = false) => {
+    if (!projects[index]) return;
+    if (mobileActiveIndexRef.current === index && mobileActiveTitle) return;
+
+    mobileActiveIndexRef.current = index;
+    window.clearTimeout(mobileActiveTitleTimerRef.current);
+
+    const commitTitle = () => {
+      setMobileActiveTitle(projects[index]?.title ?? "");
+      const prev = projects[(index - 1 + projects.length) % projects.length];
+      const current = projects[index];
+      const next = projects[(index + 1) % projects.length];
+
+      [prev, current, next].forEach((project) =>
+        preloadVideo(project?.video, {
+          priority: project?.id === current?.id ? "auto" : "metadata",
+        })
+      );
+
+      mobileItemRefs.current.forEach((element, itemIndex) => {
+        const video = element?.querySelector("video");
+        if (!video) return;
+
+        if (itemIndex === index) {
+          video.preload = "auto";
+          video.muted = true;
+          video.playsInline = true;
+          void video.play().catch(() => {});
+          return;
+        }
+
+        video.pause();
+        video.preload = "metadata";
+      });
+    };
+
+    if (immediate) {
+      commitTitle();
+      return;
+    }
+
+    mobileActiveTitleTimerRef.current = window.setTimeout(commitTitle, 150);
+  }, [mobileActiveTitle, projects]);
+
+  const updateMobileWheel = useCallback(() => {
+    const total = projects.length;
+    if (!total) return;
+
+    const radiusX = window.innerWidth * 0.64;
+    const radiusY = 105;
+    let frontIndex = 0;
+    let frontDepth = -1;
+
+    projects.forEach((_, index) => {
+      const element = mobileItemRefs.current[index];
+      if (!element) return;
+
+      const baseAngle = (index / total) * Math.PI * 2;
+      const angle = baseAngle + rotationRef.current;
+      const x = Math.cos(angle) * radiusX;
+      const y = Math.sin(angle) * radiusY;
+      const depth = (Math.sin(angle) + 1) / 2;
+      const scale = 0.25 + Math.pow(depth, 3.2) * 1.35;
+      const opacity = 0.35 + depth * 0.65;
+      const zIndex = Math.round(depth * 100);
+
+      element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+      element.style.opacity = String(opacity);
+      element.style.zIndex = String(zIndex);
+
+      if (depth > frontDepth) {
+        frontDepth = depth;
+        frontIndex = index;
+      }
+    });
+
+    updateMobileActiveTitle(frontIndex);
+  }, [projects, updateMobileActiveTitle]);
+
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
     const media = window.matchMedia("(max-width: 768px)");
     const update = () => {
       setIsMobile(media.matches);
-      setViewportWidth(window.innerWidth);
     };
 
     update();
@@ -69,6 +178,8 @@ export default function VideoWheel({
   }, []);
 
   useEffect(() => {
+    if (isMobile) return undefined;
+
     const animate = () => {
       rotationRef.current += (targetRotationRef.current - rotationRef.current) * 0.11;
       setRotation(rotationRef.current);
@@ -80,7 +191,7 @@ export default function VideoWheel({
     return () => {
       window.cancelAnimationFrame(frameRef.current);
     };
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     hideRandomButton();
@@ -199,61 +310,10 @@ export default function VideoWheel({
     });
   }, [projects, rotation, isExpanded]);
 
-  const mobileItems = useMemo(() => {
-    const total = projects.length || 1;
-    const radiusX = viewportWidth * 0.62;
-    const radiusY = 105;
-
-    return projects.map((project, index) => {
-      const angle = (index / total) * Math.PI * 2 + rotation;
-      const x = Math.cos(angle) * radiusX;
-      const y = Math.sin(angle) * radiusY;
-      const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.32 + Math.pow(depth, 2.4) * 1.05;
-      const opacity = 0.38 + depth * 0.62;
-      const zIndex = Math.round(depth * 100);
-      const isFocused = depth > 0.86 && Math.abs(x) < radiusX * 0.42;
-
-      return {
-        depth,
-        index,
-        isFocused,
-        project,
-        style: {
-          "--x": `${x}px`,
-          "--y": `${y}px`,
-          "--scale": scale,
-          "--opacity": opacity,
-          "--z": zIndex,
-          pointerEvents: "auto",
-        },
-      };
-    });
-  }, [projects, rotation, viewportWidth]);
-
-  const activeMobileItem = useMemo(() => {
-    if (!mobileItems.length) return null;
-
-    return mobileItems.reduce((front, item) =>
-      item.depth > front.depth ? item : front
-    );
-  }, [mobileItems]);
-
   useEffect(() => {
     if (!projects.length) return;
 
     if (isMobile) {
-      if (!activeMobileItem) return;
-
-      const current = activeMobileItem.project;
-      const prev = projects[(activeMobileItem.index - 1 + projects.length) % projects.length];
-      const next = projects[(activeMobileItem.index + 1) % projects.length];
-
-      [current, prev, next].forEach((project) =>
-        preloadVideo(project?.video, {
-          priority: project?.id === current?.id ? "auto" : "metadata",
-        })
-      );
       return;
     }
 
@@ -272,18 +332,52 @@ export default function VideoWheel({
       preloadVideo(project?.video, { priority: "auto" })
     );
     preloadVideoBatch([nextTwo?.video], { priority: "metadata", delay: 220 });
-  }, [activeMobileItem, isMobile, items, projects]);
+  }, [isMobile, items, projects]);
 
-  const handleMobileTouchStart = (event) => {
-    mobileTouchLastXRef.current = event.touches[0]?.clientX ?? 0;
+  useEffect(() => {
+    if (!isMobile || !projects.length) return undefined;
+
+    updateMobileWheel();
+    updateMobileActiveTitle(getMobileFrontIndex(), true);
+
+    const animate = () => {
+      if (!isMobileDraggingRef.current) {
+        rotationRef.current += (targetRotationRef.current - rotationRef.current) * 0.13;
+      }
+
+      updateMobileWheel();
+      mobileFrameRef.current = window.requestAnimationFrame(animate);
+    };
+
+    mobileFrameRef.current = window.requestAnimationFrame(animate);
+
+    return () => {
+      window.cancelAnimationFrame(mobileFrameRef.current);
+    };
+  }, [getMobileFrontIndex, isMobile, projects.length, updateMobileActiveTitle, updateMobileWheel]);
+
+  useEffect(() => () => {
+    window.clearTimeout(mobileActiveTitleTimerRef.current);
+    window.clearTimeout(mobileSnapTimerRef.current);
+  }, []);
+
+  const handleMobilePointerDown = (event) => {
+    event.preventDefault();
+    window.clearTimeout(mobileSnapTimerRef.current);
+    isMobileDraggingRef.current = true;
+    mobileTouchLastXRef.current = event.clientX;
     mobileTouchMovedRef.current = false;
-    setIsMobileDragging(true);
+    mobileVelocityRef.current = 0;
+    event.currentTarget.classList.add("is-dragging");
+    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
-  const handleMobileTouchMove = (event) => {
+  const handleMobilePointerMove = (event) => {
+    if (!isMobileDraggingRef.current) return;
+
     event.preventDefault();
 
-    const currentX = event.touches[0]?.clientX ?? mobileTouchLastXRef.current;
+    const currentX = event.clientX;
     const deltaX = currentX - mobileTouchLastXRef.current;
 
     if (Math.abs(deltaX) > 1) {
@@ -291,21 +385,37 @@ export default function VideoWheel({
     }
 
     mobileTouchLastXRef.current = currentX;
-    rotationRef.current -= deltaX * 0.0022;
+    mobileVelocityRef.current = -deltaX * 0.0022;
+    rotationRef.current += mobileVelocityRef.current;
     targetRotationRef.current = rotationRef.current;
-    setRotation(rotationRef.current);
+    updateMobileWheel();
   };
 
-  const handleMobileTouchEnd = () => {
-    setIsMobileDragging(false);
+  const handleMobilePointerUp = (event) => {
+    if (!isMobileDraggingRef.current) return;
 
-    if (activeMobileItem) {
-      rotateProjectToFront(activeMobileItem.index, 0);
-    }
+    isMobileDraggingRef.current = false;
+    event.currentTarget.classList.remove("is-dragging");
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+
+    targetRotationRef.current = rotationRef.current + mobileVelocityRef.current * 18;
+
+    window.clearTimeout(mobileSnapTimerRef.current);
+    mobileSnapTimerRef.current = window.setTimeout(() => {
+      rotateProjectToFront(getMobileFrontIndex(), 0);
+    }, 260);
 
     window.setTimeout(() => {
       mobileTouchMovedRef.current = false;
     }, 120);
+  };
+
+  const handleMobilePointerCancel = (event) => {
+    if (!isMobileDraggingRef.current) return;
+
+    isMobileDraggingRef.current = false;
+    event.currentTarget.classList.remove("is-dragging");
+    rotateProjectToFront(getMobileFrontIndex(), 0);
   };
 
   const handleMobileRandom = () => {
@@ -318,24 +428,27 @@ export default function VideoWheel({
     return (
       <>
         <div
-          className={`mobile-carousel-container ${isMobileDragging ? "is-dragging" : ""}`}
-          onTouchStart={handleMobileTouchStart}
-          onTouchMove={handleMobileTouchMove}
-          onTouchEnd={handleMobileTouchEnd}
+          className="mobile-carousel-container"
+          onPointerDown={handleMobilePointerDown}
+          onPointerMove={handleMobilePointerMove}
+          onPointerUp={handleMobilePointerUp}
+          onPointerCancel={handleMobilePointerCancel}
         >
-          {mobileItems.map(({ index, isFocused, project, style }) => (
+          {projects.map((project, index) => (
               <button
                 key={project.id}
                 type="button"
                 className="mobile-video-card"
-                style={style}
+                ref={(element) => {
+                  mobileItemRefs.current[index] = element;
+                }}
                 onClick={(event) => {
                   if (mobileTouchMovedRef.current) return;
 
                   const rect = event.currentTarget.getBoundingClientRect();
                   preloadVideo(project.video, { priority: "auto" });
 
-                  if (!isFocused && activeMobileItem?.project.id !== project.id) {
+                  if (mobileActiveIndexRef.current !== index) {
                     rotateProjectToFront(index, 0);
                     return;
                   }
@@ -347,16 +460,14 @@ export default function VideoWheel({
                   <video
                     src={project.video}
                     poster={project.cover}
-                    autoPlay={activeMobileItem?.project.id === project.id}
                     muted
                     loop
                     playsInline
-                    preload={isFocused || activeMobileItem?.project.id === project.id ? "auto" : "metadata"}
+                    preload="metadata"
                     ref={(video) => {
                       if (!video) return;
                       video.muted = true;
                       video.playsInline = true;
-                      void video.play().catch(() => {});
                     }}
                   />
                 ) : (
@@ -375,8 +486,8 @@ export default function VideoWheel({
           ⤨
         </button>
 
-        {activeMobileItem ? (
-          <div className="mobile-active-title">{activeMobileItem.project.title}</div>
+        {mobileActiveTitle ? (
+          <div className="mobile-active-title">{mobileActiveTitle}</div>
         ) : null}
       </>
     );
