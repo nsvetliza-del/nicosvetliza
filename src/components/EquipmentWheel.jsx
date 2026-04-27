@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const FRONT_ANGLE = 0;
+const MOBILE_FRONT_ANGLE = Math.PI / 2;
 
 function angularDistance(a, b) {
   return Math.atan2(Math.sin(a - b), Math.cos(a - b));
@@ -26,8 +27,9 @@ export default function EquipmentWheel({ items }) {
       if (!total || typeof window === "undefined") return;
 
       const isMobile = window.innerWidth <= 768;
-      const radiusX = isMobile ? window.innerWidth * 0.46 : window.innerWidth * 0.28;
-      const radiusY = isMobile ? 92 : 120;
+      const frontAngle = isMobile ? MOBILE_FRONT_ANGLE : FRONT_ANGLE;
+      const radiusX = isMobile ? window.innerWidth * 0.42 : window.innerWidth * 0.28;
+      const radiusY = isMobile ? 78 : 120;
       let strongestIndex = 0;
       let strongestFrontness = -1;
 
@@ -39,15 +41,15 @@ export default function EquipmentWheel({ items }) {
         const angle = baseAngle + rotationRef.current;
         const x = Math.cos(angle) * radiusX;
         const y = Math.sin(angle) * radiusY;
-        const distanceToFront = Math.abs(angularDistance(angle, FRONT_ANGLE));
+        const distanceToFront = Math.abs(angularDistance(angle, frontAngle));
         const frontness = Math.max(0, 1 - distanceToFront / (isMobile ? 1.15 : 1.35));
         const scale = isMobile
-          ? 0.5 + Math.pow(frontness, 2.4) * 0.85
+          ? 0.58 + Math.pow(frontness, 2.4) * 0.72
           : 0.45 + Math.pow(frontness, 2.5) * 0.75;
         const opacity = isMobile
-          ? 0.18 + Math.pow(frontness, 1.3) * 0.82
+          ? 0.22 + Math.pow(frontness, 1.25) * 0.78
           : 0.2 + Math.pow(frontness, 1.4) * 0.8;
-        const blur = (1 - frontness) * 7;
+        const blur = (1 - frontness) * (isMobile ? 6 : 7);
         const zIndex = Math.round(frontness * 1000);
 
         element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
@@ -78,8 +80,10 @@ export default function EquipmentWheel({ items }) {
       const total = items.length;
       if (!total) return;
 
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+      const frontAngle = isMobile ? MOBILE_FRONT_ANGLE : FRONT_ANGLE;
       const baseAngle = (index / total) * Math.PI * 2;
-      const target = FRONT_ANGLE - baseAngle;
+      const target = frontAngle - baseAngle;
       const difference = angularDistance(target, rotationRef.current);
       targetRotationRef.current = rotationRef.current + difference;
     },

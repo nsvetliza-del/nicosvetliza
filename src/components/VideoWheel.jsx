@@ -62,6 +62,24 @@ export default function VideoWheel({
     targetRotationRef.current = finalRotation + overshoot;
   };
 
+  const getCloudinaryPoster = (src) => {
+    if (!src?.includes("/video/upload/")) return null;
+
+    const optimizedSrc = optimizeVideoSrc(src);
+    const posterSrc = optimizedSrc.replace(
+      "/video/upload/f_auto,q_auto/",
+      "/video/upload/so_0.2,f_jpg,q_auto/"
+    );
+
+    return posterSrc.replace(/\.(mp4|mov|webm)(\?.*)?$/i, ".jpg$2");
+  };
+
+  const getCircularIndexDistance = (index, targetIndex, total) => {
+    const forward = (index - targetIndex + total) % total;
+    const backward = (targetIndex - index + total) % total;
+    return Math.min(forward, backward);
+  };
+
 const getMobileFrontIndex = useCallback(() => {
     const total = projects.length;
     if (!total) return 0;
@@ -120,11 +138,15 @@ const getMobileFrontIndex = useCallback(() => {
       const nextTitle = projects[index]?.title ?? "";
       mobileActiveTitleRef.current = nextTitle;
       setMobileActiveTitle(nextTitle);
-      const prev = projects[(index - 1 + projects.length) % projects.length];
       const current = projects[index];
+      const prev = projects[(index - 1 + projects.length) % projects.length];
+      const prevTwo = projects[(index - 2 + projects.length) % projects.length];
       const next = projects[(index + 1) % projects.length];
+      const nextTwo = projects[(index + 2) % projects.length];
 
-      [prev, current, next].forEach((project) => preloadVideoLink(project?.video));
+      [current, prev, next, prevTwo, nextTwo].forEach((project) =>
+        preloadVideoLink(project?.video)
+      );
 
       mobileItemRefs.current.forEach((element, itemIndex) => {
         const video = element?.querySelector("video");
@@ -155,8 +177,8 @@ const getMobileFrontIndex = useCallback(() => {
     const total = projects.length;
     if (!total) return;
 
-    const radiusX = window.innerWidth * 0.46;
-    const radiusY = 72;
+    const radiusX = window.innerWidth * 0.72;
+    const radiusY = 135;
     const frontIndex = getMobileFrontIndex();
     const frontAngle = Math.PI / 2;
 
@@ -172,11 +194,11 @@ const getMobileFrontIndex = useCallback(() => {
       ));
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
-      const frontness = Math.max(0, 1 - angleDistanceToFront / 1.1);
-      const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.32 + Math.pow(frontness, 3.4) * 2.15;
-      const opacity = 0.28 + Math.pow(frontness, 1.2) * 0.72;
+      const frontness = Math.max(0, 1 - angleDistanceToFront / 1.35);
+      const scale = 0.35 + Math.pow(frontness, 2.4) * 1.65;
+      const opacity = 0.3 + Math.pow(frontness, 1.1) * 0.7;
       const zIndex = Math.round(frontness * 1000);
+      const indexDistance = getCircularIndexDistance(index, frontIndex, total);
 
       element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
       element.style.opacity = String(opacity);
@@ -186,7 +208,7 @@ const getMobileFrontIndex = useCallback(() => {
       if (!video) return;
 
       const source = video.dataset.src;
-      const shouldLoad = depth > 0.18 || angleDistanceToFront < 2.6;
+      const shouldLoad = indexDistance <= 2 || angleDistanceToFront < 1.45;
       const isFront = index === frontIndex;
       const hasSource = Boolean(video.getAttribute("src"));
 
@@ -511,6 +533,7 @@ const getMobileFrontIndex = useCallback(() => {
           {projects.map((project, index) => (
             (() => {
               const optimizedSrc = optimizeVideoSrc(project.video);
+              const posterSrc = getCloudinaryPoster(project.video) ?? project.cover;
 
               return (
               <button
@@ -537,7 +560,7 @@ const getMobileFrontIndex = useCallback(() => {
                 {project.video || project.cover ? (
                   <video
                     data-src={optimizedSrc}
-                    poster={project.cover}
+                    poster={posterSrc}
                     muted
                     loop
                     playsInline

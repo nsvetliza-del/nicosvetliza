@@ -626,11 +626,11 @@ body.is-transitioning .mobile-carousel-container {
 @media (max-width: 768px) {
   .mobile-carousel-container {
     position: fixed !important;
-    top: 43dvh !important;
+    top: 48dvh !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     width: 100vw !important;
-    height: 330px !important;
+    height: 430px !important;
     overflow: visible !important;
     z-index: 20 !important;
     display: block !important;
@@ -645,8 +645,8 @@ body.is-transitioning .mobile-carousel-container {
     position: absolute !important;
     left: 50% !important;
     top: 50% !important;
-    width: clamp(68px, 22vw, 110px) !important;
-    height: clamp(44px, 14vw, 72px) !important;
+    width: clamp(80px, 30vw, 150px) !important;
+    height: clamp(50px, 19vw, 95px) !important;
     max-height: none !important;
     min-height: 0 !important;
     margin: 0 !important;
@@ -675,13 +675,13 @@ body.is-transitioning .mobile-carousel-container {
 
   .mobile-active-title {
     position: fixed !important;
-    top: calc(43dvh + 185px) !important;
+    top: calc(48dvh + 230px) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 90vw !important;
     padding: 0 !important;
     text-align: center !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     line-height: 1.2 !important;
     color: rgba(0, 0, 0, 0.78) !important;
     opacity: 1 !important;
@@ -695,7 +695,7 @@ body.is-transitioning .mobile-carousel-container {
   .mobile-random-button {
     position: fixed !important;
     left: 50% !important;
-    top: 43dvh !important;
+    top: 48dvh !important;
     transform: translate(-50%, -50%) !important;
     z-index: 180 !important;
     width: 28px !important;
@@ -902,45 +902,44 @@ body.is-transitioning .mobile-carousel-container {
   .equipment-wheel {
     position: relative !important;
     width: 100vw !important;
-    height: 360px !important;
+    height: 380px !important;
     margin-top: 32px !important;
     overflow: hidden !important;
     -webkit-mask-image: linear-gradient(
       90deg,
       transparent 0%,
-      transparent 4%,
-      black 18%,
-      black 78%,
+      black 14%,
+      black 86%,
       transparent 100%
     ) !important;
     mask-image: linear-gradient(
       90deg,
       transparent 0%,
-      transparent 4%,
-      black 18%,
-      black 78%,
+      black 14%,
+      black 86%,
       transparent 100%
     ) !important;
   }
 
   .equipment-wheel-stage {
     position: absolute !important;
-    left: -42vw !important;
+    left: 50% !important;
     top: 50% !important;
-    width: 120vw !important;
+    width: 100vw !important;
     height: 100% !important;
-    transform: translateY(-50%) !important;
+    transform: translate(-50%, -50%) !important;
     overflow: visible !important;
   }
 
   .equipment-logo-item {
-    width: 100px !important;
-    height: 54px !important;
+    width: 150px !important;
+    height: 82px !important;
   }
 
   .equipment-logo-item img {
-    max-width: 88px !important;
-    max-height: 36px !important;
+    max-width: 135px !important;
+    max-height: 62px !important;
+    object-fit: contain !important;
   }
 
   .equipment-active-label {
