@@ -1,20 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import MinimalMenu from "../components/MinimalMenu";
 
 export default function Contact() {
-  const handleSubmit = (event) => {
+  const [formStatus, setFormStatus] = useState("");
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name")?.toString().trim() ?? "";
+    const email = formData.get("email")?.toString().trim() ?? "";
     const subject = formData.get("subject")?.toString().trim() ?? "";
     const message = formData.get("message")?.toString().trim() ?? "";
-    const body = `Name: ${name}\r\n\r\n${message}`;
-    const mailto = `mailto:nsvetliza@gmail.com?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
 
-    window.location.href = mailto;
+    setIsSending(true);
+    setFormStatus("");
+
+    try {
+      const response = await fetch("https://formspree.io/f/xpqkedyz", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          subject,
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Formspree request failed");
+      }
+
+      event.currentTarget.reset();
+      setFormStatus("message sent.");
+    } catch (error) {
+      setFormStatus("something went wrong. please try again.");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -47,9 +75,13 @@ export default function Contact() {
 
           <form className="contact-form" onSubmit={handleSubmit}>
             <input type="text" name="name" placeholder="your name" required />
+            <input type="email" name="email" placeholder="your email" required />
             <input type="text" name="subject" placeholder="subject" required />
             <textarea name="message" placeholder="your message" rows="4" required />
-            <button type="submit">send message</button>
+            <button type="submit" disabled={isSending}>
+              {isSending ? "sending..." : "send message"}
+            </button>
+            {formStatus ? <p className="contact-form-status">{formStatus}</p> : null}
           </form>
         </div>
       </section>
