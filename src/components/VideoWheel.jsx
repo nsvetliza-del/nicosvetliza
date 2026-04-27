@@ -155,8 +155,8 @@ const getMobileFrontIndex = useCallback(() => {
     const total = projects.length;
     if (!total) return;
 
-    const radiusX = window.innerWidth * 0.48;
-    const radiusY = 70;
+    const radiusX = window.innerWidth * 0.46;
+    const radiusY = 72;
     const frontIndex = getMobileFrontIndex();
     const frontAngle = Math.PI / 2;
 
@@ -172,10 +172,10 @@ const getMobileFrontIndex = useCallback(() => {
       ));
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
-      const frontness = Math.max(0, 1 - angleDistanceToFront / 1.25);
+      const frontness = Math.max(0, 1 - angleDistanceToFront / 1.1);
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.42 + Math.pow(frontness, 2.8) * 1.25;
-      const opacity = 0.35 + Math.pow(frontness, 1.4) * 0.65;
+      const scale = 0.32 + Math.pow(frontness, 3.4) * 2.15;
+      const opacity = 0.28 + Math.pow(frontness, 1.2) * 0.72;
       const zIndex = Math.round(frontness * 1000);
 
       element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
