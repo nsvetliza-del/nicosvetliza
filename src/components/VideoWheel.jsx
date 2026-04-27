@@ -63,21 +63,14 @@ export default function VideoWheel({
   };
 
   const getCloudinaryPoster = (src) => {
-    if (!src?.includes("/video/upload/")) return null;
+    if (!src) return "";
+    if (!src.includes("/video/upload/")) return "";
 
-    const optimizedSrc = optimizeVideoSrc(src);
-    const posterSrc = optimizedSrc.replace(
-      "/video/upload/f_auto,q_auto/",
-      "/video/upload/so_0.2,f_jpg,q_auto/"
-    );
+    const posterSrc = src
+      .replace("/video/upload/", "/video/upload/so_0.2,f_jpg,q_auto/")
+      .replace(/\.mp4($|\?)/i, ".jpg$1");
 
-    return posterSrc.replace(/\.(mp4|mov|webm)(\?.*)?$/i, ".jpg$2");
-  };
-
-  const getCircularIndexDistance = (index, targetIndex, total) => {
-    const forward = (index - targetIndex + total) % total;
-    const backward = (targetIndex - index + total) % total;
-    return Math.min(forward, backward);
+    return posterSrc;
   };
 
 const getMobileFrontIndex = useCallback(() => {
@@ -105,28 +98,6 @@ const getMobileFrontIndex = useCallback(() => {
     return frontIndex;
   }, [projects]);
 
-  const setVideoPreviewFrame = (video, isFront) => {
-    if (!video || isFront || video.dataset.previewFrameSet === "true") return;
-
-    const setFrame = () => {
-      try {
-        if (video.readyState >= 1 && video.duration > 0) {
-          video.currentTime = Math.min(0.1, video.duration * 0.05);
-          video.dataset.previewFrameSet = "true";
-        }
-      } catch {
-        // Some mobile browsers can reject early seeks; metadata still keeps the card stable.
-      }
-    };
-
-    if (video.readyState >= 1) {
-      setFrame();
-      return;
-    }
-
-    video.onloadedmetadata = setFrame;
-  };
-
   const updateMobileActiveTitle = useCallback((index, immediate = false) => {
     if (!projects[index]) return;
     if (mobileActiveIndexRef.current === index && mobileActiveTitleRef.current) return;
@@ -147,22 +118,6 @@ const getMobileFrontIndex = useCallback(() => {
       [current, prev, next, prevTwo, nextTwo].forEach((project) =>
         preloadVideoLink(project?.video)
       );
-
-      mobileItemRefs.current.forEach((element, itemIndex) => {
-        const video = element?.querySelector("video");
-        if (!video) return;
-
-        if (itemIndex === index) {
-          video.preload = "auto";
-          video.muted = true;
-          video.playsInline = true;
-          void video.play().catch(() => {});
-          return;
-        }
-
-        video.pause();
-        video.preload = "metadata";
-      });
     };
 
     if (immediate) {
@@ -198,59 +153,10 @@ const getMobileFrontIndex = useCallback(() => {
       const scale = 0.35 + Math.pow(frontness, 2.4) * 1.65;
       const opacity = 0.3 + Math.pow(frontness, 1.1) * 0.7;
       const zIndex = Math.round(frontness * 1000);
-      const indexDistance = getCircularIndexDistance(index, frontIndex, total);
 
       element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale})`;
       element.style.opacity = String(opacity);
       element.style.zIndex = String(zIndex);
-
-      const video = element.querySelector("video");
-      if (!video) return;
-
-      const source = video.dataset.src;
-      const shouldLoad = indexDistance <= 2 || angleDistanceToFront < 1.45;
-      const isFront = index === frontIndex;
-      const hasSource = Boolean(video.getAttribute("src"));
-
-      if (shouldLoad && source && !hasSource) {
-        video.src = source;
-        video.preload = isFront ? "auto" : "metadata";
-        video.load();
-        setVideoPreviewFrame(video, isFront);
-      } else if (isFront && hasSource && video.preload !== "auto") {
-        video.preload = "auto";
-      } else if (!isFront && hasSource && video.preload !== "metadata") {
-        video.preload = "metadata";
-      }
-
-      if (!shouldLoad && hasSource) {
-        video.pause();
-        video.removeAttribute("src");
-        video.dataset.front = "false";
-        video.dataset.previewFrameSet = "false";
-        video.load();
-      }
-
-      const nextFrontState = isFront ? "true" : "false";
-      if (video.dataset.front !== nextFrontState) {
-        video.dataset.front = nextFrontState;
-
-        if (isFront && source) {
-          if (!video.getAttribute("src")) {
-            video.src = source;
-            video.preload = "auto";
-            video.load();
-          }
-
-          video.muted = true;
-          video.loop = true;
-          video.playsInline = true;
-          void video.play().catch(() => {});
-        } else {
-          video.pause();
-          setVideoPreviewFrame(video, false);
-        }
-      }
     });
 
     updateMobileActiveTitle(frontIndex);
@@ -532,7 +438,6 @@ const getMobileFrontIndex = useCallback(() => {
         >
           {projects.map((project, index) => (
             (() => {
-              const optimizedSrc = optimizeVideoSrc(project.video);
               const posterSrc = getCloudinaryPoster(project.video) ?? project.cover;
 
               return (
@@ -557,20 +462,20 @@ const getMobileFrontIndex = useCallback(() => {
                   onProjectSelect(project.id, rect);
                 }}
               >
-                {project.video || project.cover ? (
-                  <video
-                    data-src={optimizedSrc}
-                    poster={posterSrc}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    ref={(video) => {
-                      if (!video) return;
-                      video.muted = true;
-                      video.playsInline = true;
-                    }}
-                  />
+                {posterSrc || project.cover ? (
+                  <>
+                    <img
+                      src={posterSrc || project.cover}
+                      alt={project.title}
+                      loading={index < 6 ? "eager" : "lazy"}
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                        event.currentTarget.parentElement?.classList.add("has-poster-error");
+                      }}
+                    />
+                    <span className="mobile-video-fallback-title">{project.title}</span>
+                  </>
                 ) : (
                   <div className="video-wheel-fallback">{project.title}</div>
                 )}
