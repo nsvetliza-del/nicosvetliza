@@ -177,6 +177,169 @@
   transition: opacity 450ms ease, transform 450ms ease;
 }
 
+.page-transition {
+  min-height: 100dvh;
+}
+
+.page-transition-enter .portfolio-wheel-shell,
+.page-transition-enter .about-content,
+.page-transition-enter .contact-content,
+.page-transition-enter .equipment-intro,
+.page-transition-enter .equipment-wheel-wrap {
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  filter: blur(8px);
+}
+
+.page-transition-enter-active .portfolio-wheel-shell,
+.page-transition-enter-active .about-content,
+.page-transition-enter-active .contact-content,
+.page-transition-enter-active .equipment-intro,
+.page-transition-enter-active .equipment-wheel-wrap {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition:
+    opacity 650ms cubic-bezier(0.19, 1, 0.22, 1),
+    transform 650ms cubic-bezier(0.19, 1, 0.22, 1),
+    filter 650ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.page-transition-exit .portfolio-wheel-shell,
+.page-transition-exit .about-content,
+.page-transition-exit .contact-content,
+.page-transition-exit .equipment-wheel-wrap {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.page-transition-exit-active .portfolio-wheel-shell,
+.page-transition-exit-active .about-content,
+.page-transition-exit-active .contact-content,
+.page-transition-exit-active .equipment-wheel-wrap {
+  opacity: 0;
+  transform: translateY(-8px) scale(1.01);
+  filter: blur(10px);
+  transition:
+    opacity 650ms cubic-bezier(0.19, 1, 0.22, 1),
+    transform 650ms cubic-bezier(0.19, 1, 0.22, 1),
+    filter 650ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.transition-burst {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.85), transparent 36%),
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  filter: blur(18px);
+  transform: translateX(-30%);
+}
+
+.transition-burst.is-active {
+  animation: burstSweep 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes burstSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-35%) scale(0.98);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(35%) scale(1.02);
+  }
+}
+
+.video-wheel-item,
+.mobile-video-card,
+.video-card {
+  transition:
+    transform 650ms cubic-bezier(0.19, 1, 0.22, 1),
+    opacity 500ms ease,
+    filter 500ms ease;
+}
+
+body.is-transitioning .video-wheel,
+body.is-transitioning .mobile-carousel-container {
+  opacity: 0.18;
+  filter: blur(10px);
+}
+
+.page-transition-enter-active .equipment-logo-item {
+  animation: equipmentLogoReveal 650ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+  animation-delay: calc(var(--logo-index, 0) * 40ms);
+}
+
+@keyframes equipmentLogoReveal {
+  0% {
+    opacity: 0;
+    filter: blur(10px) grayscale(1);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0) grayscale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-transition-enter .portfolio-wheel-shell,
+  .page-transition-enter .about-content,
+  .page-transition-enter .contact-content,
+  .page-transition-enter .equipment-intro,
+  .page-transition-enter .equipment-wheel-wrap {
+    transform: translateY(8px) scale(0.99);
+    filter: blur(5px);
+  }
+
+  .page-transition-enter-active .portfolio-wheel-shell,
+  .page-transition-enter-active .about-content,
+  .page-transition-enter-active .contact-content,
+  .page-transition-enter-active .equipment-intro,
+  .page-transition-enter-active .equipment-wheel-wrap {
+    transition:
+      opacity 550ms cubic-bezier(0.19, 1, 0.22, 1),
+      transform 550ms cubic-bezier(0.19, 1, 0.22, 1),
+      filter 550ms cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .transition-burst.is-active {
+    animation-duration: 560ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter .portfolio-wheel-shell,
+  .page-transition-enter .about-content,
+  .page-transition-enter .contact-content,
+  .page-transition-enter .equipment-intro,
+  .page-transition-enter .equipment-wheel-wrap,
+  .page-transition-enter-active .portfolio-wheel-shell,
+  .page-transition-enter-active .about-content,
+  .page-transition-enter-active .contact-content,
+  .page-transition-enter-active .equipment-intro,
+  .page-transition-enter-active .equipment-wheel-wrap {
+    transform: none;
+    filter: none;
+    transition: opacity 220ms ease;
+  }
+
+  .transition-burst,
+  .transition-burst.is-active,
+  .page-transition-enter-active .equipment-logo-item {
+    animation: none;
+  }
+}
+
 .equipment-page {
   min-height: 100dvh;
   padding: 140px 0 100px;

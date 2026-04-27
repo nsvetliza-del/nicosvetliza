@@ -183,6 +183,7 @@ export default function EquipmentWheel({ items }) {
               }}
               className="equipment-logo-item"
               type="button"
+              style={{ "--logo-index": index }}
               onClick={() => {
                 if (didDragRef.current) {
                   didDragRef.current = false;
