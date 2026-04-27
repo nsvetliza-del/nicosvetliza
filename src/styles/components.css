@@ -294,6 +294,11 @@
 .mobile-random-button,
 .random-play-button,
 .shuffle-button {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 300 !important;
   width: auto !important;
   height: auto !important;
   background: transparent !important;
@@ -329,7 +334,7 @@
 .random-play-button:hover,
 .mobile-random-button:hover {
   opacity: 0.9;
-  transform: translate(-50%, -50%) scale(1.02);
+  transform: translate(-50%, -50%) scale(1.02) !important;
 }
 
 .video-wheel-item {
@@ -414,23 +419,13 @@
   background: rgba(29, 92, 255, 0.025);
 }
 
+.video-card-title,
+.project-card-title,
+.project-title,
+.video-title,
+.mobile-video-title,
 .video-wheel-meta {
-  display: grid;
-  gap: 0.16rem;
-  opacity: 0.88;
-  transform: translateY(0);
-  transition: opacity 0.28s ease, transform 0.28s ease;
-  text-align: center;
-}
-
-.video-wheel-item:hover .video-wheel-meta,
-.video-wheel-item.is-focused .video-wheel-meta {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.video-wheel-meta span:first-child {
-  font-size: 0.74rem;
+  display: none !important;
 }
 
 .single-video-project {
@@ -463,6 +458,24 @@
 @media (max-width: 820px) {
   .video-wheel-random {
     display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .desktop-active-title {
+    position: fixed;
+    left: 50%;
+    top: calc(50vh + 210px);
+    transform: translateX(-50%);
+    width: min(70vw, 720px);
+    color: rgba(0, 0, 0, 0.68);
+    font-size: 15px;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-align: center;
+    z-index: 140;
+    pointer-events: none;
+    white-space: nowrap;
   }
 }
 

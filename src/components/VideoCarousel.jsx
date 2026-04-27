@@ -57,11 +57,6 @@ export default function VideoCarousel({
                 className="carousel-card-cover"
                 style={{ backgroundImage: `url(${project.cover})` }}
               />
-              <span className="carousel-card-meta">
-                <span>{project.title}</span>
-                <span>{project.category}</span>
-                <span>{project.year}</span>
-              </span>
             </button>
           ))}
         </div>

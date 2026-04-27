@@ -16,15 +16,6 @@ export default function VideoCard({ project }) {
           <div className="media-placeholder">Replace this with a Vimeo or YouTube embed URL</div>
         )}
       </div>
-      <div className="video-card-copy">
-        <div className="video-card-meta">
-          <span>{project.brand}</span>
-          <span>{project.group}</span>
-          <span>{project.year}</span>
-        </div>
-        <h3>{project.title}</h3>
-        <p>{project.shortDescription}</p>
-      </div>
     </article>
   );
 }

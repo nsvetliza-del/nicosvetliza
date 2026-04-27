@@ -32,20 +32,7 @@ export default function ProjectCard({ project, index = 0, variant = "standard" }
             <div className="media-placeholder">Replace project cover image</div>
           ) : null}
 
-          <div className="project-card-overlay">
-            <p>{project.shortDescription}</p>
-          </div>
         </div>
-      </div>
-
-      <div className="project-card-copy">
-        <div className="project-meta">
-          <span>{projectNumber}</span>
-          <span>{project.brand}</span>
-          <span>{project.group}</span>
-          <span>{project.year}</span>
-        </div>
-        <h3>{project.title}</h3>
       </div>
     </Link>
   );

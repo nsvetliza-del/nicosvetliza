@@ -2,13 +2,12 @@ import React from "react";
 
 export default function RandomPlayButton({
   onClick,
-  isVisible = false,
   isDizzy = false,
 }) {
   return (
     <button
       type="button"
-      className={`video-wheel-random random-play-button ${isVisible ? "is-visible" : ""}`}
+      className="random-play-button"
       onClick={onClick}
       aria-label="Play random project"
       title="Play random project"

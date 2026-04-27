@@ -307,7 +307,7 @@ const getMobileFrontIndex = useCallback(() => {
 
   const items = useMemo(() => {
     const total = projects.length || 1;
-    const radiusX = Math.min(window.innerWidth * 0.34, 560);
+    const radiusX = Math.min(window.innerWidth * 0.28, 460);
     const radiusY = 150;
 
     return projects.map((project, index) => {
@@ -340,6 +340,14 @@ const getMobileFrontIndex = useCallback(() => {
       };
     });
   }, [projects, rotation, isExpanded]);
+
+  const desktopActiveProject = useMemo(() => {
+    if (!items.length) return null;
+
+    return items.reduce((closest, item) =>
+      item.style.zIndex > closest.style.zIndex ? item : closest
+    ).project;
+  }, [items]);
 
   useEffect(() => {
     if (!projects.length) return;
@@ -513,6 +521,16 @@ const getMobileFrontIndex = useCallback(() => {
               );
             })()
           ))}
+
+          <button
+            type="button"
+            className="mobile-random-button"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={handleMobileRandom}
+            aria-label="Random project"
+          >
+            {isDizzy ? "I feel dizzy." : "click to open randomly"}
+          </button>
         </div>
 
         {mobileActiveTitle ? (
@@ -521,23 +539,64 @@ const getMobileFrontIndex = useCallback(() => {
           </div>
         ) : null}
 
-        <button
-          type="button"
-          className="mobile-random-button"
-          onClick={handleMobileRandom}
-          aria-label="Random project"
-        >
-          {isDizzy ? "I feel dizzy." : "click to open randomly"}
-        </button>
-
         <AudioKeys />
       </>
     );
   };
 
   const renderDesktopWheel = () => (
-    <div className="video-wheel-frame" ref={wheelRef}>
-      <div className="video-wheel">
+    <>
+      <div className="video-wheel-frame" ref={wheelRef}>
+        <div className="video-wheel video-wheel-container">
+          {items.map(({ project, style, isFocused, isPrepared }) => (
+            <button
+              key={project.id}
+              type="button"
+              className={`video-wheel-item ${isFocused ? "is-focused" : ""} ${
+                launchingProjectId === project.id ? "is-launching" : ""
+              }`}
+              style={style}
+              onMouseEnter={() => {
+                setHoveredProjectId(project.id);
+                preloadVideo(project.video);
+              }}
+              onFocus={() => {
+                setHoveredProjectId(project.id);
+                preloadVideo(project.video);
+              }}
+              onMouseLeave={() => setHoveredProjectId(null)}
+              onBlur={() => setHoveredProjectId(null)}
+              onClick={(event) => {
+                const mediaElement = event.currentTarget.querySelector(".video-wheel-media");
+                const videoElement = mediaElement?.querySelector("video");
+                preloadVideo(project.video, { priority: "auto" });
+                if (videoElement) {
+                  videoElement.preload = "auto";
+                  videoElement.load();
+                  void videoElement.play().catch(() => {});
+                }
+                const rect =
+                  mediaElement?.getBoundingClientRect() ??
+                  event.currentTarget.getBoundingClientRect();
+                onProjectSelect(project.id, rect);
+              }}
+            >
+              <div className="video-wheel-media">
+                <video
+                  className="video-wheel-video"
+                  src={project.video}
+                  poster={project.cover}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload={isPrepared || hoveredProjectId === project.id ? "auto" : "metadata"}
+                />
+              </div>
+            </button>
+          ))}
+        </div>
+
         {projects.length > 0 ? (
           <RandomPlayButton
             onClick={(event) => {
@@ -551,59 +610,14 @@ const getMobileFrontIndex = useCallback(() => {
             isDizzy={isDizzy}
           />
         ) : null}
-        {items.map(({ project, style, isFocused, isPrepared }) => (
-          <button
-            key={project.id}
-            type="button"
-            className={`video-wheel-item ${isFocused ? "is-focused" : ""} ${
-              launchingProjectId === project.id ? "is-launching" : ""
-            }`}
-            style={style}
-            onMouseEnter={() => {
-              setHoveredProjectId(project.id);
-              preloadVideo(project.video);
-            }}
-            onFocus={() => {
-              setHoveredProjectId(project.id);
-              preloadVideo(project.video);
-            }}
-            onMouseLeave={() => setHoveredProjectId(null)}
-            onBlur={() => setHoveredProjectId(null)}
-            onClick={(event) => {
-              const mediaElement = event.currentTarget.querySelector(".video-wheel-media");
-              const videoElement = mediaElement?.querySelector("video");
-              preloadVideo(project.video, { priority: "auto" });
-              if (videoElement) {
-                videoElement.preload = "auto";
-                videoElement.load();
-                void videoElement.play().catch(() => {});
-              }
-              const rect =
-                mediaElement?.getBoundingClientRect() ??
-                event.currentTarget.getBoundingClientRect();
-              onProjectSelect(project.id, rect);
-            }}
-          >
-            <div className="video-wheel-media">
-              <video
-                className="video-wheel-video"
-                src={project.video}
-                poster={project.cover}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload={isPrepared || hoveredProjectId === project.id ? "auto" : "metadata"}
-              />
-            </div>
-
-            <div className="video-wheel-meta">
-              <span>{project.title}</span>
-            </div>
-          </button>
-        ))}
       </div>
-    </div>
+
+      {desktopActiveProject ? (
+        <div className="desktop-active-title">
+          {desktopActiveProject.title}
+        </div>
+      ) : null}
+    </>
   );
 
   const renderSingleProject = () => {
