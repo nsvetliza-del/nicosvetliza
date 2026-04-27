@@ -120,6 +120,72 @@
   letter-spacing: -0.02em;
 }
 
+.ig-profile {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 20px;
+  transition: opacity 280ms ease, transform 280ms ease;
+}
+
+.ig-profile:hover {
+  transform: translateY(-2px);
+  opacity: 0.75;
+}
+
+.ig-avatar img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ig-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+.ig-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ig-username {
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.ig-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+.ig-name {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.ig-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  font-size: 12px;
+  opacity: 0.68;
+}
+
+.ig-bio {
+  font-size: 13px;
+  line-height: 1.3;
+  opacity: 0.6;
+}
+
 .contact-links a:hover,
 .instagram-card:hover {
   opacity: 0.7;
@@ -184,7 +250,190 @@
   text-align: center;
 }
 
+.equipment-page {
+  min-height: 100dvh;
+  padding: 140px 0 100px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.equipment-content {
+  width: 100%;
+  display: grid;
+  gap: 42px;
+}
+
+.equipment-intro {
+  width: min(calc(100% - 48px), 34rem);
+  margin: 0 auto;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.equipment-kicker {
+  margin: 0;
+  color: rgba(17, 17, 17, 0.54);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+.equipment-intro h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 2.4rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.equipment-wheel-wrap {
+  display: grid;
+  gap: 18px;
+}
+
+.equipment-wheel {
+  position: relative;
+  width: 100vw;
+  height: 420px;
+  margin-top: 32px;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  perspective: 900px;
+  touch-action: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+}
+
+.equipment-wheel-stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100vw;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+}
+
+.equipment-logo-item {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 130px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.equipment-logo-item img {
+  max-width: 110px;
+  max-height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.equipment-active-label {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  color: rgba(17, 17, 17, 0.65);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.equipment-active-label span:last-child {
+  color: rgba(17, 17, 17, 0.45);
+  font-size: 11px;
+}
+
 @media (max-width: 768px) {
+  .ig-profile {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .ig-avatar img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .ig-username {
+    font-size: 16px;
+  }
+
+  .ig-stats {
+    font-size: 11px;
+    gap: 8px 10px;
+  }
+
+  .ig-bio {
+    font-size: 12px;
+  }
+
+  .equipment-page {
+    min-height: 100dvh !important;
+    padding: var(--mobile-menu-zone, 220px) 0 100px !important;
+    overflow: hidden !important;
+  }
+
+  .equipment-content {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    gap: 28px !important;
+    padding: 0 !important;
+  }
+
+  .equipment-intro {
+    width: calc(100% - 48px) !important;
+    margin: 0 auto !important;
+    gap: 0.7rem !important;
+  }
+
+  .equipment-intro h1 {
+    font-size: 1.35rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .equipment-wheel {
+    height: 380px !important;
+    margin-top: 32px !important;
+  }
+
+  .equipment-logo-item {
+    width: 145px !important;
+    height: 78px !important;
+  }
+
+  .equipment-logo-item img {
+    max-width: 130px !important;
+    max-height: 60px !important;
+  }
+
   .portfolio-stage,
   .portfolio-view,
   .portfolio-view.is-active,

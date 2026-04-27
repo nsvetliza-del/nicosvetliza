@@ -27,8 +27,8 @@ export default function EquipmentWheel({ items }) {
       if (!total || typeof window === "undefined") return;
 
       const isMobile = window.innerWidth <= 768;
-      const radiusX = isMobile ? window.innerWidth * 0.48 : window.innerWidth * 0.28;
-      const radiusY = isMobile ? 92 : 115;
+      const radiusX = isMobile ? window.innerWidth * 0.4 : window.innerWidth * 0.28;
+      const radiusY = isMobile ? 82 : 115;
       let strongestIndex = 0;
       let strongestFrontness = -1;
       let strongestX = 0;
@@ -42,13 +42,9 @@ export default function EquipmentWheel({ items }) {
         const x = Math.cos(angle) * radiusX;
         const y = Math.sin(angle) * radiusY;
         const distanceToFront = Math.abs(angularDistance(angle, FRONT_ANGLE));
-        const frontness = Math.max(0, 1 - distanceToFront / (isMobile ? 1.15 : 1.05));
-        const scale = isMobile
-          ? 0.58 + Math.pow(frontness, 2.4) * 0.72
-          : 0.58 + Math.pow(frontness, 2.5) * 0.72;
-        const opacity = isMobile
-          ? 0.22 + Math.pow(frontness, 1.25) * 0.78
-          : 0.22 + Math.pow(frontness, 1.25) * 0.78;
+        const frontness = Math.max(0, 1 - distanceToFront / 1.05);
+        const scale = 0.58 + Math.pow(frontness, 2.5) * 0.72;
+        const opacity = 0.22 + Math.pow(frontness, 1.25) * 0.78;
         const blur = (1 - frontness) * 6;
         const zIndex = Math.round(frontness * 1000);
 
