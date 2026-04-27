@@ -8,6 +8,18 @@ import {
   preloadVideoLink,
 } from "../utils/videoPreload";
 
+const randomTitleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#<>_-.";
+
+const encodeTitle = (title) =>
+  title
+    .split("")
+    .map((char) =>
+      char === " "
+        ? " "
+        : randomTitleChars[Math.floor(Math.random() * randomTitleChars.length)]
+    )
+    .join("");
+
 export default function VideoWheel({
   projects,
   onProjectSelect,
@@ -20,7 +32,12 @@ export default function VideoWheel({
   const randomTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
   const dizzyTimerRef = useRef(0);
+  const fastTimerRef = useRef(null);
   const lastMoveTimeRef = useRef(0);
+  const titleEncodingTimerRef = useRef(null);
+  const titleEncodingIntervalRef = useRef(null);
+  const highlightedProjectRef = useRef(null);
+  const highlightUpdateTimeRef = useRef(0);
   const mobileTouchLastXRef = useRef(0);
   const mobileTouchMovedRef = useRef(false);
   const mobileItemRefs = useRef([]);
@@ -38,9 +55,13 @@ export default function VideoWheel({
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
   const [showRandomButton, setShowRandomButton] = useState(false);
   const [isDizzy, setIsDizzy] = useState(false);
+  const [isDraggingFast, setIsDraggingFast] = useState(false);
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [highlightedProject, setHighlightedProject] = useState(null);
+  const [encodedTitle, setEncodedTitle] = useState("");
+  const [isEncodingTitle, setIsEncodingTitle] = useState(false);
 
   const hideRandomButton = () => {
     setIsCarouselMoving(true);
@@ -63,13 +84,60 @@ export default function VideoWheel({
     lastMoveTimeRef.current = now;
 
     if (velocity > 1.2) {
-      setIsDizzy(true);
+      setIsDraggingFast(true);
+      setIsDizzy(false);
+      window.clearTimeout(fastTimerRef.current);
       window.clearTimeout(dizzyTimerRef.current);
-      dizzyTimerRef.current = window.setTimeout(() => {
-        setIsDizzy(false);
-      }, 2000);
+
+      fastTimerRef.current = window.setTimeout(() => {
+        setIsDraggingFast(false);
+        setIsDizzy(true);
+
+        dizzyTimerRef.current = window.setTimeout(() => {
+          setIsDizzy(false);
+        }, 2000);
+      }, 180);
     }
   }, []);
+
+  const startTitleEncoding = useCallback((project) => {
+    if (!project) return;
+
+    const title = project.title ?? "";
+
+    highlightedProjectRef.current = project;
+    setHighlightedProject(project);
+    setIsEncodingTitle(true);
+    setEncodedTitle(encodeTitle(title));
+
+    window.clearTimeout(titleEncodingTimerRef.current);
+    window.clearInterval(titleEncodingIntervalRef.current);
+
+    titleEncodingIntervalRef.current = window.setInterval(() => {
+      setEncodedTitle(encodeTitle(title));
+    }, 45);
+
+    titleEncodingTimerRef.current = window.setTimeout(() => {
+      window.clearInterval(titleEncodingIntervalRef.current);
+      titleEncodingIntervalRef.current = null;
+      setEncodedTitle(title);
+      setIsEncodingTitle(false);
+    }, 620);
+  }, []);
+
+  const updateHighlightedProject = useCallback(
+    (project, immediate = false) => {
+      if (!project || highlightedProjectRef.current?.id === project.id) return;
+      if (typeof window === "undefined") return;
+
+      const now = performance.now();
+      if (!immediate && now - highlightUpdateTimeRef.current < 120) return;
+
+      highlightUpdateTimeRef.current = now;
+      startTitleEncoding(project);
+    },
+    [startTitleEncoding]
+  );
 
   const rotateProjectToFront = (index, overshoot = 0) => {
     const total = projects.length;
@@ -183,8 +251,8 @@ const getMobileFrontIndex = useCallback(() => {
       element.style.zIndex = String(zIndex);
     });
 
-    updateMobileActiveTitle(frontIndex);
-  }, [getMobileFrontIndex, projects, updateMobileActiveTitle]);
+    updateHighlightedProject(projects[frontIndex]);
+  }, [getMobileFrontIndex, projects, updateHighlightedProject]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -243,7 +311,10 @@ const getMobileFrontIndex = useCallback(() => {
   useEffect(() => () => window.clearTimeout(shuffleTimerRef.current), []);
 
   useEffect(() => () => {
+    window.clearTimeout(fastTimerRef.current);
     window.clearTimeout(dizzyTimerRef.current);
+    window.clearTimeout(titleEncodingTimerRef.current);
+    window.clearInterval(titleEncodingIntervalRef.current);
   }, []);
 
   useEffect(() => {
@@ -350,6 +421,11 @@ const getMobileFrontIndex = useCallback(() => {
   }, [items]);
 
   useEffect(() => {
+    if (isMobile || !desktopActiveProject) return;
+    updateHighlightedProject(desktopActiveProject);
+  }, [desktopActiveProject, isMobile, updateHighlightedProject]);
+
+  useEffect(() => {
     if (!projects.length) return;
 
     if (isMobile) {
@@ -377,7 +453,7 @@ const getMobileFrontIndex = useCallback(() => {
     if (!isMobile || !projects.length) return undefined;
 
     updateMobileWheel();
-    updateMobileActiveTitle(getMobileFrontIndex(), true);
+    updateHighlightedProject(projects[getMobileFrontIndex()], true);
 
     const animate = () => {
       if (!isMobileDraggingRef.current) {
@@ -393,7 +469,7 @@ const getMobileFrontIndex = useCallback(() => {
     return () => {
       window.cancelAnimationFrame(mobileFrameRef.current);
     };
-  }, [getMobileFrontIndex, isMobile, projects.length, updateMobileActiveTitle, updateMobileWheel]);
+  }, [getMobileFrontIndex, isMobile, projects, updateHighlightedProject, updateMobileWheel]);
 
   useEffect(() => () => {
     window.clearTimeout(mobileActiveTitleTimerRef.current);
@@ -464,6 +540,22 @@ const getMobileFrontIndex = useCallback(() => {
     rotateProjectToFront(randomIndex, 0);
   };
 
+  const highlightedTitleText = isEncodingTitle
+    ? encodedTitle
+    : highlightedProject?.title ?? "";
+
+  const renderHighlightedTitle = () =>
+    highlightedProject ? (
+      <div
+        className={`carousel-highlighted-title ${
+          isEncodingTitle ? "is-encoding" : ""
+        }`}
+        data-encoding={isEncodingTitle ? "true" : "false"}
+      >
+        {highlightedTitleText}
+      </div>
+    ) : null;
+
   const renderMobileGallery = () => {
     return (
       <>
@@ -524,7 +616,7 @@ const getMobileFrontIndex = useCallback(() => {
 
           <button
             type="button"
-            className="mobile-random-button"
+            className={`mobile-random-button ${isDraggingFast ? "is-hidden-fast" : ""}`}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={handleMobileRandom}
             aria-label="Random project"
@@ -533,11 +625,7 @@ const getMobileFrontIndex = useCallback(() => {
           </button>
         </div>
 
-        {mobileActiveTitle ? (
-          <div className="mobile-active-title">
-            {mobileActiveTitle}
-          </div>
-        ) : null}
+        {renderHighlightedTitle()}
 
         <AudioKeys />
       </>
@@ -608,15 +696,12 @@ const getMobileFrontIndex = useCallback(() => {
             }}
             isVisible={showRandomButton && !isCarouselMoving}
             isDizzy={isDizzy}
+            isDraggingFast={isDraggingFast}
           />
         ) : null}
       </div>
 
-      {desktopActiveProject ? (
-        <div className="desktop-active-title">
-          {desktopActiveProject.title}
-        </div>
-      ) : null}
+      {renderHighlightedTitle()}
     </>
   );
 
