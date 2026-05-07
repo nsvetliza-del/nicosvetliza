@@ -7,6 +7,8 @@ export default function About() {
       <section className="simple-page-shell">
         <MinimalMenu />
         <div className="about-content">
+          <h1 style={{ fontSize: "12px", opacity: 0.3 }}>UPDATED ABOUT</h1>
+
           <p>
             I create sound pieces that help each project tell its story with more clarity,
             depth, and impact.
@@ -19,8 +21,7 @@ export default function About() {
           </p>
 
           <p>
-            I spent several years working as a music producer, sound designer, and music
-            supervisor at{" "}
+            I’ve been working as a music producer, sound designer, and music supervisor at{" "}
             <a
               href="https://bdsmusic.tv"
               target="_blank"
@@ -29,7 +30,7 @@ export default function About() {
             >
               BDS Music
             </a>
-            , where I developed a practical understanding of how to deliver high-level work
+            , where I’ve developed a practical understanding of delivering high-level work
             under real deadlines and expectations.
           </p>
 
