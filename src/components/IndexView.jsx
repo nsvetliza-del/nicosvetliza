@@ -42,7 +42,7 @@ export default function IndexView({
 
   useEffect(() => {
     if (hoveredProject) {
-      preloadVideo(hoveredProject.video);
+      preloadVideo(hoveredProject.previewVideo || hoveredProject.video);
       setDisplayProject(hoveredProject);
       setIsVideoVisible(true);
       return;
@@ -76,7 +76,7 @@ export default function IndexView({
               <video
                 key={`${displayProject.id}-${instance}`}
                 className="index-view-backdrop-video"
-                src={displayProject.video}
+                src={displayProject.previewVideo || displayProject.video}
                 autoPlay
                 muted
                 loop
@@ -113,7 +113,7 @@ export default function IndexView({
               onMouseLeave={() => setHoveredProject(null)}
               onBlur={() => setHoveredProject(null)}
               onClick={(event) => {
-                preloadVideo(project.video);
+                preloadVideo(project.fullVideo || project.previewVideo || project.video);
                 const rect = event.currentTarget.getBoundingClientRect();
                 onProjectSelect(project.id, rect);
               }}

@@ -5,6 +5,7 @@ import WorkGrid from "./WorkGrid";
 
 export default function ProjectDetail({ project, projectIndex = 0, relatedProjects = [] }) {
   const projectNumber = String(projectIndex + 1).padStart(2, "0");
+  const fullSrc = project.fullVideo || project.previewVideo || project.video;
 
   return (
     <div className="project-detail">
@@ -21,13 +22,14 @@ export default function ProjectDetail({ project, projectIndex = 0, relatedProjec
           </div>
 
           <div className="detail-video">
-            {project.video ? (
-              <iframe
-                src={project.video}
+            {fullSrc ? (
+              <video
+                src={fullSrc}
                 title={`${project.title} showcase`}
-                loading="lazy"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
+                controls
+                autoPlay
+                playsInline
+                preload="metadata"
               />
             ) : (
               <div className="media-placeholder">Replace this area with a video embed URL</div>

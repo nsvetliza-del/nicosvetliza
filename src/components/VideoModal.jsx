@@ -33,6 +33,8 @@ export default function VideoModal({ project, onClose, onPrev, onNext }) {
 
   if (!project) return null;
 
+  const fullSrc = project.fullVideo || project.previewVideo || project.video;
+
   return (
     <div className="video-modal" role="dialog" aria-modal="true" aria-label={project.title}>
       <button type="button" className="video-modal-backdrop" aria-label="Close video" onClick={onClose} />
@@ -54,7 +56,7 @@ export default function VideoModal({ project, onClose, onPrev, onNext }) {
             Prev
           </button>
           <div className="video-modal-player">
-            <video ref={videoRef} src={project.video} controls playsInline preload="metadata" />
+            <video ref={videoRef} src={fullSrc} controls autoPlay playsInline preload="metadata" />
           </div>
           <button type="button" className="video-modal-arrow is-right" onClick={onNext} aria-label="Next project">
             Next

@@ -153,19 +153,7 @@ export default function VideoWheel({
     targetRotationRef.current = finalRotation + overshoot;
   };
 
-  const getCloudinaryPoster = (src) => {
-    if (!src) return "";
-    if (src.includes("rafaga_liviano_puzw5z")) {
-      return "https://res.cloudinary.com/dlpmcvfva/video/upload/so_0.2,f_jpg,q_auto/v1777177825/rafaga_liviano_puzw5z.jpg";
-    }
-
-    return src
-      .replace("/video/upload/f_auto,q_auto/", "/video/upload/so_0.2,f_jpg,q_auto/")
-      .replace("/video/upload/", "/video/upload/so_0.2,f_jpg,q_auto/")
-      .replace(/\.mp4($|\?)/, ".jpg$1");
-  };
-
-const getMobileFrontIndex = useCallback(() => {
+  const getMobileFrontIndex = useCallback(() => {
     const total = projects.length;
     if (!total) return 0;
 
@@ -208,7 +196,7 @@ const getMobileFrontIndex = useCallback(() => {
       const nextTwo = projects[(index + 2) % projects.length];
 
       [current, prev, next, prevTwo, nextTwo].forEach((project) =>
-        preloadVideoLink(project?.video)
+        preloadVideoLink(project?.previewVideo || project?.video)
       );
     };
 
@@ -341,13 +329,13 @@ const getMobileFrontIndex = useCallback(() => {
 
     initialVisible
       .filter(Boolean)
-      .forEach((project) => preloadVideo(project.video, { priority: "auto" }));
+      .forEach((project) => preloadVideo(project.previewVideo || project.video, { priority: "auto" }));
 
     const remainingSources = isMobile
       ? []
       : projects
           .filter((project) => !initialVisible.some((visible) => visible?.id === project.id))
-          .map((project) => project.video);
+          .map((project) => project.previewVideo || project.video);
 
     if (remainingSources.length) {
       preloadVideoBatch(remainingSources, { priority: "metadata", delay: 900 });
@@ -444,9 +432,9 @@ const getMobileFrontIndex = useCallback(() => {
     const nextTwo = projects[(focusedItem.index + 2) % projects.length];
 
     [current, prev, next].forEach((project) =>
-      preloadVideo(project?.video, { priority: "auto" })
+      preloadVideo(project?.previewVideo || project?.video, { priority: "auto" })
     );
-    preloadVideoBatch([nextTwo?.video], { priority: "metadata", delay: 220 });
+    preloadVideoBatch([nextTwo?.previewVideo || nextTwo?.video], { priority: "metadata", delay: 220 });
   }, [isMobile, items, projects]);
 
   useEffect(() => {
@@ -568,48 +556,44 @@ const getMobileFrontIndex = useCallback(() => {
         >
           {projects.map((project, index) => (
             (() => {
-              const posterSrc = getCloudinaryPoster(project.video) ?? project.cover;
+              const videoSrc = project.previewVideo || project.video;
 
               return (
-              <button
-                key={project.id}
-                type="button"
-                className="mobile-video-card"
-                aria-label={project.title}
-                ref={(element) => {
-                  mobileItemRefs.current[index] = element;
-                }}
-                onClick={(event) => {
-                  if (mobileTouchMovedRef.current) return;
+                <button
+                  key={project.id}
+                  type="button"
+                  className="mobile-video-card"
+                  aria-label={project.title}
+                  ref={(element) => {
+                    mobileItemRefs.current[index] = element;
+                  }}
+                  onClick={(event) => {
+                    if (mobileTouchMovedRef.current) return;
 
-                  const rect = event.currentTarget.getBoundingClientRect();
-                  preloadVideo(project.video, { priority: "auto" });
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    preloadVideo(project.fullVideo || videoSrc, { priority: "auto" });
 
-                  if (mobileActiveIndexRef.current !== index) {
-                    rotateProjectToFront(index, 0);
-                    return;
-                  }
+                    if (mobileActiveIndexRef.current !== index) {
+                      rotateProjectToFront(index, 0);
+                      return;
+                    }
 
-                  onProjectSelect(project.id, rect);
-                }}
-              >
-                {posterSrc || project.cover ? (
-                  <>
-                    <img
-                      src={posterSrc || project.cover}
-                      alt={project.title}
-                      loading={index < 6 ? "eager" : "lazy"}
-                      decoding="async"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                        event.currentTarget.parentElement?.classList.add("has-poster-error");
-                      }}
+                    onProjectSelect(project.id, rect);
+                  }}
+                >
+                  {videoSrc ? (
+                    <video
+                      src={videoSrc}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload={index < 6 ? "auto" : "metadata"}
                     />
-                  </>
-                ) : (
-                  <div className="video-wheel-fallback" aria-hidden="true" />
-                )}
-              </button>
+                  ) : (
+                    <div className="video-wheel-fallback" aria-hidden="true" />
+                  )}
+                </button>
               );
             })()
           ))}
@@ -646,18 +630,18 @@ const getMobileFrontIndex = useCallback(() => {
               style={style}
               onMouseEnter={() => {
                 setHoveredProjectId(project.id);
-                preloadVideo(project.video);
+                preloadVideo(project.previewVideo || project.video);
               }}
               onFocus={() => {
                 setHoveredProjectId(project.id);
-                preloadVideo(project.video);
+                preloadVideo(project.previewVideo || project.video);
               }}
               onMouseLeave={() => setHoveredProjectId(null)}
               onBlur={() => setHoveredProjectId(null)}
               onClick={(event) => {
                 const mediaElement = event.currentTarget.querySelector(".video-wheel-media");
                 const videoElement = mediaElement?.querySelector("video");
-                preloadVideo(project.video, { priority: "auto" });
+                preloadVideo(project.fullVideo || project.previewVideo || project.video, { priority: "auto" });
                 if (videoElement) {
                   videoElement.preload = "auto";
                   videoElement.load();
@@ -672,8 +656,7 @@ const getMobileFrontIndex = useCallback(() => {
               <div className="video-wheel-media">
                 <video
                   className="video-wheel-video"
-                  src={project.video}
-                  poster={project.cover}
+                  src={project.previewVideo || project.video}
                   autoPlay
                   muted
                   loop
@@ -690,7 +673,7 @@ const getMobileFrontIndex = useCallback(() => {
             onClick={(event) => {
               const randomProject = projects[Math.floor(Math.random() * projects.length)];
               if (!randomProject) return;
-              preloadVideo(randomProject.video);
+              preloadVideo(randomProject.fullVideo || randomProject.previewVideo || randomProject.video);
               const rect = event.currentTarget.getBoundingClientRect();
               onProjectSelect(randomProject.id, rect);
             }}
@@ -715,15 +698,14 @@ const getMobileFrontIndex = useCallback(() => {
           type="button"
           className="single-video-project"
           onClick={(event) => {
-            preloadVideo(project.video, { priority: "auto" });
+            preloadVideo(project.fullVideo || project.previewVideo || project.video, { priority: "auto" });
             onProjectSelect(project.id, event.currentTarget.getBoundingClientRect());
           }}
           aria-label={`Open ${project.title}`}
         >
           <video
             className="single-video-project-media"
-            src={project.video}
-            poster={project.cover}
+            src={project.previewVideo || project.video}
             autoPlay
             muted
             loop

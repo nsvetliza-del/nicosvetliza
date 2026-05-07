@@ -21,6 +21,7 @@ export default function VideoPlayerExperience({
   const [isMuted, setIsMuted] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const fullSrc = project.fullVideo || project.previewVideo || project.video;
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -101,7 +102,7 @@ export default function VideoPlayerExperience({
         <video
           ref={videoRef}
           className="player-video"
-          src={project.video}
+          src={fullSrc}
           autoPlay
           muted
           playsInline

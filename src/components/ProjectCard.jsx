@@ -4,7 +4,8 @@ import { Link } from "react-router-dom";
 export default function ProjectCard({ project, index = 0, variant = "standard" }) {
   const coverImage = project.images?.[0];
   const projectNumber = String(index + 1).padStart(2, "0");
-  const mediaMode = project.video ? "video" : "image";
+  const videoSrc = project.previewVideo || project.video;
+  const mediaMode = videoSrc ? "video" : "image";
 
   return (
     <Link to={`/work/${project.slug}`} className={`project-card is-${variant} is-${mediaMode}`}>
@@ -18,13 +19,14 @@ export default function ProjectCard({ project, index = 0, variant = "standard" }
                 : undefined,
           }}
         >
-          {mediaMode === "video" && project.video ? (
-            <iframe
-              src={project.video}
+          {mediaMode === "video" && videoSrc ? (
+            <video
+              src={videoSrc}
               title={`${project.title} preview`}
-              loading="lazy"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
+              muted
+              loop
+              playsInline
+              preload="metadata"
             />
           ) : null}
 

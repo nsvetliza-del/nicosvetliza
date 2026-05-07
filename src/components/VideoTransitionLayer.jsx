@@ -19,6 +19,8 @@ export default function VideoTransitionLayer({ project, originRect, onComplete }
 
   if (!project || !originRect) return null;
 
+  const videoSrc = project.previewVideo || project.video;
+
   const collapsedStyle = {
     top: `${originRect.top}px`,
     left: `${originRect.left}px`,
@@ -42,8 +44,7 @@ export default function VideoTransitionLayer({ project, originRect, onComplete }
       <div className="video-transition-media" style={collapsedStyle}>
         <video
           className="video-transition-video"
-          src={project.video}
-          poster={project.cover}
+          src={videoSrc}
           autoPlay
           muted
           loop

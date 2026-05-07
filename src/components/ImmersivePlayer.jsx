@@ -21,6 +21,7 @@ export default function ImmersivePlayer({ project, onClose, onPrev, onNext }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showPoster, setShowPoster] = useState(true);
+  const fullSrc = project.fullVideo || project.previewVideo || project.video;
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -32,9 +33,9 @@ export default function ImmersivePlayer({ project, onClose, onPrev, onNext }) {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !project?.video) return undefined;
+    if (!video || !fullSrc) return undefined;
 
-    preloadVideo(project.video, { priority: "auto" });
+    preloadVideo(fullSrc, { priority: "auto" });
 
     const attemptId = ++playAttemptRef.current;
 
@@ -84,7 +85,7 @@ export default function ImmersivePlayer({ project, onClose, onPrev, onNext }) {
       video.removeEventListener("canplay", onCanPlay);
       playAttemptRef.current += 1;
     };
-  }, [project]);
+  }, [fullSrc, project]);
 
   const revealControls = useCallback(() => {
     setShowControls(true);
@@ -180,8 +181,8 @@ export default function ImmersivePlayer({ project, onClose, onPrev, onNext }) {
         <video
           ref={videoRef}
           className={`immersive-player-video ${showPoster ? "is-buffering" : ""}`}
-          src={project.video}
-          poster={project.cover}
+          src={fullSrc}
+          autoPlay
           playsInline
           preload="auto"
           onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}

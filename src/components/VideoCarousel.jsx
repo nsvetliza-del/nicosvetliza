@@ -46,18 +46,35 @@ export default function VideoCarousel({
       <div className="carousel-shell">
         <div className="carousel-track" ref={trackRef}>
           {projects.map((project, index) => (
-            <button
-              key={project.id}
-              type="button"
-              className={`carousel-card ${project.id === selectedProjectId ? "is-active" : ""}`}
-              data-project-index={index}
-              onClick={() => onSelectProject(project.id)}
-            >
-              <span
-                className="carousel-card-cover"
-                style={{ backgroundImage: `url(${project.cover})` }}
-              />
-            </button>
+            (() => {
+              const videoSrc = project.previewVideo || project.video;
+
+              return (
+                <button
+                  key={project.id}
+                  type="button"
+                  className={`carousel-card ${project.id === selectedProjectId ? "is-active" : ""}`}
+                  data-project-index={index}
+                  onClick={() => onSelectProject(project.id)}
+                >
+                  {videoSrc ? (
+                    <video
+                      className="carousel-card-cover"
+                      src={videoSrc}
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                    />
+                  ) : (
+                    <span
+                      className="carousel-card-cover"
+                      style={{ backgroundImage: `url(${project.cover})` }}
+                    />
+                  )}
+                </button>
+              );
+            })()
           ))}
         </div>
       </div>
