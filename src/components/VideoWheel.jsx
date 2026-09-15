@@ -26,10 +26,12 @@ export default function VideoWheel({
   launchingProjectId = null,
   isReady = true,
   sonicShuffleTick = 0,
+  onAmbientPreview = null,
 }) {
   const wheelRef = useRef(null);
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
+  const ambientHoverTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
   const dizzyTimerRef = useRef(0);
   const fastTimerRef = useRef(null);
@@ -413,6 +415,32 @@ export default function VideoWheel({
     if (isMobile || !desktopActiveProject) return;
     updateHighlightedProject(desktopActiveProject);
   }, [desktopActiveProject, isMobile, updateHighlightedProject]);
+
+  useEffect(() => {
+    window.clearTimeout(ambientHoverTimerRef.current);
+
+    if (isMobile || !hoveredProjectId || isCarouselMoving) {
+      onAmbientPreview?.(null);
+      return undefined;
+    }
+
+    const project = projects.find((item) => item.id === hoveredProjectId);
+    if (!project) return undefined;
+
+    ambientHoverTimerRef.current = window.setTimeout(() => {
+      onAmbientPreview?.(project);
+    }, 2000);
+
+    return () => window.clearTimeout(ambientHoverTimerRef.current);
+  }, [hoveredProjectId, isCarouselMoving, isMobile, onAmbientPreview, projects]);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(ambientHoverTimerRef.current);
+      onAmbientPreview?.(null);
+    },
+    [onAmbientPreview]
+  );
 
   useEffect(() => {
     if (!projects.length) return;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import EpicIntro from "../components/EpicIntro";
 import ImmersivePlayer from "../components/ImmersivePlayer";
@@ -18,6 +18,10 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   const [filterPhase, setFilterPhase] = useState("idle");
   const [sonicShuffleTick, setSonicShuffleTick] = useState(0);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [ambientProject, setAmbientProject] = useState(null);
+  const [isAmbientBoosted, setIsAmbientBoosted] = useState(false);
+  const ambientVideoRef = useRef(null);
+  const ambientBoostTimerRef = useRef(0);
 
   const activeCategory = useMemo(() => {
     if (location.pathname.startsWith("/films")) return "Short Film";
@@ -119,6 +123,27 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
 
   const openProject = useCallback(
     (id, rect) => {
+      if (ambientProject?.id === id) {
+        const video = ambientVideoRef.current;
+        if (video) {
+          try {
+            video.currentTime = 0;
+          } catch {
+            // ignore, video may not be seekable yet
+          }
+        }
+
+        setIsAmbientBoosted(true);
+        finalizeProjectOpen(id);
+
+        window.clearTimeout(ambientBoostTimerRef.current);
+        ambientBoostTimerRef.current = window.setTimeout(() => {
+          setIsAmbientBoosted(false);
+          setAmbientProject(null);
+        }, 900);
+        return;
+      }
+
       if (rect) {
         const project = getProjectById(id);
         if (project) {
@@ -130,7 +155,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
 
       finalizeProjectOpen(id);
     },
-    [finalizeProjectOpen]
+    [ambientProject, finalizeProjectOpen]
   );
 
   const closeProject = useCallback(() => {
@@ -172,8 +197,29 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
     setSonicShuffleTick((value) => value + 1);
   }, []);
 
+  useEffect(() => () => window.clearTimeout(ambientBoostTimerRef.current), []);
+
   return (
     <>
+      <div
+        className={`ambient-hover-video ${ambientProject ? "is-visible" : ""} ${
+          isAmbientBoosted ? "is-boosted" : ""
+        }`}
+        aria-hidden="true"
+      >
+        {ambientProject ? (
+          <video
+            key={ambientProject.id}
+            ref={ambientVideoRef}
+            src={ambientProject.previewVideo || ambientProject.fullVideo}
+            autoPlay
+            muted
+            loop={!isAmbientBoosted}
+            playsInline
+          />
+        ) : null}
+      </div>
+
       <EpicIntro enabled={showIntroOverlay} onComplete={() => setShowIntroOverlay(false)} />
 
       <main className={`portfolio-page ${showIntroOverlay ? "is-obscured" : ""}`}>
@@ -198,6 +244,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
                   launchingProjectId={transitionState?.targetId ?? null}
                   isReady={!showIntroOverlay}
                   sonicShuffleTick={sonicShuffleTick}
+                  onAmbientPreview={setAmbientProject}
                 />
               </div>
             </div>

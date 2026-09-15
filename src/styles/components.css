@@ -297,30 +297,23 @@
   position: absolute !important;
   left: 50% !important;
   top: 50% !important;
+  transform: translate(-50%, -50%) !important;
   z-index: 300 !important;
   width: auto !important;
   height: auto !important;
   background: transparent !important;
   border: 0 !important;
   padding: 0 !important;
-  color: rgba(0, 0, 0, 0.55) !important;
+  color: var(--text) !important;
   font: inherit !important;
   font-size: 11px !important;
-  letter-spacing: 0.04em !important;
+  letter-spacing: 0.08em !important;
+  text-transform: lowercase !important;
   line-height: 1 !important;
   cursor: pointer !important;
   opacity: 0.68 !important;
   transition: opacity 220ms ease, transform 220ms ease !important;
   white-space: nowrap !important;
-}
-
-.random-play-button,
-.shuffle-button {
-  transform: translate(-50%, calc(-50% - 12.5rem)) !important;
-}
-
-.mobile-random-button {
-  transform: translate(-50%, calc(-50% - 6rem)) !important;
 }
 
 .mobile-random-button svg,
@@ -340,14 +333,10 @@
 }
 
 .random-play-button:hover,
-.shuffle-button:hover {
-  opacity: 0.9;
-  transform: translate(-50%, calc(-50% - 12.5rem)) scale(1.02) !important;
-}
-
+.shuffle-button:hover,
 .mobile-random-button:hover {
-  opacity: 0.9;
-  transform: translate(-50%, calc(-50% - 6rem)) scale(1.02) !important;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.03) !important;
 }
 
 .video-wheel-item {

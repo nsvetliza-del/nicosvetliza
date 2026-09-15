@@ -6,18 +6,14 @@ export default function About() {
     <main className="simple-page about-page">
       <section className="simple-page-shell">
         <MinimalMenu />
-        <div className="about-content">
-          <h1 style={{ fontSize: "12px", opacity: 0.3 }}>UPDATED ABOUT</h1>
 
+        <div className="about-content">
           <p>
-            I create sound pieces that help each project tell its story with more clarity,
-            depth, and impact.
+            I create sound pieces that help each project tell its story with more clarity, depth, and impact.
           </p>
 
           <p>
-            My work combines a background in classical, modern, and electronic music with
-            strong experience in music production and sound design. The goal is simple:
-            build sound that fits, supports, and elevates the narrative of each project.
+            My work combines a background in classical, modern, and electronic music with strong experience in music production and sound design. The goal is simple: build sound that fits, supports, and elevates the narrative of each project.
           </p>
 
           <p>
@@ -30,30 +26,27 @@ export default function About() {
             >
               BDS Music
             </a>
-            , where I’ve developed a practical understanding of delivering high-level work
-            under real deadlines and expectations.
+            , where I’ve developed a practical understanding of delivering high-level work under real deadlines and expectations.
           </p>
 
           <p>
-            I hold a degree in Film Scoring from Pontifical Catholic University of
-            Argentina, graduating with honors.
+            I hold a degree in Film Scoring from Pontifical Catholic University of Argentina, graduating with honors.
           </p>
 
           <p>
-            I&apos;m a multi-instrumentalist, composer, songwriter, and arranger. This
-            allows me to approach each project with flexibility and precision, adapting to
-            what the piece needs rather than forcing a style.
-          </p>
-
-          <p>Time and execution are always a priority. So is attention to detail.</p>
-
-          <p>
-            Every project is treated as an opportunity to create something unique,
-            intentional, and well-crafted.
+            I’m a multi-instrumentalist, composer, songwriter, and arranger. This allows me to approach each project with flexibility and precision, adapting to what the piece needs rather than forcing a style.
           </p>
 
           <p>
-            <strong>Let&apos;s work.</strong>
+            Time and execution are always a priority. So is attention to detail.
+          </p>
+
+          <p>
+            Every project is treated as an opportunity to create something unique, intentional, and well-crafted.
+          </p>
+
+          <p>
+            <strong>Let’s work.</strong>
           </p>
         </div>
       </section>
