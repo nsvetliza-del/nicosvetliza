@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import blueDotSound from "../assets/audios/blue-dot-sound.mp3";
 
 const BRAND_NAME = "Nico Svetliza™";
 
@@ -61,19 +62,13 @@ export default function MinimalMenu({ onSonicShuffle }) {
 
   const playBlueSound = async () => {
     try {
-      console.log("blue dot clicked");
-
-      const audio = new Audio(
-        "https://res.cloudinary.com/dlpmcvfva/video/upload/v1777178050/blue-dot-sound_kycbix.wav"
-      );
+      const audio = new Audio(blueDotSound);
 
       audio.volume = 0.9;
       audio.currentTime = 0;
       audio.muted = false;
 
       await audio.play();
-
-      console.log("blue dot sound started");
     } catch (error) {
       console.warn("blue dot sound error", error);
     }

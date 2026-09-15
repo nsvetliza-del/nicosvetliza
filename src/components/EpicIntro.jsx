@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-
-const orchestraTuning =
-  "https://res.cloudinary.com/dlpmcvfva/video/upload/v1777178051/orchestra-tuning_su2efh.mp3";
+import orchestraTuning from "../assets/audios/orchestra-tuning.mp3";
 
 const introWords = [
   { text: "soundscape", marker: "—", x: "-13vw", y: "-7vh" },
@@ -37,8 +35,6 @@ export default function EpicIntro({ enabled = true, onComplete }) {
 
     hasStartedRef.current = true;
 
-    console.log("initial play clicked");
-
     const audio = audioRef.current;
 
     if (audio) {
@@ -49,16 +45,10 @@ export default function EpicIntro({ enabled = true, onComplete }) {
         audio.loop = false;
         audio.muted = false;
 
-        console.log("orchestra play called immediately");
-
         await audio.play();
-
-        console.log("orchestra started");
       } catch (error) {
         console.warn("orchestra audio error", error);
       }
-    } else {
-      console.warn("orchestra audio ref missing");
     }
 
     setPhase("words");
@@ -92,28 +82,16 @@ export default function EpicIntro({ enabled = true, onComplete }) {
     audio.volume = 0.45;
     audio.loop = false;
 
-    const handleCanPlayThrough = () => {
-      console.log("orchestra audio can play through");
-    };
-
-    const handleEnded = () => {
-      console.log("orchestra audio ended");
-    };
-
     const handleError = () => {
       console.warn("orchestra audio failed to load");
     };
 
-    audio.addEventListener("canplaythrough", handleCanPlayThrough);
-    audio.addEventListener("ended", handleEnded);
     audio.addEventListener("error", handleError);
 
     audio.load();
     audioRef.current = audio;
 
     return () => {
-      audio.removeEventListener("canplaythrough", handleCanPlayThrough);
-      audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("error", handleError);
       audio.pause();
       audio.currentTime = 0;

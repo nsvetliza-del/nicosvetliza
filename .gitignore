@@ -2,8 +2,6 @@ node_modules/
 dist/
 src/assets/videos/
 src/assets/videos_optimized/
-src/assets/audios/
-src/assets/audio/
 .DS_Store
 src/assets/images/
 public/videos/

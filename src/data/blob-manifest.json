@@ -25,7 +25,13 @@
     "taekwondo.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/taekwondo.mp4",
     "yango.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/yango.mp4",
     "zelmira_ari.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/zelmira_ari.mp4",
-    "zelmira_sumaq.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/zelmira_sumaq.mp4"
+    "zelmira_sumaq.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/zelmira_sumaq.mp4",
+    "loreal_collagen_oriana.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/loreal_collagen_oriana.mp4",
+    "angela_movistar.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/angela_movistar.mp4",
+    "girona_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/girona_puma_home.mp4",
+    "la_roche.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/la_roche.mp4",
+    "rabieta.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/rabieta.mp4",
+    "valencia_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/valencia_puma_home.mp4"
   },
   "full": {
     ".DS_Store": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/.DS_Store",
@@ -54,6 +60,12 @@
     "taekwondo.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/taekwondo.mp4",
     "yango.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/yango.mp4",
     "zelmira_ari.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/zelmira_ari.mp4",
-    "zelmira_sumaq.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/zelmira_sumaq.mp4"
+    "zelmira_sumaq.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/zelmira_sumaq.mp4",
+    "loreal_collagen_oriana.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/loreal_collagen_oriana.mp4",
+    "angela_movistar.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/angela_movistar.mp4",
+    "girona_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/girona_puma_home.mp4",
+    "la_roche.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/la_roche.mp4",
+    "rabieta.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/rabieta.mp4",
+    "valencia_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/valencia_puma_home.mp4"
   }
 }

@@ -375,8 +375,9 @@ export default function VideoWheel({
       const x = Math.cos(angle) * radiusX;
       const y = Math.sin(angle) * radiusY;
       const depth = (Math.sin(angle) + 1) / 2;
-      const scale = 0.72 + depth * 0.28;
-      const opacity = 0.55 + depth * 0.45;
+      const eased = Math.pow(depth, 1.8);
+      const scale = 0.48 + eased * 0.52;
+      const opacity = 0.2 + eased * 0.8;
       const zIndex = Math.round(depth * 100);
       const isFocused = Math.abs(x) < 110 && depth > 0.82;
       const isPrepared = depth > 0.58 || isFocused;
@@ -619,7 +620,11 @@ export default function VideoWheel({
   const renderDesktopWheel = () => (
     <>
       <div className="video-wheel-frame" ref={wheelRef}>
-        <div className="video-wheel video-wheel-container">
+        <div
+          className={`video-wheel video-wheel-container ${
+            isCarouselMoving ? "is-moving" : ""
+          }`}
+        >
           {items.map(({ project, style, isFocused, isPrepared }) => (
             <button
               key={project.id}

@@ -297,7 +297,6 @@
   position: absolute !important;
   left: 50% !important;
   top: 50% !important;
-  transform: translate(-50%, -50%) !important;
   z-index: 300 !important;
   width: auto !important;
   height: auto !important;
@@ -313,6 +312,15 @@
   opacity: 0.68 !important;
   transition: opacity 220ms ease, transform 220ms ease !important;
   white-space: nowrap !important;
+}
+
+.random-play-button,
+.shuffle-button {
+  transform: translate(-50%, calc(-50% - 12.5rem)) !important;
+}
+
+.mobile-random-button {
+  transform: translate(-50%, calc(-50% - 6rem)) !important;
 }
 
 .mobile-random-button svg,
@@ -332,9 +340,14 @@
 }
 
 .random-play-button:hover,
+.shuffle-button:hover {
+  opacity: 0.9;
+  transform: translate(-50%, calc(-50% - 12.5rem)) scale(1.02) !important;
+}
+
 .mobile-random-button:hover {
   opacity: 0.9;
-  transform: translate(-50%, -50%) scale(1.02) !important;
+  transform: translate(-50%, calc(-50% - 6rem)) scale(1.02) !important;
 }
 
 .video-wheel-item {
@@ -342,7 +355,7 @@
   left: 50%;
   top: 50%;
   width: clamp(16rem, 18vw, 19.5rem);
-  margin: -8rem 0 0 0;
+  margin: calc(-0.375 * clamp(16rem, 18vw, 19.5rem)) 0 0 0;
   display: grid;
   gap: 0.8rem;
   cursor: pointer;
@@ -358,27 +371,34 @@
   opacity: 0 !important;
 }
 
+.video-wheel-container.is-moving .video-wheel-item {
+  transition: opacity 260ms ease;
+}
+
 .video-wheel-media {
   position: relative;
-  overflow: visible;
-  background: transparent;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #0c0c0c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 40px rgba(17, 17, 17, 0.22);
 }
 
 .video-wheel-media::after {
   content: none;
 }
 
-.video-wheel-item.is-focused .video-wheel-media::after {
-  opacity: 1;
+.video-wheel-item.is-focused .video-wheel-media {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 22px 48px rgba(17, 17, 17, 0.32);
 }
 
 .video-wheel-video {
   width: 100%;
-  height: auto;
-  max-height: 17.5rem;
-  aspect-ratio: auto;
-  object-fit: contain;
-  background: transparent;
+  height: 100%;
+  object-fit: cover;
+  background: #0c0c0c;
 }
 
 .video-wheel-fallback {
