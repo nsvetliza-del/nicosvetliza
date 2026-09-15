@@ -529,23 +529,38 @@
     display: block !important;
   }
 
-  .mobile-active-title {
+  .carousel-highlighted-title {
     position: fixed !important;
-    top: calc(48dvh + 165px) !important;
+    top: auto !important;
+    bottom: calc(88px + env(safe-area-inset-bottom)) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 90vw !important;
+    width: 80vw !important;
     padding: 0 !important;
     text-align: center !important;
     font-size: 15px !important;
     line-height: 1.2 !important;
     color: rgba(0, 0, 0, 0.75) !important;
     opacity: 1 !important;
-    z-index: 120 !important;
+    z-index: 150 !important;
     pointer-events: none !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+  }
+
+  .carousel-highlighted-title.is-encoding,
+  .carousel-highlighted-title[data-encoding="true"] {
+    animation: carouselTitlePulse 650ms linear;
+  }
+
+  @keyframes carouselTitlePulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
   }
 
   .mobile-random-button {

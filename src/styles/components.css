@@ -360,6 +360,18 @@
   opacity: 0 !important;
 }
 
+.carousel-highlighted-title {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--text);
+  opacity: 0.72;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .video-wheel-container.is-moving .video-wheel-item {
   transition: opacity 260ms ease;
 }

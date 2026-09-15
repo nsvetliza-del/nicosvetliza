@@ -32,6 +32,7 @@ export default function VideoWheel({
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const ambientHoverTimerRef = useRef(0);
+  const mobileAmbientTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
   const dizzyTimerRef = useRef(0);
   const fastTimerRef = useRef(null);
@@ -61,6 +62,7 @@ export default function VideoWheel({
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMobileInteracting, setIsMobileInteracting] = useState(false);
   const [highlightedProject, setHighlightedProject] = useState(null);
   const [encodedTitle, setEncodedTitle] = useState("");
   const [isEncodingTitle, setIsEncodingTitle] = useState(false);
@@ -434,9 +436,27 @@ export default function VideoWheel({
     return () => window.clearTimeout(ambientHoverTimerRef.current);
   }, [hoveredProjectId, isCarouselMoving, isMobile, onAmbientPreview, projects]);
 
+  useEffect(() => {
+    window.clearTimeout(mobileAmbientTimerRef.current);
+
+    if (!isMobile) return undefined;
+
+    if (!highlightedProject || isMobileInteracting) {
+      onAmbientPreview?.(null);
+      return undefined;
+    }
+
+    mobileAmbientTimerRef.current = window.setTimeout(() => {
+      onAmbientPreview?.(highlightedProject);
+    }, 2000);
+
+    return () => window.clearTimeout(mobileAmbientTimerRef.current);
+  }, [highlightedProject, isMobile, isMobileInteracting, onAmbientPreview]);
+
   useEffect(
     () => () => {
       window.clearTimeout(ambientHoverTimerRef.current);
+      window.clearTimeout(mobileAmbientTimerRef.current);
       onAmbientPreview?.(null);
     },
     [onAmbientPreview]
@@ -497,6 +517,7 @@ export default function VideoWheel({
     event.preventDefault();
     window.clearTimeout(mobileSnapTimerRef.current);
     isMobileDraggingRef.current = true;
+    setIsMobileInteracting(true);
     mobileTouchLastXRef.current = event.clientX;
     mobileTouchMovedRef.current = false;
     mobileVelocityRef.current = 0;
@@ -536,6 +557,7 @@ export default function VideoWheel({
     window.clearTimeout(mobileSnapTimerRef.current);
     mobileSnapTimerRef.current = window.setTimeout(() => {
       rotateProjectToFront(getMobileFrontIndex(), 0);
+      setIsMobileInteracting(false);
     }, 260);
 
     window.setTimeout(() => {
@@ -549,6 +571,7 @@ export default function VideoWheel({
     isMobileDraggingRef.current = false;
     event.currentTarget.classList.remove("is-dragging");
     rotateProjectToFront(getMobileFrontIndex(), 0);
+    setIsMobileInteracting(false);
   };
 
   const handleMobileRandom = () => {
