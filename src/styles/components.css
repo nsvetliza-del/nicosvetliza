@@ -339,6 +339,12 @@
   transform: translate(-50%, -50%) scale(1.03) !important;
 }
 
+@media (max-width: 767px) {
+  .mobile-random-button {
+    display: none !important;
+  }
+}
+
 .video-wheel-item {
   position: absolute;
   left: 50%;

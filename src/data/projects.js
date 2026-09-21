@@ -257,6 +257,14 @@ export const projects = [
     previewVideo: blobManifest.preview["valencia_puma_home.mp4"],
     fullVideo: blobManifest.full["valencia_puma_home.mp4"],
   },
+  {
+    id: "pronovias",
+    title: "Pronovias",
+    category: "Ads / Commercial / Fashion Film",
+    type: "commercial",
+    previewVideo: "/videos/preview/pronovias.mp4",
+    fullVideo: "/videos/full/pronovias.mp4",
+  },
 ];
 
 export const categories = [
