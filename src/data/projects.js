@@ -254,8 +254,8 @@ export const projects = [
     title: "Pronovias",
     category: "Ads / Commercial / Fashion Film",
     type: "commercial",
-    previewVideo: "/videos/preview/pronovias.mp4",
-    fullVideo: "/videos/full/pronovias.mp4",
+    previewVideo: blobManifest.preview["pronovias.mp4"],
+    fullVideo: blobManifest.full["pronovias.mp4"],
   },
 ];
 

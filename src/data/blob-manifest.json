@@ -30,7 +30,8 @@
     "girona_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/girona_puma_home.mp4",
     "la_roche.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/la_roche.mp4",
     "rabieta.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/rabieta.mp4",
-    "valencia_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/valencia_puma_home.mp4"
+    "valencia_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/valencia_puma_home.mp4",
+    "pronovias.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/preview/pronovias.mp4"
   },
   "full": {
     ".DS_Store": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/.DS_Store",
@@ -64,6 +65,7 @@
     "girona_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/girona_puma_home.mp4",
     "la_roche.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/la_roche.mp4",
     "rabieta.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/rabieta.mp4",
-    "valencia_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/valencia_puma_home.mp4"
+    "valencia_puma_home.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/valencia_puma_home.mp4",
+    "pronovias.mp4": "https://lieds18m1pqqphxg.public.blob.vercel-storage.com/full/pronovias.mp4"
   }
 }
