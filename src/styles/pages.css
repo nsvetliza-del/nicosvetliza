@@ -563,26 +563,6 @@
     }
   }
 
-  .mobile-random-button {
-    position: fixed !important;
-    left: 50% !important;
-    top: 48dvh !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 1200 !important;
-    width: 28px !important;
-    height: 28px !important;
-    display: grid !important;
-    place-items: center !important;
-    border: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-    color: rgba(17, 17, 17, 0.72) !important;
-    opacity: 0.45 !important;
-    cursor: pointer !important;
-    font-size: 18px !important;
-    line-height: 1 !important;
-  }
-
   .minimal-menu {
     position: fixed !important;
     top: 22px !important;

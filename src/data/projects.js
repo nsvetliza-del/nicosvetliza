@@ -130,14 +130,6 @@ export const projects = [
     fullVideo: blobManifest.full["Vichy_zuzu.mp4"],
   },
   {
-    id: "el-director",
-    title: "El Director",
-    category: "Short Film / Documentary",
-    type: "short-film",
-    previewVideo: blobManifest.preview["El_Director.mp4"],
-    fullVideo: blobManifest.full["El_Director_smaller.mp4"],
-  },
-  {
     id: "ford-ranger",
     title: "Ford Ranger",
     category: "Ads / Commercial / Fashion Film",

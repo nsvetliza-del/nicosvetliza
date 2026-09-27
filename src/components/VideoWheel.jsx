@@ -574,12 +574,6 @@ export default function VideoWheel({
     setIsMobileInteracting(false);
   };
 
-  const handleMobileRandom = () => {
-    if (!projects.length) return;
-    const randomIndex = Math.floor(Math.random() * projects.length);
-    rotateProjectToFront(randomIndex, 0);
-  };
-
   const highlightedTitleText = isEncodingTitle
     ? encodedTitle
     : highlightedProject?.title ?? "";
@@ -649,16 +643,6 @@ export default function VideoWheel({
               );
             })()
           ))}
-
-          <button
-            type="button"
-            className={`mobile-random-button ${isDraggingFast ? "is-hidden-fast" : ""}`}
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={handleMobileRandom}
-            aria-label="Random project"
-          >
-            {isDizzy ? "I feel dizzy." : "click to open randomly"}
-          </button>
         </div>
 
         {renderHighlightedTitle()}

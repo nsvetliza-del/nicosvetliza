@@ -291,7 +291,6 @@
   pointer-events: none;
 }
 
-.mobile-random-button,
 .random-play-button,
 .shuffle-button {
   position: absolute !important;
@@ -316,7 +315,6 @@
   white-space: nowrap !important;
 }
 
-.mobile-random-button svg,
 .random-play-button svg,
 .shuffle-button svg,
 .video-wheel-random-icon {
@@ -333,16 +331,9 @@
 }
 
 .random-play-button:hover,
-.shuffle-button:hover,
-.mobile-random-button:hover {
+.shuffle-button:hover {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1.03) !important;
-}
-
-@media (max-width: 767px) {
-  .mobile-random-button {
-    display: none !important;
-  }
 }
 
 .video-wheel-item {
