@@ -431,20 +431,26 @@
     padding: 0 16vw !important;
   }
 
-  .mobile-video-item {
-    flex: 0 0 72vw !important;
-    width: 72vw !important;
-    scroll-snap-align: center !important;
-  }
-
   .mobile-video-card {
+    flex: 0 0 72vw !important;
     width: 72vw !important;
     height: 42vw !important;
     max-height: 220px !important;
     min-height: 150px !important;
+    scroll-snap-align: center !important;
     overflow: hidden !important;
     background: #f2f2f2 !important;
     display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    cursor: pointer !important;
+    opacity: 0.55 !important;
+    transition: opacity 300ms ease !important;
+  }
+
+  .mobile-video-card.is-active {
+    opacity: 1 !important;
   }
 
   .mobile-video-card video {
@@ -452,14 +458,6 @@
     height: 100% !important;
     object-fit: cover !important;
     display: block !important;
-  }
-
-  .mobile-video-title {
-    margin-top: 10px !important;
-    text-align: center !important;
-    font-size: 14px !important;
-    line-height: 1.2 !important;
-    opacity: 0.7 !important;
   }
 
   .minimal-menu {
@@ -480,55 +478,6 @@
 }
 
 @media (max-width: 768px) {
-  .mobile-carousel-container {
-    position: fixed !important;
-    top: 48dvh !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 100vw !important;
-    height: 360px !important;
-    overflow: visible !important;
-    z-index: 20 !important;
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    touch-action: none !important;
-    will-change: transform !important;
-  }
-
-  .mobile-carousel-container .mobile-video-card {
-    position: absolute !important;
-    left: 50% !important;
-    top: 50% !important;
-    width: clamp(72px, 25vw, 125px) !important;
-    height: clamp(46px, 16vw, 82px) !important;
-    max-height: none !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    overflow: hidden !important;
-    background: #eee !important;
-    display: block !important;
-    transition:
-      transform 650ms cubic-bezier(0.19, 1, 0.22, 1),
-      opacity 500ms ease !important;
-    will-change: transform, opacity !important;
-    backface-visibility: hidden !important;
-  }
-
-  .mobile-carousel-container.is-dragging .mobile-video-card {
-    transition: none !important;
-  }
-
-  .mobile-carousel-container .mobile-video-card video {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
-  }
-
   .carousel-highlighted-title {
     position: fixed !important;
     top: auto !important;
