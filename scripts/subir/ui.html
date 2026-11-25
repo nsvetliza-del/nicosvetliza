@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subir video · Nico Svetliza</title>
+<style>
+  :root { --bg:#f9f9f7; --ink:#1c1c1c; --mute:#7a7a78; --line:#dcdcd8; --blue:#3b5bf6; --ok:#2f8f5b; --bad:#c0392b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 "Manrope",-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif; }
+  main { max-width:620px; margin:0 auto; padding:56px 24px 96px; }
+  h1 { font-size:20px; font-weight:500; margin:0 0 2px; }
+  .sub { color:var(--mute); margin:0 0 28px; letter-spacing:.02em; }
+  .estado { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:26px; font-size:13px; color:var(--mute); }
+  .estado span::before { content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--line); margin-right:7px; }
+  .estado span.ok::before { background:var(--ok); } .estado span.mal::before { background:var(--bad); }
+  #drop { border:1px solid var(--line); border-radius:14px; padding:44px 20px; text-align:center; color:var(--mute); cursor:pointer; transition:.2s; background:#fff; }
+  #drop.over, #drop:hover { border-color:var(--blue); color:var(--blue); }
+  #drop.listo { color:var(--ink); border-style:solid; }
+  #drop small { display:block; margin-top:4px; opacity:.8; }
+  label { display:block; margin:20px 0 6px; font-size:13px; color:var(--mute); }
+  input[type=text], input[type=number], select { width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:10px; background:#fff; font:inherit; color:var(--ink); }
+  input:focus, select:focus { outline:none; border-color:var(--blue); }
+  .fila { display:flex; gap:12px; } .fila > div { flex:1; }
+  .check { display:flex; gap:9px; align-items:center; margin-top:20px; font-size:14px; color:var(--ink); }
+  .check input { accent-color:var(--blue); width:16px; height:16px; }
+  button { font:inherit; cursor:pointer; border-radius:999px; border:1px solid var(--blue); background:var(--blue); color:#fff; padding:12px 26px; margin-top:26px; transition:.2s; }
+  button:hover { opacity:.88; } button:disabled { opacity:.35; cursor:default; }
+  button.sec { background:transparent; color:var(--blue); margin-top:14px; }
+  #progreso { margin-top:30px; display:none; }
+  .paso { margin:0 0 14px; } .paso b { font-weight:500; }
+  .barra { height:3px; background:var(--line); border-radius:3px; overflow:hidden; margin-top:7px; }
+  .barra i { display:block; height:100%; width:0; background:var(--blue); transition:width .25s; }
+  .paso.hecho .barra i { width:100%; background:var(--ok); }
+  .aviso { color:#9a6b00; font-size:13px; margin:6px 0; } .error { color:var(--bad); margin:14px 0; }
+  .fin { margin-top:22px; padding:16px 18px; border:1px solid var(--ok); border-radius:12px; color:var(--ink); background:#fff; }
+  details { margin-top:44px; border-top:1px solid var(--line); padding-top:18px; color:var(--mute); }
+  summary { cursor:pointer; } details p { margin:12px 0 0; font-size:14px; }
+  .item { margin-top:18px; padding:16px 18px 18px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+  .item .nombre { font-size:14px; } .item .nombre span { color:var(--mute); } .item .nombre a { float:right; color:var(--mute); font-size:13px; text-decoration:none; }
+  .item label { margin-top:12px; } .fila .corto { flex:0 0 120px; }
+  .item .fila > div:nth-child(2) { flex:1.6; }
+  .bloque { margin-top:26px; } .bt { font-weight:500; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Subir video</h1>
+  <p class="sub">where sound meets meaning.</p>
+
+  <div class="estado" id="estado"></div>
+
+  <div id="drop">Arrastrá acá uno o varios videos originales<small>o hacé clic para elegirlos</small></div>
+  <input type="file" id="archivo" accept="video/*,.mov,.mp4,.m4v,.mkv" multiple hidden>
+
+  <div id="cola"></div>
+
+  <label class="check"><input type="checkbox" id="publicar" checked> Publicar en la web al terminar (un solo commit + push)</label>
+
+  <button id="go" disabled>Publicar</button>
+
+  <div id="progreso"></div>
+
+  <details>
+    <summary>Migrar los videos que ya tenés en Vercel Blob a R2</summary>
+    <p>Sube a R2 los videos que ya tenés en tu Mac (carpeta public/videos) y cambia los links de la web. Se hace una sola vez. Hace una copia de seguridad del listado antes. Los archivos de Vercel Blob no se borran solos: los borrás vos desde Vercel cuando verifiques que todo anda.</p>
+    <button class="sec" id="migrar">Migrar ahora</button>
+    <div id="progreso2"></div>
+  </details>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let cola = [], ocupado = false, categorias = [];
+
+fetch("/api/estado").then(r => r.json()).then(e => {
+  categorias = e.categorias;
+  $("#estado").innerHTML = [
+    [e.ffmpeg, "ffmpeg", "Falta ffmpeg"], [e.r2, "R2", "Faltan datos de R2: " + (e.r2Faltan||[]).join(", ")],
+    [e.git, "git", "No es un repo git"],
+  ].map(([ok, n, mal]) => `<span class="${ok ? "ok" : "mal"}">${ok ? n : mal}</span>`).join("") + `<span class="ok">${e.proyectos} piezas</span>`;
+  render();
+});
+
+const drop = $("#drop"), input = $("#archivo");
+drop.onclick = () => input.click();
+input.onchange = () => { agregar([...input.files]); input.value = ""; };
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => agregar([...e.dataTransfer.files]));
+
+function agregar(files) {
+  for (const f of files) {
+    if (!f.type.startsWith("video/") && !/\.(mov|mp4|m4v|mkv)$/i.test(f.name)) continue;
+    cola.push({ file: f, titulo: f.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "), categoria: categorias[0], inicio: 0 });
+  }
+  render();
+}
+
+function render() {
+  $("#cola").innerHTML = cola.map((it, i) => `
+    <div class="item">
+      <div class="nombre">${it.file.name} <span>· ${(it.file.size/1e6).toFixed(0)} MB</span>
+        <a href="#" data-quitar="${i}" title="Sacar de la lista">quitar</a></div>
+      <div class="fila">
+        <div><label>Título</label><input type="text" data-i="${i}" data-k="titulo" value="${it.titulo.replace(/"/g, "&quot;")}" autocomplete="off"></div>
+        <div><label>Categoría</label><select data-i="${i}" data-k="categoria">${categorias.map(c => `<option${c === it.categoria ? " selected" : ""}>${c}</option>`).join("")}</select></div>
+        <div class="corto"><label>Preview desde (s)</label><input type="number" min="0" step="1" data-i="${i}" data-k="inicio" value="${it.inicio}"></div>
+      </div>
+    </div>`).join("");
+  $("#go").textContent = cola.length > 1 ? `Publicar ${cola.length} videos` : "Publicar";
+  revisar();
+}
+$("#cola").addEventListener("input", e => {
+  const { i, k } = e.target.dataset; if (i === undefined) return;
+  cola[i][k] = k === "inicio" ? Number(e.target.value) || 0 : e.target.value; revisar();
+});
+$("#cola").addEventListener("click", e => {
+  const q = e.target.dataset.quitar; if (q === undefined) return;
+  e.preventDefault(); if (!ocupado) { cola.splice(Number(q), 1); render(); }
+});
+function revisar() { $("#go").disabled = ocupado || !cola.length || cola.some(it => !it.titulo.trim()); }
+
+function subirArchivo(f, onPct) {
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open("POST", "/api/subir?nombre=" + encodeURIComponent(f.name));
+    x.setRequestHeader("x-subir", "1");
+    x.upload.onprogress = e => e.lengthComputable && onPct(e.loaded / e.total);
+    x.onload = () => x.status === 200 ? resolve(JSON.parse(x.responseText).id) : reject(new Error("No pude recibir el video"));
+    x.onerror = () => reject(new Error("Se cortó la conexión con la herramienta"));
+    x.send(f);
+  });
+}
+
+async function stream(url, body, onEv) {
+  const r = await fetch(url, { method: "POST", headers: { "x-subir": "1", "content-type": "application/json" }, body: JSON.stringify(body) });
+  const reader = r.body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n")) >= 0) { const l = buf.slice(0, i); buf = buf.slice(i + 1); if (l.trim()) onEv(JSON.parse(l)); }
+  }
+}
+
+function panel(el, titulo) {
+  const box = document.createElement("div"); box.className = "bloque";
+  if (titulo) { const t = document.createElement("div"); t.className = "bt"; t.textContent = titulo; box.appendChild(t); }
+  el.appendChild(box);
+  const pasos = {};
+  return {
+    paso(id, texto, pct) {
+      let p = pasos[id];
+      if (!p) { p = pasos[id] = document.createElement("div"); p.className = "paso"; p.innerHTML = `<b></b><div class="barra"><i></i></div>`; box.appendChild(p); }
+      if (texto) p.querySelector("b").textContent = texto;
+      if (typeof pct === "number") { p.querySelector("i").style.width = Math.round(pct * 100) + "%"; if (pct >= 1) p.classList.add("hecho"); }
+    },
+    aviso(t) { const d = document.createElement("div"); d.className = "aviso"; d.textContent = t; box.appendChild(d); },
+    error(t) { const d = document.createElement("div"); d.className = "error"; d.textContent = t; box.appendChild(d); },
+    fin(t) { const d = document.createElement("div"); d.className = "fin"; d.innerHTML = t; box.appendChild(d); },
+  };
+}
+
+$("#go").onclick = async () => {
+  ocupado = true; revisar();
+  const raiz = $("#progreso"); raiz.style.display = "block"; raiz.innerHTML = "";
+  const lote = cola.slice(); const hechos = [], fallidos = [];
+  for (let n = 0; n < lote.length; n++) {
+    const it = lote[n];
+    const ui = panel(raiz, lote.length > 1 ? `(${n + 1}/${lote.length}) ${it.titulo.trim()}` : "");
+    let ok = false;
+    try {
+      ui.paso("subir", "Recibiendo el video…", 0);
+      const id = await subirArchivo(it.file, p => ui.paso("subir", null, p));
+      ui.paso("subir", null, 1);
+      await stream("/api/procesar", { id, titulo: it.titulo.trim(), categoria: it.categoria, inicioPreview: it.inicio, publicarAhora: false }, ev => {
+        if (ev.error) ui.error(ev.error);
+        else if (ev.aviso) ui.aviso(ev.aviso);
+        else if (ev.listo) { ok = true; ui.fin(`Listo: <b>${ev.titulo}</b> ya está en R2 y en tu lista de proyectos.`); }
+        else if (ev.paso) ui.paso(ev.paso, ev.texto, ev.pct);
+      });
+    } catch (e) { ui.error(e.message); }
+    (ok ? hechos : fallidos).push(it.titulo.trim());
+  }
+  const ui = panel(raiz, "");
+  if (hechos.length && $("#publicar").checked) {
+    const msg = hechos.length === 1 ? `Agrega ${hechos[0]}` : `Agrega ${hechos.length} videos al portfolio`;
+    await stream("/api/publicar", { mensaje: msg }, ev => {
+      if (ev.aviso) ui.aviso(ev.aviso);
+      else if (ev.error) ui.error(ev.error);
+      else if (ev.paso) ui.paso(ev.paso, ev.texto, ev.ok ? 1 : undefined);
+      else if (ev.listo) ui.fin(ev.publicado ? "Publicado en la web. Vercel tarda un par de minutos en desplegar." : "No se pudo publicar: revisá el aviso de arriba.");
+    });
+  } else if (hechos.length) {
+    ui.fin("Listo. Quedó todo en R2 y en projects.js, pero sin publicar: falta hacer git push.");
+  }
+  if (fallidos.length) ui.error("No se pudieron procesar: " + fallidos.join(", "));
+  cola = cola.filter(it => !hechos.includes(it.titulo.trim()));
+  ocupado = false; render();
+};
+
+$("#migrar").onclick = async () => {
+  if (!confirm("Esto sube todos tus videos de public/videos a R2 y cambia los links de la web. ¿Seguimos?")) return;
+  $("#migrar").disabled = true;
+  const el = $("#progreso2"); el.style.display = "block"; el.innerHTML = "";
+  const ui = panel(el, "");
+  try {
+    await stream("/api/migrar", { publicarAhora: $("#publicar").checked }, ev => {
+      if (ev.error) ui.error(ev.error);
+      else if (ev.aviso) ui.aviso(ev.aviso);
+      else if (ev.listo) ui.fin(ev.texto || `Migrados ${ev.migrados} archivos (${ev.mb} MB).` + (ev.saltados ? ` ${ev.saltados} no estaban en tu Mac y quedan en Vercel Blob.` : "") + (ev.publicado ? " Publicado en la web." : ""));
+      else if (ev.paso) ui.paso("m" + (ev.n || 0), ev.texto ? `(${ev.n}/${ev.de}) ${ev.texto}` : null, ev.pct);
+    });
+  } catch (e) { ui.error(e.message); }
+  $("#migrar").disabled = false;
+};
+</script>
+</body>
+</html>

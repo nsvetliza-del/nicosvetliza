@@ -9,3 +9,6 @@ public/videos/
 .env.local
 public/videos/
 .env.local
+
+.env.r2.local
+R2-CLAVES.txt
