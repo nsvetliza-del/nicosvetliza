@@ -337,6 +337,30 @@ export const projects = [
     previewVideo: blobManifest.preview["violeta_hodar_dime_que_no.mp4"],
     fullVideo: blobManifest.full["violeta_hodar_dime_que_no.mp4"],
   },
+  {
+    id: "k42-salomon",
+    title: "K42 - SALOMON",
+    category: "Ads / Commercial / Fashion Film",
+    type: "commercial",
+    previewVideo: blobManifest.preview["k42_salomon.mp4"],
+    fullVideo: blobManifest.full["k42_salomon.mp4"],
+  },
+  {
+    id: "river-plate-prota",
+    title: "RIVER PLATE - PROTA",
+    category: "Ads / Commercial / Fashion Film",
+    type: "commercial",
+    previewVideo: blobManifest.preview["river_plate_prota.mp4"],
+    fullVideo: blobManifest.full["river_plate_prota.mp4"],
+  },
+  {
+    id: "river-plate-prota-dc",
+    title: "RIVER PLATE PROTA - DC",
+    category: "Ads / Commercial / Fashion Film",
+    type: "commercial",
+    previewVideo: blobManifest.preview["river_plate_prota_dc.mp4"],
+    fullVideo: blobManifest.full["river_plate_prota_dc.mp4"],
+  },
 ];
 
 export const categories = [
