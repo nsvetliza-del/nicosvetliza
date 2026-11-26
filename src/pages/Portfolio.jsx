@@ -4,6 +4,7 @@ import EpicIntro from "../components/EpicIntro";
 import ImmersivePlayer from "../components/ImmersivePlayer";
 import AudioKeys from "../components/AudioKeys";
 import MinimalMenu from "../components/MinimalMenu";
+import TitlesIndex from "../components/TitlesIndex";
 import VideoTransitionLayer from "../components/VideoTransitionLayer";
 import VideoWheel from "../components/VideoWheel";
 import { projects } from "../data/projects";
@@ -20,6 +21,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [ambientProject, setAmbientProject] = useState(null);
   const [isAmbientBoosted, setIsAmbientBoosted] = useState(false);
+  const [isIndexOpen, setIsIndexOpen] = useState(false);
   const ambientVideoRef = useRef(null);
   const ambientBoostTimerRef = useRef(0);
 
@@ -199,6 +201,8 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
 
   useEffect(() => () => window.clearTimeout(ambientBoostTimerRef.current), []);
 
+  const closeIndex = useCallback(() => setIsIndexOpen(false), []);
+
   return (
     <>
       <div
@@ -251,6 +255,24 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
           </div>
         </section>
       </main>
+
+      {!showIntroOverlay && !activeProject ? (
+        <button
+          type="button"
+          className="titles-index-toggle"
+          onClick={() => setIsIndexOpen(true)}
+          aria-haspopup="dialog"
+        >
+          index
+        </button>
+      ) : null}
+
+      <TitlesIndex
+        isOpen={isIndexOpen}
+        projects={displayedProjects}
+        onClose={closeIndex}
+        onProjectSelect={openProject}
+      />
 
       {transitionState ? (
         <VideoTransitionLayer

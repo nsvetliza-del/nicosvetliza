@@ -1008,3 +1008,122 @@
     inset: -0.42rem;
   }
 }
+
+/* Titles index (full screen) */
+.titles-index-toggle {
+  position: fixed;
+  right: 24px;
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  z-index: 90;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  opacity: 0.68;
+  cursor: pointer;
+  transition: opacity 220ms ease, color 220ms ease;
+}
+
+.titles-index-toggle:hover,
+.titles-index-toggle:focus-visible {
+  opacity: 1;
+  color: var(--accent);
+  outline: none;
+}
+
+.titles-index {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--text);
+  padding: 96px 24px 72px;
+  animation: titlesIndexIn 420ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes titlesIndexIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.titles-index-close {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  opacity: 0.68;
+  cursor: pointer;
+}
+
+.titles-index-close:hover {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.titles-index-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  width: min(100%, 46rem);
+}
+
+.titles-index-item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.55rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+
+.titles-index-item:hover,
+.titles-index-item:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.titles-index-number {
+  font-size: 10px;
+  opacity: 0.45;
+}
+
+@media (max-width: 768px) {
+  .titles-index-toggle {
+    right: 20px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    z-index: 190;
+  }
+
+  .titles-index {
+    padding: 88px 22px 64px;
+  }
+
+  .titles-index-close {
+    top: 22px;
+    right: 20px;
+  }
+}
