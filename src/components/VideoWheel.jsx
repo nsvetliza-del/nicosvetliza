@@ -365,7 +365,7 @@ export default function VideoWheel({
         const frameRect = frame.getBoundingClientRect();
         const centerY = frameRect.top + frameRect.height / 2;
         const nav = document.querySelector(".minimal-menu")?.getBoundingClientRect();
-        const below = [".video-wheel-section .carousel-highlighted-title", ".background-toggle", ".titles-index-toggle"]
+        const below = [".video-wheel-section .carousel-highlighted-title", ".background-toggle"]
           .map((selector) => document.querySelector(selector)?.getBoundingClientRect())
           .filter((rect) => rect?.height)
           .map((rect) => rect.top);

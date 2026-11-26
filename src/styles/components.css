@@ -1128,10 +1128,12 @@
 }
 
 @media (max-width: 768px) {
-  /* Larger tap target (≥ 44px), above the title and piano, clear of the bottom edge/toolbar. */
+  /* Larger tap target (≥ 44px), top right just below the tagline; the 12px inner
+     padding puts the label's right edge on the tagline's (right: 20px). */
   .titles-index-toggle {
     right: 8px;
-    bottom: calc(150px + env(safe-area-inset-bottom));
+    top: 52px;
+    bottom: auto;
     z-index: 190;
     min-width: 64px;
     min-height: 44px;
