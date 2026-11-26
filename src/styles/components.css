@@ -1203,6 +1203,28 @@
     aspect-ratio: 16 / 9 !important;
   }
 
+  /* One-octave piano: drawn ~1:1 (keys ≥ 44 px apart, 44×40–50 px hit areas)
+     instead of the two-octave sketch scaled to 0.34. */
+  .audio-keys-wrap.is-single-octave {
+    width: auto !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .audio-keys-wrap.is-single-octave .audio-keys-sketch {
+    width: 352px !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .audio-note-hit {
+    fill: transparent;
+    stroke: none;
+  }
+
+  /* Title sits just above the larger piano (piano: 12px + ~104px from the bottom). */
+  .video-wheel-section .carousel-highlighted-title {
+    bottom: calc(126px + env(safe-area-inset-bottom)) !important;
+  }
+
   /* Touch target = the item, not a video that may be swapped out mid-swipe. */
   .video-wheel-video,
   .video-wheel-video-full {

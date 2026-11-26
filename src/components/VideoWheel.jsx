@@ -703,7 +703,7 @@ export default function VideoWheel({
 
       {renderHighlightedTitle()}
 
-      {isMobile ? <AudioKeys onKeyPlay={onKeyPlay} /> : null}
+      {isMobile ? <AudioKeys onKeyPlay={onKeyPlay} octaves={1} /> : null}
     </>
   );
 
@@ -735,7 +735,7 @@ export default function VideoWheel({
 
         <div className="single-video-project-title">{project.title}</div>
 
-        {isMobile ? <AudioKeys onKeyPlay={onKeyPlay} /> : null}
+        {isMobile ? <AudioKeys onKeyPlay={onKeyPlay} octaves={1} /> : null}
       </>
     );
   };

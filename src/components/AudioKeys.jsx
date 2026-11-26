@@ -30,29 +30,35 @@ const accidentalNotes = [
   ["A#5", 932.33, 12],
 ];
 
-export default function AudioKeys({ onKeyPlay = null }) {
+// octaves={1} (mobile): C4–C5 only, 8 white + 5 black keys, with larger touch targets.
+export default function AudioKeys({ onKeyPlay = null, octaves = 2 }) {
+  const isSingleOctave = octaves === 1;
   const audioContextRef = useRef(null);
 
   const naturals = useMemo(
     () =>
-      naturalNotes.map(([id, note], index) => ({
-        id,
-        note,
-        cx: 42 + index * 44,
-        cy: 88 + (index % 2 === 0 ? 0 : 2),
-      })),
-    []
+      naturalNotes
+        .slice(0, isSingleOctave ? 8 : naturalNotes.length)
+        .map(([id, note], index) => ({
+          id,
+          note,
+          cx: 42 + index * 44,
+          cy: 88 + (index % 2 === 0 ? 0 : 2),
+        })),
+    [isSingleOctave]
   );
 
   const accidentals = useMemo(
     () =>
-      accidentalNotes.map(([id, note, whiteIndex]) => ({
-        id,
-        note,
-        cx: 64 + whiteIndex * 44,
-        cy: 36 + (whiteIndex % 2 === 0 ? -2 : 2),
-      })),
-    []
+      accidentalNotes
+        .filter(([, , whiteIndex]) => !isSingleOctave || whiteIndex < 7)
+        .map(([id, note, whiteIndex]) => ({
+          id,
+          note,
+          cx: 64 + whiteIndex * 44,
+          cy: 36 + (whiteIndex % 2 === 0 ? -2 : 2),
+        })),
+    [isSingleOctave]
   );
 
   useEffect(() => {
@@ -121,8 +127,16 @@ export default function AudioKeys({ onKeyPlay = null }) {
   };
 
   return (
-    <section className="audio-keys-wrap" aria-label="Notes keyboard">
-      <svg className="audio-keys-sketch" viewBox="0 0 660 132" role="group" aria-label="Two octave notes">
+    <section
+      className={`audio-keys-wrap ${isSingleOctave ? "is-single-octave" : ""}`}
+      aria-label="Notes keyboard"
+    >
+      <svg
+        className="audio-keys-sketch"
+        viewBox={isSingleOctave ? "20 12 352 104" : "0 0 660 132"}
+        role="group"
+        aria-label={isSingleOctave ? "One octave notes" : "Two octave notes"}
+      >
         <g className="audio-notes-natural">
           {naturals.map((key) => (
             <g
@@ -134,6 +148,9 @@ export default function AudioKeys({ onKeyPlay = null }) {
               onClick={() => playKey(key)}
               onKeyDown={(event) => handleKeyDown(event, key)}
             >
+              {isSingleOctave ? (
+                <rect className="audio-note-hit" x={key.cx - 22} y={key.cy - 26} width="44" height="50" />
+              ) : null}
               <circle cx={key.cx} cy={key.cy} r="14" />
               <circle className="audio-note-echo" cx={key.cx + 1.1} cy={key.cy + 1.2} r="14" />
             </g>
@@ -151,6 +168,9 @@ export default function AudioKeys({ onKeyPlay = null }) {
               onClick={() => playKey(key)}
               onKeyDown={(event) => handleKeyDown(event, key)}
             >
+              {isSingleOctave ? (
+                <rect className="audio-note-hit" x={key.cx - 22} y={key.cy - 20} width="44" height="40" />
+              ) : null}
               <circle cx={key.cx} cy={key.cy} r="10.5" />
             </g>
           ))}
