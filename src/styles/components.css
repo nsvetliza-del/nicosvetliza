@@ -1233,6 +1233,11 @@
     bottom: calc(126px + env(safe-area-inset-bottom)) !important;
   }
 
+  /* Blue "tune" dot (MinimalMenu's .minimal-menu-pulse): hidden on mobile only. */
+  .minimal-menu-pulse {
+    display: none !important;
+  }
+
   /* Touch target = the item, not a video that may be swapped out mid-swipe. */
   .video-wheel-video,
   .video-wheel-video-full {
