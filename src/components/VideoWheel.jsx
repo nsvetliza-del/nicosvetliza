@@ -299,7 +299,8 @@ export default function VideoWheel({
 
   useEffect(() => {
     if (isMobile || !projects.length) return;
-    snapToNearestProject();
+    // Every load (and every new list) starts on the first piece.
+    rotateProjectToFront(0);
     if (!hasInitialSnapRef.current) {
       // First layout: start already aligned instead of sliding into place.
       hasInitialSnapRef.current = true;
@@ -575,7 +576,11 @@ export default function VideoWheel({
       }, 160);
     };
 
-    updateHighlightedProject(projects[mobileActiveIndexRef.current], true);
+    // A new list starts on its first piece.
+    container.scrollLeft = 0;
+    mobileActiveIndexRef.current = 0;
+    setMobileActiveIndex(0);
+    updateHighlightedProject(projects[0], true);
     container.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {

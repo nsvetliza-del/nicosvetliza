@@ -10,6 +10,43 @@ import VideoTransitionLayer from "../components/VideoTransitionLayer";
 import VideoWheel from "../components/VideoWheel";
 import { projects } from "../data/projects";
 
+// Featured pieces, in this exact order. Matched to src/data/projects.js by title
+// (case-insensitive, ignoring punctuation and accents).
+export const FEATURED_TITLES = [
+  "LOUIS VUITTON - REAL MADRID - BENZENE",
+  "GIRONA HOME KIT - PUMA - DC",
+  "ADIDAS - TAEKWONDO",
+  "NTT DATA",
+  "JOANA MICHAELA",
+  "AY NOT DEAD FW24",
+  "MILLER HIGH LIFE",
+  "PRONOVIAS DC",
+  "LEVI'S - BUILT TO LAST",
+  "FAMILIAR STRANGENESS",
+];
+
+const normalizeTitle = (title = "") =>
+  title
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const featuredProjects = FEATURED_TITLES.map((title) => {
+  const match = projects.find((project) => normalizeTitle(project.title) === normalizeTitle(title));
+  if (!match && import.meta.env.DEV) console.warn(`Featured title not found: ${title}`);
+  return match;
+}).filter(Boolean);
+
+const featuredIds = new Set(featuredProjects.map((project) => project.id));
+
+// Main carousel: featured pieces first (in order), then everything else as before.
+const orderedProjects = [
+  ...featuredProjects,
+  ...projects.filter((project) => !featuredIds.has(project.id)),
+];
+
 export default function Portfolio({ showIntro = false, initialCategory = "All" }) {
   const { projectId } = useParams();
   const location = useLocation();
@@ -37,7 +74,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   }, [initialCategory, location.pathname]);
 
   const filteredProjects = useMemo(() => {
-    if (activeCategory === "All") return projects;
+    if (activeCategory === "All") return orderedProjects;
     if (activeCategory === "Commercial" || activeCategory === "Advertising") {
       return projects.filter(
         (project) => project.category === "Commercial" || project.type === "commercial"
@@ -61,7 +98,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
     return projects.filter((project) => project.category === activeCategory);
   }, [activeCategory]);
 
-  const currentPool = filteredProjects.length > 0 ? filteredProjects : projects;
+  const currentPool = filteredProjects.length > 0 ? filteredProjects : orderedProjects;
 
   useEffect(() => {
     if (displayedProjects.length === 0) {
