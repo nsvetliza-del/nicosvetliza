@@ -453,6 +453,15 @@
     opacity: 1 !important;
   }
 
+  .mobile-video-card {
+    position: relative !important;
+  }
+
+  .mobile-video-card .video-wheel-video-full {
+    position: absolute !important;
+    inset: 0 !important;
+  }
+
   .mobile-video-card video {
     width: 100% !important;
     height: 100% !important;

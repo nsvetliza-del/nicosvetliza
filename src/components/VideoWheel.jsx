@@ -9,6 +9,38 @@ import {
 } from "../utils/videoPreload";
 import { useTextEncoding } from "../utils/useTextEncoding";
 
+// Full-quality file for the active item only. Mounted lazily, fades in over
+// the preview once it plays, and drops its download when unmounted.
+function FullQualityVideo({ src }) {
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+    video.src = src;
+    void video.play().catch(() => {});
+    return () => {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [src]);
+
+  return (
+    <video
+      ref={videoRef}
+      className={`video-wheel-video-full ${isPlaying ? "is-playing" : ""}`}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      onPlaying={() => setIsPlaying(true)}
+    />
+  );
+}
+
 export default function VideoWheel({
   projects,
   onProjectSelect,
@@ -543,6 +575,12 @@ export default function VideoWheel({
                   ) : (
                     <div className="video-wheel-fallback" aria-hidden="true" />
                   )}
+                  {videoSrc &&
+                  project.fullVideo &&
+                  index === mobileActiveIndex &&
+                  !isMobileInteracting ? (
+                    <FullQualityVideo key={project.id} src={project.fullVideo} />
+                  ) : null}
                 </button>
               );
             })}
@@ -607,6 +645,9 @@ export default function VideoWheel({
                   playsInline
                   preload={isPrepared || hoveredProjectId === project.id ? "auto" : "metadata"}
                 />
+                {isFocused && !isCarouselMoving && project.fullVideo ? (
+                  <FullQualityVideo key={project.id} src={project.fullVideo} />
+                ) : null}
               </div>
             </button>
           ))}
