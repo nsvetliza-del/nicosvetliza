@@ -123,7 +123,7 @@ button {
   }
 }
 
-/* Piano → background tone (set on <html data-bg-tone>). Dark tones: all type white. */
+/* Piano → background tone (set on <html data-bg-tone>). On black, all type is white. */
 html,
 body {
   transition:
@@ -131,19 +131,11 @@ body {
     color 0.25s ease;
 }
 
-html[data-bg-tone="blue"] {
-  --bg: #1d5cff;
-  --bg-soft: #1d5cff;
-}
-
-html[data-bg-tone="ink"] {
-  --bg: #111111;
-  --bg-soft: #111111;
-}
-
-html[data-bg-tone="blue"],
-html[data-bg-tone="ink"] {
+/* Black keys: the site's black (--player-bg on main); white keys restore --bg (#f8f7f3). */
+html[data-bg-tone="dark"] {
   color-scheme: dark;
+  --bg: #050505;
+  --bg-soft: #050505;
   --text: #ffffff;
   --muted: rgba(255, 255, 255, 0.78);
   --line: rgba(255, 255, 255, 0.24);

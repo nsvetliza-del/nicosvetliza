@@ -23,7 +23,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   const [ambientProject, setAmbientProject] = useState(null);
   const [isAmbientBoosted, setIsAmbientBoosted] = useState(false);
   const [isIndexOpen, setIsIndexOpen] = useState(false);
-  const [backgroundTone, setBackgroundTone] = useState(null);
+  const [isDarkBackground, setIsDarkBackground] = useState(false);
   const ambientVideoRef = useRef(null);
   const ambientBoostTimerRef = useRef(0);
 
@@ -205,22 +205,20 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
 
   const closeIndex = useCallback(() => setIsIndexOpen(false), []);
 
-  // Piano → background: keys alternate blue / ink in pitch order;
-  // pressing the same key again returns to the default off-white.
-  const handlePianoKey = useCallback(({ id, index }) => {
-    setBackgroundTone((current) =>
-      current?.keyId === id ? null : { keyId: id, tone: index % 2 === 0 ? "blue" : "ink" }
-    );
+  // Piano → background: white keys restore the original off-white,
+  // black keys switch to the site's black.
+  const handlePianoKey = useCallback(({ isBlack }) => {
+    setIsDarkBackground(isBlack);
   }, []);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (backgroundTone) {
-      root.dataset.bgTone = backgroundTone.tone;
+    if (isDarkBackground) {
+      root.dataset.bgTone = "dark";
     } else {
       delete root.dataset.bgTone;
     }
-  }, [backgroundTone]);
+  }, [isDarkBackground]);
 
   useEffect(() => () => delete document.documentElement.dataset.bgTone, []);
 

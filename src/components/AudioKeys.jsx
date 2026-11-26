@@ -30,13 +30,6 @@ const accidentalNotes = [
   ["A#5", 932.33, 12],
 ];
 
-// Position of each note in pitch order (C4 = 0 … B5 = 23).
-const pitchIndex = Object.fromEntries(
-  [...naturalNotes, ...accidentalNotes]
-    .sort((a, b) => a[1] - b[1])
-    .map(([id], index) => [id, index])
-);
-
 export default function AudioKeys({ onKeyPlay = null }) {
   const audioContextRef = useRef(null);
 
@@ -118,7 +111,7 @@ export default function AudioKeys({ onKeyPlay = null }) {
   // Only ever called from a direct click/touch/keypress on a key.
   const playKey = (key) => {
     void playTone(key.note);
-    onKeyPlay?.({ id: key.id, index: pitchIndex[key.id] });
+    onKeyPlay?.({ id: key.id, isBlack: key.id.includes("#") });
   };
 
   const handleKeyDown = (event, key) => {
