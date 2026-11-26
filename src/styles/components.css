@@ -340,8 +340,9 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: clamp(18rem, 28vw, 35rem);
-  margin: calc(-0.28125 * clamp(18rem, 28vw, 35rem)) 0 0 0;
+  /* Peak (centred) size, computed in VideoWheel; side items scale down from it. */
+  width: var(--wheel-item-width, clamp(18rem, 28vw, 35rem));
+  margin: calc(-0.28125 * var(--wheel-item-width, clamp(18rem, 28vw, 35rem))) 0 0 0;
   display: grid;
   gap: 0.8rem;
   cursor: pointer;
@@ -485,7 +486,7 @@
 
 /* Curved line: the random button sits under the centred item instead of over it. */
 .video-wheel-frame .random-play-button {
-  top: calc(50% + 0.28125 * clamp(18rem, 28vw, 35rem) + 1.6rem) !important;
+  top: calc(50% + 0.28125 * var(--wheel-item-width, clamp(18rem, 28vw, 35rem)) + 1.6rem) !important;
   transform: translate(-50%, 0) !important;
 }
 

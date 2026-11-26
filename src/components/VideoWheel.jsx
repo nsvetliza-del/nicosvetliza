@@ -9,6 +9,15 @@ import {
 } from "../utils/videoPreload";
 import { useTextEncoding } from "../utils/useTextEncoding";
 
+// ── Carousel tuning ──────────────────────────────────────────────────────────
+// Size of the centred item relative to the previous base width (28vw, 288–560px).
+// It is still capped so it never reaches the piano, the hint, the title or the index button.
+const LINE_PEAK_SCALE = 1.42;
+// How steeply neighbours shrink away from the centre (higher = steeper).
+// With 0.72: centre 1.0 → ±1 ≈ 0.62 → ±2 ≈ 0.40 → ±3 ≈ 0.31.
+const LINE_FALLOFF = 0.72;
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Full-quality file for the active item only. Mounted lazily, fades in over
 // the preview once it plays, and drops its download when unmounted.
 function FullQualityVideo({ src }) {
@@ -41,28 +50,27 @@ function FullQualityVideo({ src }) {
   );
 }
 
-// Flat line: scale falls off smoothly with distance from the centre.
-const LINE_MIN_SCALE = 0.3;
-const LINE_FALLOFF = 0.7;
+// Flat line: scale falls off smoothly and continuously with distance from the centre.
+const LINE_MIN_SCALE = 0.26; // floor the outer items approach
+const LINE_FALLOFF_SHAPE = 1.2; // > 1 keeps the curve smooth (flat) right at the centre
 const LINE_GAP = 0.08; // constant gap between neighbours, as a fraction of the item width
+const LINE_BASE_WIDTH = (viewportWidth) => Math.min(Math.max(viewportWidth * 0.28, 288), 560);
 
 const lineScale = (distance) =>
-  LINE_MIN_SCALE + (1 - LINE_MIN_SCALE) * Math.exp(-LINE_FALLOFF * distance * distance);
+  LINE_MIN_SCALE +
+  (1 - LINE_MIN_SCALE) * Math.exp(-LINE_FALLOFF * Math.pow(distance, LINE_FALLOFF_SHAPE));
 
-// Error function (Abramowitz–Stegun 7.1.26), for the closed-form position below.
-const erf = (value) => {
-  const t = 1 / (1 + 0.3275911 * value);
-  const poly =
-    t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
-  return 1 - poly * Math.exp(-value * value);
+// Horizontal position = integral of the scale (Simpson's rule), so neighbours never overlap.
+const linePosition = (distance) => {
+  if (distance <= 0) return 0;
+  const steps = 16;
+  const h = distance / steps;
+  let sum = lineScale(0) + lineScale(distance);
+  for (let i = 1; i < steps; i += 1) {
+    sum += (i % 2 ? 4 : 2) * lineScale(i * h);
+  }
+  return (sum * h) / 3;
 };
-
-// Horizontal position = integral of the scale, so neighbours never overlap at any size.
-const linePosition = (distance) =>
-  LINE_MIN_SCALE * distance +
-  (1 - LINE_MIN_SCALE) *
-    (Math.sqrt(Math.PI) / (2 * Math.sqrt(LINE_FALLOFF))) *
-    erf(Math.sqrt(LINE_FALLOFF) * distance);
 
 export default function VideoWheel({
   projects,
@@ -74,6 +82,9 @@ export default function VideoWheel({
   onKeyPlay = null,
 }) {
   const wheelRef = useRef(null);
+  const [peakWidth, setPeakWidth] = useState(() =>
+    LINE_BASE_WIDTH(typeof window === "undefined" ? 1440 : window.innerWidth) * LINE_PEAK_SCALE
+  );
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const ambientHoverTimerRef = useRef(0);
@@ -346,12 +357,54 @@ export default function VideoWheel({
     return () => window.clearTimeout(shuffleTimerRef.current);
   }, [isMobile, sonicShuffleTick, projects]);
 
+  // Peak (centred) item size: LINE_PEAK_SCALE × base width, capped by the free space
+  // between the piano above and the hint/title/index button below.
+  useEffect(() => {
+    if (isMobile) return undefined;
+
+    const measure = () => {
+      const frame = wheelRef.current;
+      if (!frame) return;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const desired = LINE_BASE_WIDTH(viewportWidth) * LINE_PEAK_SCALE;
+
+      const frameRect = frame.getBoundingClientRect();
+      const centerY = frameRect.top + frameRect.height / 2;
+      const piano = document.querySelector(".audio-keys-wrap")?.getBoundingClientRect();
+      const title = document.querySelector(".video-wheel-section .carousel-highlighted-title")?.getBoundingClientRect();
+      const indexButton = document.querySelector(".titles-index-toggle")?.getBoundingClientRect();
+      const hint = frame.querySelector(".random-play-button")?.getBoundingClientRect();
+      const hintSpace = 1.6 * 16 + (hint?.height || 14); // gap under the item + hint line
+      const margin = 16;
+
+      const topLimit = piano ? piano.bottom : 0;
+      const bottomLimit = Math.min(
+        title?.height ? title.top : viewportHeight - 48,
+        indexButton?.height ? indexButton.top : viewportHeight
+      );
+      const halfAbove = centerY - topLimit - margin;
+      const halfBelow = bottomLimit - centerY - hintSpace - margin;
+      const maxHeight = Math.max(120, 2 * Math.min(halfAbove, halfBelow));
+      const width = Math.min(desired, (maxHeight * 16) / 9, viewportWidth * 0.9);
+
+      setPeakWidth((current) => (Math.abs(current - width) < 1 ? current : width));
+    };
+
+    measure();
+    const settleTimer = window.setTimeout(measure, 400);
+    window.addEventListener("resize", measure);
+    return () => {
+      window.clearTimeout(settleTimer);
+      window.removeEventListener("resize", measure);
+    };
+  }, [isMobile, isExpanded, Boolean(highlightedProject)]);
+
   const items = useMemo(() => {
     const total = projects.length || 1;
-    const viewportWidth = typeof window === "undefined" ? 1440 : window.innerWidth;
-    // Keep in sync with .video-wheel-item width: clamp(18rem, 28vw, 35rem).
-    const itemWidth = Math.min(Math.max(viewportWidth * 0.28, 288), 560);
-    const maxVisibleOffset = 4.2;
+    // Items are laid out at the peak width (set on the frame as --wheel-item-width).
+    const itemWidth = peakWidth;
+    const maxVisibleOffset = 4.6;
 
     return projects
       .map((project, index) => {
@@ -388,7 +441,7 @@ export default function VideoWheel({
         };
       })
       .filter((item) => item.distance <= maxVisibleOffset);
-  }, [projects, rotation, isExpanded]);
+  }, [projects, rotation, isExpanded, peakWidth]);
 
   const desktopActiveProject = useMemo(() => {
     if (!items.length) return null;
@@ -616,7 +669,11 @@ export default function VideoWheel({
 
   const renderDesktopWheel = () => (
     <>
-      <div className="video-wheel-frame" ref={wheelRef}>
+      <div
+        className="video-wheel-frame"
+        ref={wheelRef}
+        style={{ "--wheel-item-width": `${peakWidth.toFixed(1)}px` }}
+      >
         <div
           className={`video-wheel video-wheel-container ${
             isCarouselMoving ? "is-moving" : ""
