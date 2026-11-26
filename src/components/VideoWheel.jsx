@@ -8,6 +8,7 @@ import {
   preloadVideoLink,
 } from "../utils/videoPreload";
 import { useTextEncoding } from "../utils/useTextEncoding";
+import { initCarouselTick, playCarouselTick } from "../utils/carouselTick";
 
 // ── Carousel tuning ──────────────────────────────────────────────────────────
 // Size of the centred item relative to the previous base width (28vw, 288–560px).
@@ -451,6 +452,29 @@ export default function VideoWheel({
       item.style.zIndex > closest.style.zIndex ? item : closest
     ).project;
   }, [items]);
+
+  // Carousel tick: one short click each time a different item becomes active.
+  const tickActiveIdRef = useRef(null);
+
+  useEffect(() => {
+    initCarouselTick();
+  }, []);
+
+  const activeProjectId = isMobile ? projects[mobileActiveIndex]?.id : desktopActiveProject?.id;
+
+  useEffect(() => {
+    // A new list (e.g. switching to Selected Work) is not a move: don't tick for the swap.
+    tickActiveIdRef.current = activeProjectId ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects]);
+
+  useEffect(() => {
+    if (!activeProjectId) return;
+    if (tickActiveIdRef.current !== null && tickActiveIdRef.current !== activeProjectId) {
+      playCarouselTick();
+    }
+    tickActiveIdRef.current = activeProjectId;
+  }, [activeProjectId]);
 
   useEffect(() => {
     if (isMobile || !desktopActiveProject) return;
