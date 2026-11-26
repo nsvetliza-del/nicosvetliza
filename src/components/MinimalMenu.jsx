@@ -99,6 +99,15 @@ export default function MinimalMenu({ onSonicShuffle }) {
         </NavLink>
 
         <div className="minimal-menu-links-row">
+          <NavLink
+            to="/selected-work"
+            className={({ isActive }) =>
+              `minimal-menu-link ${isActive ? "is-active" : ""}`
+            }
+          >
+            Selected Work
+          </NavLink>
+
           <div
             className={`minimal-menu-portfolio-group ${
               isPortfolioOpen ? "is-open" : ""

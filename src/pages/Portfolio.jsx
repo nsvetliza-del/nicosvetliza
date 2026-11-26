@@ -65,6 +65,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   const ambientBoostTimerRef = useRef(0);
 
   const activeCategory = useMemo(() => {
+    if (location.pathname.startsWith("/selected-work")) return "Selected Work";
     if (location.pathname.startsWith("/films")) return "Short Film";
     if (location.pathname.startsWith("/commercial")) return "Commercial";
     if (location.pathname.startsWith("/music-videos")) return "Music Video";
@@ -75,6 +76,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
 
   const filteredProjects = useMemo(() => {
     if (activeCategory === "All") return orderedProjects;
+    if (activeCategory === "Selected Work") return featuredProjects;
     if (activeCategory === "Commercial" || activeCategory === "Advertising") {
       return projects.filter(
         (project) => project.category === "Commercial" || project.type === "commercial"
@@ -142,6 +144,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   const basePath = useMemo(() => {
     if (location.pathname.startsWith("/project/")) return "/";
     if (location.pathname.startsWith("/portfolio")) return "/portfolio";
+    if (location.pathname.startsWith("/selected-work")) return "/selected-work";
     if (location.pathname.startsWith("/films")) return "/films";
     if (location.pathname.startsWith("/commercial")) return "/commercial";
     if (location.pathname.startsWith("/music-videos")) return "/music-videos";
