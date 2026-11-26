@@ -1020,6 +1020,11 @@
   }
 }
 
+/* Background colour button: mobile only (see the max-width: 768px block). */
+.background-toggle {
+  display: none;
+}
+
 /* Titles index (full screen) */
 .titles-index-toggle {
   position: fixed;
@@ -1231,6 +1236,63 @@
   /* Title sits just above the larger piano (piano: 12px + ~104px from the bottom). */
   .video-wheel-section .carousel-highlighted-title {
     bottom: calc(126px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* The piano is replaced by a single background button on mobile. */
+  body .audio-keys-wrap {
+    display: none !important;
+  }
+
+  /* One circle in the piano's own visual language (natural key + echo ring).
+     48px hit area; cycles off-white ⇄ black through the piano's background handler. */
+  .background-toggle {
+    position: fixed;
+    left: 50%;
+    bottom: calc(46px + env(safe-area-inset-bottom));
+    z-index: 190;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    transform: translateX(-50%);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .background-toggle-key {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(248, 247, 243, 0.94);
+    border: 1.1px solid rgba(5, 5, 5, 0.46);
+    transition: background-color 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+  }
+
+  .background-toggle-key::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 0.7px solid rgba(5, 5, 5, 0.18);
+    transform: translate(1.1px, 1.2px);
+    transition: border-color 0.22s ease;
+  }
+
+  .background-toggle:active .background-toggle-key {
+    transform: translateY(1px);
+  }
+
+  html[data-bg-tone] .background-toggle-key {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.85);
+  }
+
+  html[data-bg-tone] .background-toggle-key::after {
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
   /* Blue "tune" dot (MinimalMenu's .minimal-menu-pulse): hidden on mobile only. */

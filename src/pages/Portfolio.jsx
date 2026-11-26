@@ -329,6 +329,20 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
         </button>
       ) : null}
 
+      {!showIntroOverlay && !activeProject ? (
+        // Mobile only (hidden on desktop by CSS): cycles the same background states as the
+        // piano keys, through the same handler. Silent: the sound lives in AudioKeys, not here.
+        <button
+          type="button"
+          className="background-toggle"
+          onClick={() => handlePianoKey({ isBlack: !isDarkBackground })}
+          aria-pressed={isDarkBackground}
+          aria-label={isDarkBackground ? "Light background" : "Dark background"}
+        >
+          <span className="background-toggle-key" aria-hidden="true" />
+        </button>
+      ) : null}
+
       <TitlesIndex
         isOpen={isIndexOpen}
         projects={displayedProjects}
