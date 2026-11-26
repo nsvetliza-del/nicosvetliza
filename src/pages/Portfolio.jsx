@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import EpicIntro from "../components/EpicIntro";
 import ImmersivePlayer from "../components/ImmersivePlayer";
 import AudioKeys from "../components/AudioKeys";
+import BackgroundCode from "../components/BackgroundCode";
 import MinimalMenu from "../components/MinimalMenu";
 import TitlesIndex from "../components/TitlesIndex";
 import VideoTransitionLayer from "../components/VideoTransitionLayer";
@@ -223,6 +224,8 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
           />
         ) : null}
       </div>
+
+      <BackgroundCode enabled={!showIntroOverlay} />
 
       <EpicIntro enabled={showIntroOverlay} onComplete={() => setShowIntroOverlay(false)} />
 

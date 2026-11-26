@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import orchestraTuning from "../assets/audios/orchestra-tuning.mp3";
 
-const introWords = [
+export const introWords = [
   { text: "soundscape", marker: "—", x: "-13vw", y: "-7vh" },
   { text: "sound design", marker: "[ ]", x: "11vw", y: "-9vh" },
   { text: "composition", marker: "/", x: "-9vw", y: "0vh" },

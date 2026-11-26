@@ -1127,3 +1127,29 @@
     right: 20px;
   }
 }
+
+/* Faint intro words "coded" in the far background */
+.background-code {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.background-code-text {
+  position: absolute;
+  color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.background-code-text.is-visible {
+  opacity: 0.1;
+  transition-duration: 300ms;
+}

@@ -7,18 +7,7 @@ import {
   preloadVideoBatch,
   preloadVideoLink,
 } from "../utils/videoPreload";
-
-const randomTitleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#<>_-.";
-
-const encodeTitle = (title) =>
-  title
-    .split("")
-    .map((char) =>
-      char === " "
-        ? " "
-        : randomTitleChars[Math.floor(Math.random() * randomTitleChars.length)]
-    )
-    .join("");
+import { useTextEncoding } from "../utils/useTextEncoding";
 
 export default function VideoWheel({
   projects,
@@ -37,8 +26,6 @@ export default function VideoWheel({
   const dizzyTimerRef = useRef(0);
   const fastTimerRef = useRef(null);
   const lastMoveTimeRef = useRef(0);
-  const titleEncodingTimerRef = useRef(null);
-  const titleEncodingIntervalRef = useRef(null);
   const highlightedProjectRef = useRef(null);
   const highlightUpdateTimeRef = useRef(0);
   const mobileItemRefs = useRef([]);
@@ -46,6 +33,8 @@ export default function VideoWheel({
   const mobileActiveIndexRef = useRef(0);
   const mobileScrollTimerRef = useRef(0);
   const wheelSnapTimerRef = useRef(0);
+  const hasInitialSnapRef = useRef(false);
+  const highlightRetryTimerRef = useRef(0);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
@@ -59,8 +48,11 @@ export default function VideoWheel({
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileInteracting, setIsMobileInteracting] = useState(false);
   const [highlightedProject, setHighlightedProject] = useState(null);
-  const [encodedTitle, setEncodedTitle] = useState("");
-  const [isEncodingTitle, setIsEncodingTitle] = useState(false);
+  const {
+    text: encodedTitle,
+    isEncoding: isEncodingTitle,
+    start: startEncoding,
+  } = useTextEncoding();
 
   const hideRandomButton = () => {
     setIsCarouselMoving(true);
@@ -106,23 +98,8 @@ export default function VideoWheel({
 
     highlightedProjectRef.current = project;
     setHighlightedProject(project);
-    setIsEncodingTitle(true);
-    setEncodedTitle(encodeTitle(title));
-
-    window.clearTimeout(titleEncodingTimerRef.current);
-    window.clearInterval(titleEncodingIntervalRef.current);
-
-    titleEncodingIntervalRef.current = window.setInterval(() => {
-      setEncodedTitle(encodeTitle(title));
-    }, 45);
-
-    titleEncodingTimerRef.current = window.setTimeout(() => {
-      window.clearInterval(titleEncodingIntervalRef.current);
-      titleEncodingIntervalRef.current = null;
-      setEncodedTitle(title);
-      setIsEncodingTitle(false);
-    }, 620);
-  }, []);
+    startEncoding(title);
+  }, [startEncoding]);
 
   const updateHighlightedProject = useCallback(
     (project, immediate = false) => {
@@ -130,7 +107,16 @@ export default function VideoWheel({
       if (typeof window === "undefined") return;
 
       const now = performance.now();
-      if (!immediate && now - highlightUpdateTimeRef.current < 120) return;
+      window.clearTimeout(highlightRetryTimerRef.current);
+      const elapsed = now - highlightUpdateTimeRef.current;
+      if (!immediate && elapsed < 120) {
+        // Throttled: retry once the window ends so the title never goes stale.
+        highlightRetryTimerRef.current = window.setTimeout(
+          () => updateHighlightedProject(project),
+          120 - elapsed
+        );
+        return;
+      }
 
       highlightUpdateTimeRef.current = now;
       startTitleEncoding(project);
@@ -221,8 +207,7 @@ export default function VideoWheel({
   useEffect(() => () => {
     window.clearTimeout(fastTimerRef.current);
     window.clearTimeout(dizzyTimerRef.current);
-    window.clearTimeout(titleEncodingTimerRef.current);
-    window.clearInterval(titleEncodingIntervalRef.current);
+    window.clearTimeout(highlightRetryTimerRef.current);
   }, []);
 
   useEffect(() => {
@@ -248,6 +233,12 @@ export default function VideoWheel({
   useEffect(() => {
     if (isMobile || !projects.length) return;
     snapToNearestProject();
+    if (!hasInitialSnapRef.current) {
+      // First layout: start already aligned instead of sliding into place.
+      hasInitialSnapRef.current = true;
+      rotationRef.current = targetRotationRef.current;
+      setRotation(rotationRef.current);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile, projects]);
 
