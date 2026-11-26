@@ -783,3 +783,51 @@
     display: none !important;
   }
 }
+
+/* Mobile header: hide on scroll down, return on scroll up (state set in MinimalMenu). */
+@media (max-width: 768px) {
+  .minimal-menu {
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s ease !important;
+  }
+
+  .minimal-menu.is-hidden-on-scroll {
+    opacity: 0 !important;
+    transform: translateY(calc(-100% - 24px)) !important;
+    pointer-events: none !important;
+  }
+
+  .portfolio-tagline {
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s ease;
+  }
+
+  body.mobile-menu-hidden .portfolio-tagline {
+    opacity: 0 !important;
+    transform: translateY(-48px) !important;
+    pointer-events: none !important;
+  }
+
+  /* Scrolling pages: an opaque strip in the current background behind the header,
+     so text scrolling up under it never collides with it. */
+  .about-page .minimal-menu::before,
+  .contact-page .minimal-menu::before,
+  .equipment-page .minimal-menu::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -22px;
+    left: -22px;
+    width: 100vw;
+    bottom: -14px;
+    background: var(--bg-soft);
+    pointer-events: none;
+  }
+
+  /* Content starts below the header at the top; grows if the header wraps. */
+  html:root {
+    --mobile-menu-zone: max(230px, calc(var(--mobile-header-bottom, 161px) + 24px));
+  }
+}

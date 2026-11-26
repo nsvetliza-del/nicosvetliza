@@ -22,40 +22,74 @@ export default function MinimalMenu({ onSonicShuffle }) {
   const [isHiddenOnScroll, setIsHiddenOnScroll] = useState(false);
 
   const tuningTimerRef = useRef(null);
+  const navRef = useRef(null);
   const location = useLocation();
 
+  // Mobile header (all pages): hides when scrolling down past 24px, returns on any
+  // upward scroll (8px tolerance) or at the top. Its measured bottom edge is exposed as
+  // --mobile-header-bottom so page content can start below it.
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
-    const isMobileAboutOrContact =
-      window.matchMedia("(max-width: 768px)").matches &&
-      (location.pathname === "/about" || location.pathname === "/contact");
-
-    if (!isMobileAboutOrContact) {
-      setIsHiddenOnScroll(false);
-      document.body.classList.remove("mobile-menu-hidden");
-      return undefined;
-    }
+    const media = window.matchMedia("(max-width: 768px)");
+    const root = document.documentElement;
+    const HIDE_AFTER = 24;
+    const TOLERANCE = 8;
 
     const getScrollTop = () =>
-      Math.max(
-        window.scrollY,
-        document.documentElement.scrollTop,
-        document.body.scrollTop
-      );
+      Math.max(window.scrollY, root.scrollTop, document.body.scrollTop);
 
-    const handleScroll = () => {
-      const shouldHide = getScrollTop() > 8;
+    let hidden = false;
+    let lastY = getScrollTop();
+    let frame = 0;
 
-      setIsHiddenOnScroll(shouldHide);
-      document.body.classList.toggle("mobile-menu-hidden", shouldHide);
+    const setHidden = (value) => {
+      if (value === hidden) return;
+      hidden = value;
+      setIsHiddenOnScroll(value);
+      document.body.classList.toggle("mobile-menu-hidden", value);
     };
 
-    handleScroll();
+    const update = () => {
+      frame = 0;
+      const y = getScrollTop();
+      if (!media.matches || y <= HIDE_AFTER) {
+        setHidden(false);
+        lastY = y;
+        return;
+      }
+      if (y - lastY > TOLERANCE) {
+        setHidden(true);
+        lastY = y;
+      } else if (lastY - y > TOLERANCE) {
+        setHidden(false);
+        lastY = y;
+      }
+    };
+
+    const handleScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    const measure = () => {
+      const nav = navRef.current;
+      if (!media.matches || !nav || hidden) return;
+      root.style.setProperty("--mobile-header-bottom", `${Math.ceil(nav.getBoundingClientRect().bottom)}px`);
+    };
+
+    measure();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    if (navRef.current) observer?.observe(navRef.current);
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", measure);
+    media.addEventListener("change", update);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", measure);
+      media.removeEventListener("change", update);
+      observer?.disconnect();
+      window.cancelAnimationFrame(frame);
       document.body.classList.remove("mobile-menu-hidden");
     };
   }, [location.pathname]);
@@ -89,10 +123,12 @@ export default function MinimalMenu({ onSonicShuffle }) {
   return (
     <>
       <nav
+        ref={navRef}
         className={`minimal-menu ${
           isHiddenOnScroll ? "is-hidden-on-scroll mobile-menu-hidden" : ""
         }`}
         aria-label="Main navigation"
+        aria-hidden={isHiddenOnScroll ? true : undefined}
       >
         <NavLink to="/work" className="minimal-menu-brand">
           {BRAND_NAME}
