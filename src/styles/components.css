@@ -1188,7 +1188,8 @@
   .video-wheel-frame {
     position: fixed !important;
     left: 0 !important;
-    top: 52dvh !important;
+    /* Centred between the nav (bottom ≈ 161px) and the background button (top ≈ 94px above the safe area). */
+    top: calc((var(--mobile-header-bottom, 161px) + 100dvh - 94px - env(safe-area-inset-bottom)) / 2) !important;
     transform: translateY(-50%) !important;
     width: 100vw !important;
     height: 320px !important;
@@ -1235,9 +1236,10 @@
     stroke: none;
   }
 
-  /* Title sits just above the larger piano (piano: 12px + ~104px from the bottom). */
+  /* Title at the very bottom (above the safe area), ~20% larger; the button sits above it. */
   .video-wheel-section .carousel-highlighted-title {
-    bottom: calc(126px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    font-size: 18px !important;
   }
 
   /* The piano is replaced by a single background button on mobile. */

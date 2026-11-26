@@ -18,9 +18,9 @@ const LINE_PEAK_SCALE = 1.42;
 const LINE_FALLOFF = 0.72;
 
 // Mobile (max-width: 768px): same line, only sizing/spacing differ.
-// Centred item ≈ 62% of the viewport width; first neighbours tuck slightly behind it
-// so about half of each stays visible, the next ones peek at the edges.
-const MOBILE_PEAK_VW = 0.62;
+// Centred item ≈ 90% of the viewport width; first neighbours tuck behind it and show
+// as strips in the remaining ~5% on each side.
+const MOBILE_PEAK_VW = 0.9;
 const MOBILE_FALLOFF = 1.2; // centre 1.0 → ±1 ≈ 0.45 → ±2 ≈ 0.27
 // ─────────────────────────────────────────────────────────────────────────────
 
