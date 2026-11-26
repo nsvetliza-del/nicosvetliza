@@ -45,6 +45,7 @@ export default function VideoWheel({
   const mobileScrollRef = useRef(null);
   const mobileActiveIndexRef = useRef(0);
   const mobileScrollTimerRef = useRef(0);
+  const wheelSnapTimerRef = useRef(0);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
@@ -151,6 +152,16 @@ export default function VideoWheel({
     targetRotationRef.current = finalRotation + overshoot;
   };
 
+  // Curved line: settle on the nearest item so one item always sits in the centre.
+  const snapToNearestProject = () => {
+    const total = projects.length;
+    if (!total) return;
+    const step = (Math.PI * 2) / total;
+    const nearestIndex =
+      ((Math.round((Math.PI / 2 - targetRotationRef.current) / step) % total) + total) % total;
+    rotateProjectToFront(nearestIndex);
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
@@ -223,11 +234,22 @@ export default function VideoWheel({
       hideRandomButton();
       triggerDizzyIfFast(event.deltaY);
       targetRotationRef.current += event.deltaY * 0.0011;
+      window.clearTimeout(wheelSnapTimerRef.current);
+      wheelSnapTimerRef.current = window.setTimeout(snapToNearestProject, 180);
     };
 
     element.addEventListener("wheel", handleWheel, { passive: false });
-    return () => element.removeEventListener("wheel", handleWheel);
-  }, [isMobile, triggerDizzyIfFast]);
+    return () => {
+      element.removeEventListener("wheel", handleWheel);
+      window.clearTimeout(wheelSnapTimerRef.current);
+    };
+  }, [isMobile, triggerDizzyIfFast, projects]);
+
+  useEffect(() => {
+    if (isMobile || !projects.length) return;
+    snapToNearestProject();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, projects]);
 
   useEffect(() => {
     if (!projects.length) return;
@@ -279,39 +301,49 @@ export default function VideoWheel({
 
   const items = useMemo(() => {
     const total = projects.length || 1;
-    const radiusX = Math.min(window.innerWidth * 0.28, 460);
-    const radiusY = 150;
+    const viewportWidth = typeof window === "undefined" ? 1440 : window.innerWidth;
+    const itemWidth = Math.min(Math.max(viewportWidth * 0.36, 288), 640);
+    const spacing = itemWidth * 1.12;
+    const curveDepth = 34;
+    const maxVisibleOffset = 3.2;
 
-    return projects.map((project, index) => {
-      const baseAngle = (index / total) * Math.PI * 2;
-      const angle = baseAngle + rotation;
-      const x = Math.cos(angle) * radiusX;
-      const y = Math.sin(angle) * radiusY;
-      const depth = (Math.sin(angle) + 1) / 2;
-      const eased = Math.pow(depth, 1.8);
-      const scale = 0.48 + eased * 0.52;
-      const opacity = 0.2 + eased * 0.8;
-      const zIndex = Math.round(depth * 100);
-      const isFocused = Math.abs(x) < 110 && depth > 0.82;
-      const isPrepared = depth > 0.58 || isFocused;
+    return projects
+      .map((project, index) => {
+        const baseAngle = (index / total) * Math.PI * 2;
+        const angle = baseAngle + rotation;
+        // Distance (in items) from the centre of the line, wrapped so the line is endless.
+        const wrapped = Math.atan2(Math.sin(angle - Math.PI / 2), Math.cos(angle - Math.PI / 2));
+        const offset = (-wrapped * total) / (Math.PI * 2);
+        const distance = Math.abs(offset);
+        const x = offset * spacing;
+        const y = -offset * offset * curveDepth;
+        const tilt = -offset * 3.2;
+        const scale = 0.6 + 0.4 * Math.exp(-offset * offset * 1.2);
+        const depth = 1 - Math.min(distance / maxVisibleOffset, 1);
+        const opacity = distance < 2.4 ? 1 : Math.max(0, 1 - (distance - 2.4) / 0.8);
+        const zIndex = Math.round(depth * 100);
+        const isFocused = distance < 0.5;
+        const isPrepared = distance < 1.6;
 
-      return {
-        index,
-        x,
-        project,
-        style: {
-          "--depth": depth,
-          "--intro-delay": isExpanded ? "0ms" : `${index * 40}ms`,
-          transform: isExpanded
-            ? `translate3d(calc(-50% + ${x}px), ${y}px, 0) scale(${scale})`
-            : "translate3d(-50%, 0, 0) scale(0.65)",
-          opacity: isExpanded ? opacity : 0.94,
-          zIndex,
-        },
-        isFocused,
-        isPrepared,
-      };
-    });
+        return {
+          index,
+          x,
+          distance,
+          project,
+          style: {
+            "--depth": depth,
+            "--intro-delay": isExpanded ? "0ms" : `${index * 40}ms`,
+            transform: isExpanded
+              ? `translate3d(calc(-50% + ${x}px), ${y}px, 0) rotate(${tilt}deg) scale(${scale})`
+              : "translate3d(-50%, 0, 0) scale(0.65)",
+            opacity: isExpanded ? opacity : 0.94,
+            zIndex,
+          },
+          isFocused,
+          isPrepared,
+        };
+      })
+      .filter((item) => item.distance <= maxVisibleOffset);
   }, [projects, rotation, isExpanded]);
 
   const desktopActiveProject = useMemo(() => {

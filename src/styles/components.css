@@ -340,8 +340,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: clamp(16rem, 18vw, 19.5rem);
-  margin: calc(-0.375 * clamp(16rem, 18vw, 19.5rem)) 0 0 0;
+  width: clamp(18rem, 36vw, 40rem);
+  margin: calc(-0.375 * clamp(18rem, 36vw, 40rem)) 0 0 0;
   display: grid;
   gap: 0.8rem;
   cursor: pointer;
@@ -471,6 +471,16 @@
   line-height: 1.2;
   text-align: center;
   white-space: nowrap;
+}
+
+/* Curved line: the random button sits under the centred item instead of over it. */
+.video-wheel-frame .random-play-button {
+  top: calc(50% + 0.375 * clamp(18rem, 36vw, 40rem) + 1.6rem) !important;
+  transform: translate(-50%, 0) !important;
+}
+
+.video-wheel-frame .random-play-button:hover {
+  transform: translate(-50%, 0) scale(1.03) !important;
 }
 
 @media (max-width: 820px) {
