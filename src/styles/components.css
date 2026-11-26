@@ -1166,3 +1166,46 @@
   opacity: 0.12;
   transition-duration: 120ms, 0.25s;
 }
+
+/* Mobile carousel: the same line as desktop, placed where the old swipe gallery was.
+   Overrides the older narrow-screen rules (scroll grid, static items) at this breakpoint only. */
+@media (max-width: 768px) {
+  .video-wheel-frame {
+    position: fixed !important;
+    left: 0 !important;
+    top: 52dvh !important;
+    transform: translateY(-50%) !important;
+    width: 100vw !important;
+    height: 320px !important;
+    overflow: hidden !important;
+    touch-action: pan-y;
+    z-index: 20;
+  }
+
+  .video-wheel {
+    display: block !important;
+    height: 100% !important;
+    padding: 0 !important;
+  }
+
+  .video-wheel-item {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: var(--wheel-item-width) !important;
+    margin: calc(-0.28125 * var(--wheel-item-width)) 0 0 0 !important;
+    transform: var(--item-transform) !important;
+    opacity: var(--item-opacity) !important;
+    z-index: var(--item-z) !important;
+  }
+
+  .video-wheel-media {
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  /* Touch target = the item, not a video that may be swapped out mid-swipe. */
+  .video-wheel-video,
+  .video-wheel-video-full {
+    pointer-events: none;
+  }
+}

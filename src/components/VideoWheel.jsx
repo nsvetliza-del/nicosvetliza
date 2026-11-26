@@ -5,7 +5,6 @@ import {
   optimizeVideoSrc,
   preloadVideo,
   preloadVideoBatch,
-  preloadVideoLink,
 } from "../utils/videoPreload";
 import { useTextEncoding } from "../utils/useTextEncoding";
 import { initCarouselTick, playCarouselTick } from "../utils/carouselTick";
@@ -17,6 +16,12 @@ const LINE_PEAK_SCALE = 1.42;
 // How steeply neighbours shrink away from the centre (higher = steeper).
 // With 0.72: centre 1.0 → ±1 ≈ 0.62 → ±2 ≈ 0.40 → ±3 ≈ 0.31.
 const LINE_FALLOFF = 0.72;
+
+// Mobile (max-width: 768px): same line, only sizing/spacing differ.
+// Centred item ≈ 62% of the viewport width; first neighbours tuck slightly behind it
+// so about half of each stays visible, the next ones peek at the edges.
+const MOBILE_PEAK_VW = 0.62;
+const MOBILE_FALLOFF = 1.2; // centre 1.0 → ±1 ≈ 0.45 → ±2 ≈ 0.27
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Full-quality file for the active item only. Mounted lazily, fades in over
@@ -52,25 +57,28 @@ function FullQualityVideo({ src }) {
 }
 
 // Flat line: scale falls off smoothly and continuously with distance from the centre.
-const LINE_MIN_SCALE = 0.26; // floor the outer items approach
 const LINE_FALLOFF_SHAPE = 1.2; // > 1 keeps the curve smooth (flat) right at the centre
-const LINE_GAP = 0.08; // constant gap between neighbours, as a fraction of the item width
 const LINE_BASE_WIDTH = (viewportWidth) => Math.min(Math.max(viewportWidth * 0.28, 288), 560);
 
-const lineScale = (distance) =>
-  LINE_MIN_SCALE +
-  (1 - LINE_MIN_SCALE) * Math.exp(-LINE_FALLOFF * Math.pow(distance, LINE_FALLOFF_SHAPE));
+// minScale: floor the outer items approach. spacing: weight of the scale integral in the
+// position (1 = neighbours never overlap). gap: constant gap, as a fraction of the item width.
+const DESKTOP_LINE = { minScale: 0.26, falloff: LINE_FALLOFF, spacing: 1, gap: 0.08 };
+const MOBILE_LINE = { minScale: 0.22, falloff: MOBILE_FALLOFF, spacing: 0.5, gap: 0.15 };
 
-// Horizontal position = integral of the scale (Simpson's rule), so neighbours never overlap.
-const linePosition = (distance) => {
+const lineScale = (distance, line = DESKTOP_LINE) =>
+  line.minScale +
+  (1 - line.minScale) * Math.exp(-line.falloff * Math.pow(distance, LINE_FALLOFF_SHAPE));
+
+// Horizontal position = integral of the scale (Simpson's rule) plus a constant gap.
+const linePosition = (distance, line = DESKTOP_LINE) => {
   if (distance <= 0) return 0;
   const steps = 16;
   const h = distance / steps;
-  let sum = lineScale(0) + lineScale(distance);
+  let sum = lineScale(0, line) + lineScale(distance, line);
   for (let i = 1; i < steps; i += 1) {
-    sum += (i % 2 ? 4 : 2) * lineScale(i * h);
+    sum += (i % 2 ? 4 : 2) * lineScale(i * h, line);
   }
-  return (sum * h) / 3;
+  return line.spacing * ((sum * h) / 3) + distance * line.gap;
 };
 
 export default function VideoWheel({
@@ -89,24 +97,20 @@ export default function VideoWheel({
   const frameRef = useRef(0);
   const randomTimerRef = useRef(0);
   const ambientHoverTimerRef = useRef(0);
-  const mobileAmbientTimerRef = useRef(0);
   const shuffleTimerRef = useRef(0);
   const dizzyTimerRef = useRef(0);
   const fastTimerRef = useRef(null);
   const lastMoveTimeRef = useRef(0);
   const highlightedProjectRef = useRef(null);
   const highlightUpdateTimeRef = useRef(0);
-  const mobileItemRefs = useRef([]);
-  const mobileScrollRef = useRef(null);
-  const mobileActiveIndexRef = useRef(0);
-  const mobileScrollTimerRef = useRef(0);
+  const touchDragRef = useRef(null);
+  const suppressClickRef = useRef(false);
   const wheelSnapTimerRef = useRef(0);
   const hasInitialSnapRef = useRef(false);
   const highlightRetryTimerRef = useRef(0);
   const rotationRef = useRef(0);
   const targetRotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
   const [showRandomButton, setShowRandomButton] = useState(false);
   const [isDizzy, setIsDizzy] = useState(false);
@@ -114,7 +118,6 @@ export default function VideoWheel({
   const [isCarouselMoving, setIsCarouselMoving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isMobileInteracting, setIsMobileInteracting] = useState(false);
   const [highlightedProject, setHighlightedProject] = useState(null);
   const {
     text: encodedTitle,
@@ -234,8 +237,6 @@ export default function VideoWheel({
   }, []);
 
   useEffect(() => {
-    if (isMobile) return undefined;
-
     const animate = () => {
       rotationRef.current += (targetRotationRef.current - rotationRef.current) * 0.11;
       setRotation(rotationRef.current);
@@ -247,7 +248,7 @@ export default function VideoWheel({
     return () => {
       window.cancelAnimationFrame(frameRef.current);
     };
-  }, [isMobile]);
+  }, []);
 
   useEffect(() => {
     hideRandomButton();
@@ -299,7 +300,7 @@ export default function VideoWheel({
   }, [isMobile, triggerDizzyIfFast, projects]);
 
   useEffect(() => {
-    if (isMobile || !projects.length) return;
+    if (!projects.length) return;
     // Every load (and every new list) starts on the first piece.
     rotateProjectToFront(0);
     if (!hasInitialSnapRef.current) {
@@ -340,15 +341,6 @@ export default function VideoWheel({
     window.clearTimeout(shuffleTimerRef.current);
 
     const randomIndex = Math.floor(Math.random() * projects.length);
-    if (isMobile) {
-      mobileItemRefs.current[randomIndex]?.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest",
-      });
-      return undefined;
-    }
-
     const spinDirection = Math.random() > 0.5 ? 1 : -1;
     rotateProjectToFront(randomIndex, spinDirection * 0.42);
 
@@ -359,16 +351,33 @@ export default function VideoWheel({
     return () => window.clearTimeout(shuffleTimerRef.current);
   }, [isMobile, sonicShuffleTick, projects]);
 
-  // Peak (centred) item size: LINE_PEAK_SCALE × base width, capped by the free space
-  // between the piano above and the hint/title/index button below.
+  // Peak (centred) item size: LINE_PEAK_SCALE × base width (MOBILE_PEAK_VW on mobile),
+  // capped by the free space so it never reaches the surrounding UI.
   useEffect(() => {
-    if (isMobile) return undefined;
-
     const measure = () => {
       const frame = wheelRef.current;
       if (!frame) return;
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
+
+      if (isMobile) {
+        // Mobile: between the nav above and the title / piano / index button below.
+        const frameRect = frame.getBoundingClientRect();
+        const centerY = frameRect.top + frameRect.height / 2;
+        const nav = document.querySelector(".minimal-menu")?.getBoundingClientRect();
+        const below = [".video-wheel-section .carousel-highlighted-title", ".audio-keys-wrap", ".titles-index-toggle"]
+          .map((selector) => document.querySelector(selector)?.getBoundingClientRect())
+          .filter((rect) => rect?.height)
+          .map((rect) => rect.top);
+        const margin = 12;
+        const halfAbove = centerY - (nav?.bottom ?? 0) - margin;
+        const halfBelow = Math.min(viewportHeight, ...below) - centerY - margin;
+        const maxHeight = Math.max(100, 2 * Math.min(halfAbove, halfBelow));
+        const width = Math.min(viewportWidth * MOBILE_PEAK_VW, (maxHeight * 16) / 9);
+        setPeakWidth((current) => (Math.abs(current - width) < 1 ? current : width));
+        return;
+      }
+
       const desired = LINE_BASE_WIDTH(viewportWidth) * LINE_PEAK_SCALE;
 
       const frameRect = frame.getBoundingClientRect();
@@ -407,6 +416,7 @@ export default function VideoWheel({
     // Items are laid out at the peak width (set on the frame as --wheel-item-width).
     const itemWidth = peakWidth;
     const maxVisibleOffset = 4.6;
+    const line = isMobile ? MOBILE_LINE : DESKTOP_LINE;
 
     return projects
       .map((project, index) => {
@@ -416,13 +426,18 @@ export default function VideoWheel({
         const wrapped = Math.atan2(Math.sin(angle - Math.PI / 2), Math.cos(angle - Math.PI / 2));
         const offset = (-wrapped * total) / (Math.PI * 2);
         const distance = Math.abs(offset);
-        const x = Math.sign(offset) * (linePosition(distance) + distance * LINE_GAP) * itemWidth;
-        const scale = lineScale(distance);
+        const x = Math.sign(offset) * linePosition(distance, line) * itemWidth;
+        const scale = lineScale(distance, line);
         const depth = 1 - Math.min(distance / maxVisibleOffset, 1);
         const opacity = distance < 3.6 ? 1 : Math.max(0, 1 - (distance - 3.6) / 0.6);
         const zIndex = Math.round(depth * 100);
         const isFocused = distance < 0.5;
         const isPrepared = distance < 1.6;
+
+        const transform = isExpanded
+          ? `translate3d(calc(-50% + ${x}px), 0, 0) scale(${scale})`
+          : "translate3d(-50%, 0, 0) scale(0.65)";
+        const itemOpacity = isExpanded ? opacity : 0.94;
 
         return {
           index,
@@ -432,10 +447,12 @@ export default function VideoWheel({
           style: {
             "--depth": depth,
             "--intro-delay": isExpanded ? "0ms" : `${index * 40}ms`,
-            transform: isExpanded
-              ? `translate3d(calc(-50% + ${x}px), 0, 0) scale(${scale})`
-              : "translate3d(-50%, 0, 0) scale(0.65)",
-            opacity: isExpanded ? opacity : 0.94,
+            // Mirrored as variables so the mobile stylesheet can apply them over its old !important rules.
+            "--item-transform": transform,
+            "--item-opacity": itemOpacity,
+            "--item-z": zIndex,
+            transform,
+            opacity: itemOpacity,
             zIndex,
           },
           isFocused,
@@ -443,7 +460,7 @@ export default function VideoWheel({
         };
       })
       .filter((item) => item.distance <= maxVisibleOffset);
-  }, [projects, rotation, isExpanded, peakWidth]);
+  }, [projects, rotation, isExpanded, peakWidth, isMobile]);
 
   const desktopActiveProject = useMemo(() => {
     if (!items.length) return null;
@@ -460,7 +477,7 @@ export default function VideoWheel({
     initCarouselTick();
   }, []);
 
-  const activeProjectId = isMobile ? projects[mobileActiveIndex]?.id : desktopActiveProject?.id;
+  const activeProjectId = desktopActiveProject?.id;
 
   useEffect(() => {
     // A new list (e.g. switching to Selected Work) is not a move: don't tick for the swap.
@@ -477,15 +494,15 @@ export default function VideoWheel({
   }, [activeProjectId]);
 
   useEffect(() => {
-    if (isMobile || !desktopActiveProject) return;
+    if (!desktopActiveProject) return;
     updateHighlightedProject(desktopActiveProject);
-  }, [desktopActiveProject, isMobile, updateHighlightedProject]);
+  }, [desktopActiveProject, updateHighlightedProject]);
 
   useEffect(() => {
     window.clearTimeout(ambientHoverTimerRef.current);
 
     // Background video follows the item in the centre of the line.
-    if (isMobile || !desktopActiveProject || isCarouselMoving) {
+    if (!desktopActiveProject || isCarouselMoving) {
       onAmbientPreview?.(null);
       return undefined;
     }
@@ -495,29 +512,11 @@ export default function VideoWheel({
     }, 2000);
 
     return () => window.clearTimeout(ambientHoverTimerRef.current);
-  }, [desktopActiveProject, isCarouselMoving, isMobile, onAmbientPreview]);
-
-  useEffect(() => {
-    window.clearTimeout(mobileAmbientTimerRef.current);
-
-    if (!isMobile) return undefined;
-
-    if (!highlightedProject || isMobileInteracting) {
-      onAmbientPreview?.(null);
-      return undefined;
-    }
-
-    mobileAmbientTimerRef.current = window.setTimeout(() => {
-      onAmbientPreview?.(highlightedProject);
-    }, 2000);
-
-    return () => window.clearTimeout(mobileAmbientTimerRef.current);
-  }, [highlightedProject, isMobile, isMobileInteracting, onAmbientPreview]);
+  }, [desktopActiveProject, isCarouselMoving, onAmbientPreview]);
 
   useEffect(
     () => () => {
       window.clearTimeout(ambientHoverTimerRef.current);
-      window.clearTimeout(mobileAmbientTimerRef.current);
       onAmbientPreview?.(null);
     },
     [onAmbientPreview]
@@ -525,10 +524,6 @@ export default function VideoWheel({
 
   useEffect(() => {
     if (!projects.length) return;
-
-    if (isMobile) {
-      return;
-    }
 
     if (!items.length) return;
 
@@ -547,72 +542,58 @@ export default function VideoWheel({
     preloadVideoBatch([nextTwo?.previewVideo || nextTwo?.video], { priority: "metadata", delay: 220 });
   }, [isMobile, items, projects]);
 
-  useEffect(() => {
-    if (!isMobile || !projects.length) return undefined;
-
-    const container = mobileScrollRef.current;
-    if (!container) return undefined;
-
-    const updateActiveFromScroll = () => {
-      const containerRect = container.getBoundingClientRect();
-      const containerCenter = containerRect.left + containerRect.width / 2;
-
-      let closestIndex = mobileActiveIndexRef.current;
-      let smallestDistance = Infinity;
-
-      mobileItemRefs.current.forEach((element, index) => {
-        if (!element) return;
-        const rect = element.getBoundingClientRect();
-        const distance = Math.abs(rect.left + rect.width / 2 - containerCenter);
-        if (distance < smallestDistance) {
-          smallestDistance = distance;
-          closestIndex = index;
-        }
-      });
-
-      if (closestIndex === mobileActiveIndexRef.current) return;
-
-      mobileActiveIndexRef.current = closestIndex;
-      setMobileActiveIndex(closestIndex);
-      updateHighlightedProject(projects[closestIndex]);
-
-      const prev = projects[(closestIndex - 1 + projects.length) % projects.length];
-      const next = projects[(closestIndex + 1) % projects.length];
-      [prev, next].forEach((project) =>
-        preloadVideoLink(project?.previewVideo || project?.video)
-      );
+  // Mobile: touch swipe moves the line (desktop keeps the mouse wheel).
+  const handleTouchStart = (event) => {
+    if (!isMobile || event.touches.length !== 1) return;
+    touchDragRef.current = {
+      x: event.touches[0].clientX,
+      lastX: event.touches[0].clientX,
+      time: performance.now(),
+      lastTime: performance.now(),
+      velocity: 0,
+      startRotation: targetRotationRef.current,
+      moved: false,
     };
+  };
 
-    let scrollFrame = 0;
-    const handleScroll = () => {
-      setIsMobileInteracting(true);
-      window.clearTimeout(mobileScrollTimerRef.current);
+  const pixelsPerItem = () => Math.max(1, linePosition(1, MOBILE_LINE) * peakWidth);
 
-      if (!scrollFrame) {
-        scrollFrame = window.requestAnimationFrame(() => {
-          scrollFrame = 0;
-          updateActiveFromScroll();
-        });
-      }
+  const handleTouchMove = (event) => {
+    const drag = touchDragRef.current;
+    if (!drag || !projects.length) return;
+    const x = event.touches[0].clientX;
+    const dx = x - drag.x;
+    if (!drag.moved && Math.abs(dx) < 8) return;
+    drag.moved = true;
 
-      mobileScrollTimerRef.current = window.setTimeout(() => {
-        setIsMobileInteracting(false);
-      }, 160);
-    };
+    const now = performance.now();
+    drag.velocity = (x - drag.lastX) / Math.max(1, now - drag.lastTime);
+    drag.lastX = x;
+    drag.lastTime = now;
 
-    // A new list starts on its first piece.
-    container.scrollLeft = 0;
-    mobileActiveIndexRef.current = 0;
-    setMobileActiveIndex(0);
-    updateHighlightedProject(projects[0], true);
-    container.addEventListener("scroll", handleScroll, { passive: true });
+    hideRandomButton();
+    const step = (Math.PI * 2) / projects.length;
+    targetRotationRef.current = drag.startRotation - (dx / pixelsPerItem()) * step;
+  };
 
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      window.cancelAnimationFrame(scrollFrame);
-      window.clearTimeout(mobileScrollTimerRef.current);
-    };
-  }, [isMobile, projects, updateHighlightedProject]);
+  const handleTouchEnd = () => {
+    const drag = touchDragRef.current;
+    touchDragRef.current = null;
+    if (!drag?.moved || !projects.length) return;
+
+    suppressClickRef.current = true;
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+
+    // A quick flick carries on a little before settling on the nearest item.
+    const step = (Math.PI * 2) / projects.length;
+    const velocity = Math.abs(drag.velocity) > 0.35 ? drag.velocity : 0; // px/ms; ignore slow drags
+    const fling = Math.max(-1.5, Math.min(1.5, (velocity * 120) / pixelsPerItem()));
+    targetRotationRef.current -= fling * step;
+    hideRandomButton();
+    snapToNearestProject();
+  };
 
   const highlightedTitleText = isEncodingTitle
     ? encodedTitle
@@ -630,85 +611,23 @@ export default function VideoWheel({
       </div>
     ) : null;
 
-  const renderMobileGallery = () => {
-    return (
-      <>
-        <div className="mobile-video-gallery" ref={mobileScrollRef}>
-          <div className="mobile-video-track">
-            {projects.map((project, index) => {
-              const videoSrc = project.previewVideo || project.video;
-
-              return (
-                <button
-                  key={project.id}
-                  type="button"
-                  className={`mobile-video-card ${
-                    index === mobileActiveIndex ? "is-active" : ""
-                  }`}
-                  aria-label={project.title}
-                  ref={(element) => {
-                    mobileItemRefs.current[index] = element;
-                  }}
-                  onClick={(event) => {
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    preloadVideo(project.fullVideo || videoSrc, { priority: "auto" });
-
-                    if (mobileActiveIndexRef.current !== index) {
-                      event.currentTarget.scrollIntoView({
-                        behavior: "smooth",
-                        inline: "center",
-                        block: "nearest",
-                      });
-                      return;
-                    }
-
-                    onProjectSelect(project.id, rect);
-                  }}
-                >
-                  {videoSrc ? (
-                    <video
-                      src={videoSrc}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload={index < 6 ? "auto" : "metadata"}
-                    />
-                  ) : (
-                    <div className="video-wheel-fallback" aria-hidden="true" />
-                  )}
-                  {videoSrc &&
-                  project.fullVideo &&
-                  index === mobileActiveIndex &&
-                  !isMobileInteracting ? (
-                    <FullQualityVideo key={project.id} src={project.fullVideo} />
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {renderHighlightedTitle()}
-
-        <AudioKeys onKeyPlay={onKeyPlay} />
-      </>
-    );
-  };
-
   const renderDesktopWheel = () => (
     <>
       <div
         className="video-wheel-frame"
         ref={wheelRef}
         style={{ "--wheel-item-width": `${peakWidth.toFixed(1)}px` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         <div
           className={`video-wheel video-wheel-container ${
             isCarouselMoving ? "is-moving" : ""
           }`}
         >
-          {items.map(({ project, style, isFocused, isPrepared }) => (
+          {items.map(({ project, style, index, isFocused, isPrepared }) => (
             <button
               key={project.id}
               type="button"
@@ -727,6 +646,13 @@ export default function VideoWheel({
               onMouseLeave={() => setHoveredProjectId(null)}
               onBlur={() => setHoveredProjectId(null)}
               onClick={(event) => {
+                if (suppressClickRef.current) return;
+                // Mobile: tapping a side item brings it to the centre; tapping the centre opens it.
+                if (isMobile && !isFocused) {
+                  hideRandomButton();
+                  rotateProjectToFront(index);
+                  return;
+                }
                 const mediaElement = event.currentTarget.querySelector(".video-wheel-media");
                 const videoElement = mediaElement?.querySelector("video");
                 preloadVideo(project.fullVideo || project.previewVideo || project.video, { priority: "auto" });
@@ -759,7 +685,7 @@ export default function VideoWheel({
           ))}
         </div>
 
-        {projects.length > 0 ? (
+        {projects.length > 0 && !isMobile ? (
           <RandomPlayButton
             onClick={(event) => {
               const randomProject = projects[Math.floor(Math.random() * projects.length)];
@@ -776,6 +702,8 @@ export default function VideoWheel({
       </div>
 
       {renderHighlightedTitle()}
+
+      {isMobile ? <AudioKeys onKeyPlay={onKeyPlay} /> : null}
     </>
   );
 
@@ -814,11 +742,7 @@ export default function VideoWheel({
 
   return (
     <section className="video-wheel-section">
-      {projects.length === 1
-        ? renderSingleProject()
-        : isMobile
-          ? renderMobileGallery()
-          : renderDesktopWheel()}
+      {projects.length === 1 ? renderSingleProject() : renderDesktopWheel()}
     </section>
   );
 }
