@@ -122,3 +122,73 @@ button {
     overflow-x: hidden;
   }
 }
+
+/* Piano → background tone (set on <html data-bg-tone>). Dark tones: all type white. */
+html,
+body {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+html[data-bg-tone="blue"] {
+  --bg: #1d5cff;
+  --bg-soft: #1d5cff;
+}
+
+html[data-bg-tone="ink"] {
+  --bg: #111111;
+  --bg-soft: #111111;
+}
+
+html[data-bg-tone="blue"],
+html[data-bg-tone="ink"] {
+  color-scheme: dark;
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.78);
+  --line: rgba(255, 255, 255, 0.24);
+  --accent: #ffffff;
+}
+
+html[data-bg-tone] .portfolio-tagline,
+html[data-bg-tone] .minimal-menu-sublink,
+html[data-bg-tone] .single-video-project-title,
+html[data-bg-tone] .desktop-active-title {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+html[data-bg-tone] .carousel-highlighted-title,
+html[data-bg-tone] .mobile-active-title {
+  color: #ffffff !important;
+}
+
+html[data-bg-tone] .minimal-menu-link::after {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+html[data-bg-tone] .minimal-menu-pulse {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Piano icons inverted: white outlines, white dots. */
+html[data-bg-tone] .audio-note-natural circle {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.85);
+}
+
+html[data-bg-tone] .audio-note-natural .audio-note-echo {
+  stroke: rgba(255, 255, 255, 0.3);
+}
+
+html[data-bg-tone] .audio-note-accidental circle {
+  fill: rgba(255, 255, 255, 0.78);
+  stroke: rgba(255, 255, 255, 0.4);
+}
+
+html[data-bg-tone] .audio-note:focus-visible circle {
+  stroke: #ffffff;
+}
+
+html[data-bg-tone] .portfolio-tagline {
+  opacity: 0.9 !important;
+}

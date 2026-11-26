@@ -30,7 +30,14 @@ const accidentalNotes = [
   ["A#5", 932.33, 12],
 ];
 
-export default function AudioKeys() {
+// Position of each note in pitch order (C4 = 0 … B5 = 23).
+const pitchIndex = Object.fromEntries(
+  [...naturalNotes, ...accidentalNotes]
+    .sort((a, b) => a[1] - b[1])
+    .map(([id], index) => [id, index])
+);
+
+export default function AudioKeys({ onKeyPlay = null }) {
   const audioContextRef = useRef(null);
 
   const naturals = useMemo(
@@ -108,10 +115,16 @@ export default function AudioKeys() {
     triangle.stop(now + 0.95);
   };
 
-  const handleKeyDown = (event, note) => {
+  // Only ever called from a direct click/touch/keypress on a key.
+  const playKey = (key) => {
+    void playTone(key.note);
+    onKeyPlay?.({ id: key.id, index: pitchIndex[key.id] });
+  };
+
+  const handleKeyDown = (event, key) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
-    void playTone(note);
+    playKey(key);
   };
 
   return (
@@ -125,8 +138,8 @@ export default function AudioKeys() {
               role="button"
               tabIndex="0"
               aria-label={`Play ${key.id}`}
-              onClick={() => void playTone(key.note)}
-              onKeyDown={(event) => handleKeyDown(event, key.note)}
+              onClick={() => playKey(key)}
+              onKeyDown={(event) => handleKeyDown(event, key)}
             >
               <circle cx={key.cx} cy={key.cy} r="14" />
               <circle className="audio-note-echo" cx={key.cx + 1.1} cy={key.cy + 1.2} r="14" />
@@ -142,8 +155,8 @@ export default function AudioKeys() {
               role="button"
               tabIndex="0"
               aria-label={`Play ${key.id}`}
-              onClick={() => void playTone(key.note)}
-              onKeyDown={(event) => handleKeyDown(event, key.note)}
+              onClick={() => playKey(key)}
+              onKeyDown={(event) => handleKeyDown(event, key)}
             >
               <circle cx={key.cx} cy={key.cy} r="10.5" />
             </g>

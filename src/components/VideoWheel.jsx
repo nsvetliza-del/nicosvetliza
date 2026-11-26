@@ -16,6 +16,7 @@ export default function VideoWheel({
   isReady = true,
   sonicShuffleTick = 0,
   onAmbientPreview = null,
+  onKeyPlay = null,
 }) {
   const wheelRef = useRef(null);
   const frameRef = useRef(0);
@@ -550,7 +551,7 @@ export default function VideoWheel({
 
         {renderHighlightedTitle()}
 
-        <AudioKeys />
+        <AudioKeys onKeyPlay={onKeyPlay} />
       </>
     );
   };
@@ -659,7 +660,7 @@ export default function VideoWheel({
 
         <div className="single-video-project-title">{project.title}</div>
 
-        {isMobile ? <AudioKeys /> : null}
+        {isMobile ? <AudioKeys onKeyPlay={onKeyPlay} /> : null}
       </>
     );
   };

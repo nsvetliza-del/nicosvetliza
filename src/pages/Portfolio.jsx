@@ -23,6 +23,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
   const [ambientProject, setAmbientProject] = useState(null);
   const [isAmbientBoosted, setIsAmbientBoosted] = useState(false);
   const [isIndexOpen, setIsIndexOpen] = useState(false);
+  const [backgroundTone, setBackgroundTone] = useState(null);
   const ambientVideoRef = useRef(null);
   const ambientBoostTimerRef = useRef(0);
 
@@ -204,6 +205,25 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
 
   const closeIndex = useCallback(() => setIsIndexOpen(false), []);
 
+  // Piano → background: keys alternate blue / ink in pitch order;
+  // pressing the same key again returns to the default off-white.
+  const handlePianoKey = useCallback(({ id, index }) => {
+    setBackgroundTone((current) =>
+      current?.keyId === id ? null : { keyId: id, tone: index % 2 === 0 ? "blue" : "ink" }
+    );
+  }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (backgroundTone) {
+      root.dataset.bgTone = backgroundTone.tone;
+    } else {
+      delete root.dataset.bgTone;
+    }
+  }, [backgroundTone]);
+
+  useEffect(() => () => delete document.documentElement.dataset.bgTone, []);
+
   return (
     <>
       <div
@@ -244,7 +264,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
                       : ""
                 }`}
               >
-                {!isMobileViewport ? <AudioKeys /> : null}
+                {!isMobileViewport ? <AudioKeys onKeyPlay={handlePianoKey} /> : null}
                 <VideoWheel
                   projects={displayedProjects}
                   onProjectSelect={openProject}
@@ -252,6 +272,7 @@ export default function Portfolio({ showIntro = false, initialCategory = "All" }
                   isReady={!showIntroOverlay}
                   sonicShuffleTick={sonicShuffleTick}
                   onAmbientPreview={setAmbientProject}
+                  onKeyPlay={handlePianoKey}
                 />
               </div>
             </div>
