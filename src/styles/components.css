@@ -490,6 +490,19 @@
 }
 
 @media (min-width: 769px) {
+  /* Active title pinned to the very bottom of the viewport. */
+  .video-wheel-section .carousel-highlighted-title {
+    position: fixed;
+    left: 50%;
+    bottom: calc(22px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    margin: 0;
+    max-width: 70vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 140;
+  }
+
   .desktop-active-title {
     position: fixed;
     left: 50%;
