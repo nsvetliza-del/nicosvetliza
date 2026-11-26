@@ -362,20 +362,18 @@ export default function VideoWheel({
   useEffect(() => {
     window.clearTimeout(ambientHoverTimerRef.current);
 
-    if (isMobile || !hoveredProjectId || isCarouselMoving) {
+    // Background video follows the item in the centre of the line.
+    if (isMobile || !desktopActiveProject || isCarouselMoving) {
       onAmbientPreview?.(null);
       return undefined;
     }
 
-    const project = projects.find((item) => item.id === hoveredProjectId);
-    if (!project) return undefined;
-
     ambientHoverTimerRef.current = window.setTimeout(() => {
-      onAmbientPreview?.(project);
+      onAmbientPreview?.(desktopActiveProject);
     }, 2000);
 
     return () => window.clearTimeout(ambientHoverTimerRef.current);
-  }, [hoveredProjectId, isCarouselMoving, isMobile, onAmbientPreview, projects]);
+  }, [desktopActiveProject, isCarouselMoving, isMobile, onAmbientPreview]);
 
   useEffect(() => {
     window.clearTimeout(mobileAmbientTimerRef.current);
