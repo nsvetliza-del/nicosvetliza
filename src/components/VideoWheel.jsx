@@ -41,6 +41,29 @@ function FullQualityVideo({ src }) {
   );
 }
 
+// Flat line: scale falls off smoothly with distance from the centre.
+const LINE_MIN_SCALE = 0.3;
+const LINE_FALLOFF = 0.7;
+const LINE_GAP = 0.08; // constant gap between neighbours, as a fraction of the item width
+
+const lineScale = (distance) =>
+  LINE_MIN_SCALE + (1 - LINE_MIN_SCALE) * Math.exp(-LINE_FALLOFF * distance * distance);
+
+// Error function (Abramowitz–Stegun 7.1.26), for the closed-form position below.
+const erf = (value) => {
+  const t = 1 / (1 + 0.3275911 * value);
+  const poly =
+    t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+  return 1 - poly * Math.exp(-value * value);
+};
+
+// Horizontal position = integral of the scale, so neighbours never overlap at any size.
+const linePosition = (distance) =>
+  LINE_MIN_SCALE * distance +
+  (1 - LINE_MIN_SCALE) *
+    (Math.sqrt(Math.PI) / (2 * Math.sqrt(LINE_FALLOFF))) *
+    erf(Math.sqrt(LINE_FALLOFF) * distance);
+
 export default function VideoWheel({
   projects,
   onProjectSelect,
@@ -326,10 +349,9 @@ export default function VideoWheel({
   const items = useMemo(() => {
     const total = projects.length || 1;
     const viewportWidth = typeof window === "undefined" ? 1440 : window.innerWidth;
-    const itemWidth = Math.min(Math.max(viewportWidth * 0.36, 288), 640);
-    const spacing = itemWidth * 1.12;
-    const curveDepth = 34;
-    const maxVisibleOffset = 3.2;
+    // Keep in sync with .video-wheel-item width: clamp(18rem, 28vw, 35rem).
+    const itemWidth = Math.min(Math.max(viewportWidth * 0.28, 288), 560);
+    const maxVisibleOffset = 4.2;
 
     return projects
       .map((project, index) => {
@@ -339,12 +361,10 @@ export default function VideoWheel({
         const wrapped = Math.atan2(Math.sin(angle - Math.PI / 2), Math.cos(angle - Math.PI / 2));
         const offset = (-wrapped * total) / (Math.PI * 2);
         const distance = Math.abs(offset);
-        const x = offset * spacing;
-        const y = -offset * offset * curveDepth;
-        const tilt = -offset * 3.2;
-        const scale = 0.6 + 0.4 * Math.exp(-offset * offset * 1.2);
+        const x = Math.sign(offset) * (linePosition(distance) + distance * LINE_GAP) * itemWidth;
+        const scale = lineScale(distance);
         const depth = 1 - Math.min(distance / maxVisibleOffset, 1);
-        const opacity = distance < 2.4 ? 1 : Math.max(0, 1 - (distance - 2.4) / 0.8);
+        const opacity = distance < 3.6 ? 1 : Math.max(0, 1 - (distance - 3.6) / 0.6);
         const zIndex = Math.round(depth * 100);
         const isFocused = distance < 0.5;
         const isPrepared = distance < 1.6;
@@ -358,7 +378,7 @@ export default function VideoWheel({
             "--depth": depth,
             "--intro-delay": isExpanded ? "0ms" : `${index * 40}ms`,
             transform: isExpanded
-              ? `translate3d(calc(-50% + ${x}px), ${y}px, 0) rotate(${tilt}deg) scale(${scale})`
+              ? `translate3d(calc(-50% + ${x}px), 0, 0) scale(${scale})`
               : "translate3d(-50%, 0, 0) scale(0.65)",
             opacity: isExpanded ? opacity : 0.94,
             zIndex,
