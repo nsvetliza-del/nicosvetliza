@@ -14,9 +14,10 @@ export const encodeTitle = (title) =>
 
 /**
  * The "coding" text effect used by the carousel title: the text is shown as
- * random characters that reshuffle every 45 ms, then resolves after 620 ms.
+ * random characters that reshuffle every `interval` ms, then resolves after
+ * `duration` ms. Defaults are the title's timings (45 ms / 620 ms).
  */
-export function useTextEncoding() {
+export function useTextEncoding({ interval = 45, duration = 620 } = {}) {
   const [text, setText] = useState("");
   const [isEncoding, setIsEncoding] = useState(false);
   const timerRef = useRef(null);
@@ -31,15 +32,15 @@ export function useTextEncoding() {
 
     intervalRef.current = window.setInterval(() => {
       setText(encodeTitle(target));
-    }, 45);
+    }, interval);
 
     timerRef.current = window.setTimeout(() => {
       window.clearInterval(intervalRef.current);
       intervalRef.current = null;
       setText(target);
       setIsEncoding(false);
-    }, 620);
-  }, []);
+    }, duration);
+  }, [interval, duration]);
 
   useEffect(
     () => () => {

@@ -2,76 +2,106 @@ import React, { useEffect, useRef, useState } from "react";
 import { introWords } from "./EpicIntro";
 import { useTextEncoding } from "../utils/useTextEncoding";
 
-const FIRST_DELAY = 4000;
-const MIN_GAP = 7000;
-const MAX_GAP = 13000;
-const VISIBLE_FOR = 3200;
+// Faster than the title (45 ms / 620 ms).
+const ENCODING = { interval: 28, duration: 260 };
+const FIRST_DELAY = 1200;
+const MIN_GAP = 900;
+const MAX_GAP = 2200;
+const VISIBLE_FOR = 2600;
+const FADE_OUT = 700;
+const MAX_WORDS = 4;
 
 const randomBetween = (min, max) => min + Math.random() * (max - min);
 
-// Occasional, very faint intro words "coded" in the far background,
-// each time at a different spot. Reuses the title's encoding effect.
+function CodeWord({ label, x, y, isLeaving }) {
+  const { text, start } = useTextEncoding(ENCODING);
+
+  useEffect(() => {
+    start(label);
+  }, [label, start]);
+
+  return (
+    <span
+      className={`background-code-text ${isLeaving ? "" : "is-visible"}`}
+      style={{ left: `${x}vw`, top: `${y}vh` }}
+    >
+      {text}
+    </span>
+  );
+}
+
+// Intro words "coded" in the far background, several at once, each at a new
+// spot. Colour comes from --text, so it flips with the background.
 export default function BackgroundCode({ enabled = true }) {
-  const { text, start } = useTextEncoding();
-  const [shot, setShot] = useState(null);
-  const wordIndexRef = useRef(0);
-  const lastPositionRef = useRef(null);
+  const [words, setWords] = useState([]);
+  const counterRef = useRef(0);
+  const recentPositionsRef = useRef([]);
 
   useEffect(() => {
     if (!enabled) {
-      setShot(null);
+      setWords([]);
       return undefined;
     }
 
-    let showTimer = 0;
-    let hideTimer = 0;
+    const timers = new Set();
+    const later = (callback, delay) => {
+      const timer = window.setTimeout(() => {
+        timers.delete(timer);
+        callback();
+      }, delay);
+      timers.add(timer);
+    };
 
     const pickPosition = () => {
       let position;
+      let tries = 0;
       do {
-        position = { x: randomBetween(6, 74), y: randomBetween(14, 82) };
+        position = { x: randomBetween(4, 78), y: randomBetween(10, 86) };
+        tries += 1;
       } while (
-        lastPositionRef.current &&
-        Math.hypot(position.x - lastPositionRef.current.x, position.y - lastPositionRef.current.y) < 25
+        tries < 20 &&
+        recentPositionsRef.current.some(
+          (previous) => Math.hypot(position.x - previous.x, position.y - previous.y) < 18
+        )
       );
-      lastPositionRef.current = position;
+      recentPositionsRef.current = [position, ...recentPositionsRef.current].slice(0, 6);
       return position;
     };
 
-    const show = () => {
-      const word = introWords[wordIndexRef.current % introWords.length];
-      wordIndexRef.current += 1;
-      const label = `${word.marker} ${word.text}`;
+    let activeCount = 0;
 
-      setShot({ key: wordIndexRef.current, ...pickPosition(), visible: true });
-      start(label);
+    const spawn = () => {
+      later(spawn, randomBetween(MIN_GAP, MAX_GAP));
+      if (activeCount >= MAX_WORDS) return;
 
-      hideTimer = window.setTimeout(() => {
-        setShot((current) => (current ? { ...current, visible: false } : current));
+      const word = introWords[counterRef.current % introWords.length];
+      counterRef.current += 1;
+      const id = counterRef.current;
+      const entry = { id, label: `${word.marker} ${word.text}`, ...pickPosition(), isLeaving: false };
+      activeCount += 1;
+      setWords((list) => [...list, entry]);
+
+      later(() => {
+        activeCount -= 1;
+        setWords((list) => list.map((item) => (item.id === id ? { ...item, isLeaving: true } : item)));
       }, VISIBLE_FOR);
-
-      showTimer = window.setTimeout(show, VISIBLE_FOR + randomBetween(MIN_GAP, MAX_GAP));
+      later(() => {
+        setWords((list) => list.filter((item) => item.id !== id));
+      }, VISIBLE_FOR + FADE_OUT);
     };
 
-    showTimer = window.setTimeout(show, FIRST_DELAY);
+    later(spawn, FIRST_DELAY);
 
-    return () => {
-      window.clearTimeout(showTimer);
-      window.clearTimeout(hideTimer);
-    };
-  }, [enabled, start]);
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [enabled]);
 
-  if (!shot) return null;
+  if (!words.length) return null;
 
   return (
     <div className="background-code" aria-hidden="true">
-      <span
-        key={shot.key}
-        className={`background-code-text ${shot.visible ? "is-visible" : ""}`}
-        style={{ left: `${shot.x}vw`, top: `${shot.y}vh` }}
-      >
-        {text}
-      </span>
+      {words.map((word) => (
+        <CodeWord key={word.id} {...word} />
+      ))}
     </div>
   );
 }
